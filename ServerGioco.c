@@ -78,7 +78,7 @@ int main()
         printf("Socket successfully binded..\n"); 
   
     // Now server is ready to listen and verification 
-    if ((listen(sockfd, 5)) != 0) { 
+    if ((listen(sockfd, 10)) != 0) { 
         printf("Listen failed...\n"); 
         exit(0); 
     } 
