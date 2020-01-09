@@ -18,13 +18,14 @@
 void *func(void *sockfd) 
 { 
     char buff[MAX]; 
-    int n; 
+    int n;
+    int clientsd=*(int*)sockfd; 
     // infinite loop for chat 
     for (;;) { 
         memset(buff, '\0', MAX);
         //write(*(int*)sockfd,"Benvenuto!")
         // read the message from client and copy it in buffer 
-        read(*(int*)sockfd, buff, sizeof(buff)); 
+        read(clientsd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
         printf("From client: %s\t To client : ", buff); 
 
