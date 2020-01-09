@@ -51,7 +51,7 @@ void *func(void *sockfd)
 // Driver function 
 int main() 
 { 
-    int sockfd, connfd, len; 
+    int sockfd, connfd[10], len,int i=0; 
     struct sockaddr_in servaddr, cli; 
     pthread_t tid;
     // socket create and verification 
@@ -88,8 +88,9 @@ int main()
     while(1){
         len = sizeof(cli); 
         // Accept the data packet from client and verification 
-        connfd = accept(sockfd, (SA*)&cli, &len); 
+        connfd[i] = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
+            i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
