@@ -23,6 +23,7 @@ void *login(void *sockfd)
     // read the message from client and copy it in buffer 
     memset(choice, '\0', MAX);
     while(1){
+        printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
         printf("Lettera: %c\n",choice[0]);
         if(choice[0]=='1'){

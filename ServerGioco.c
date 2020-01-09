@@ -23,7 +23,6 @@ void *func(void *sockfd)
     // infinite loop for chat 
     for (;;) { 
         memset(buff, '\0', MAX);
-        //write(*(int*)sockfd,"Benvenuto!")
         // read the message from client and copy it in buffer 
         read(clientsd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
