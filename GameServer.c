@@ -14,38 +14,49 @@
 #define PORT 5000
 #define SA struct sockaddr 
 
-// Function designed for chat between client and server. 
-void *game(void *sockfd) 
+// Login Function
+void *login(void *sockfd) 
 { 
-    char buff[MAX]; 
+    char choice[10]; 
     int n,connected=1,clientsd=*(int*)sockfd; 
-    // infinite loop for chat 
-    while(connected) { 
+    write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",100);
+    // read the message from client and copy it in buffer 
+    memset(choice, '\0', MAX);
+    while(1){
+        read(clientsd, choice, sizeof(choice)); 
+        if(choice[0]=='1'){
+        }
+        else if(choice[0]=='2'){
 
-        write(clientsd,"----PROGETTO LSO - GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",100);
-        // read the message from client and copy it in buffer 
-        memset(buff, '\0', MAX);
-        read(clientsd, buff, sizeof(buff)); 
-        // print buffer which contains the client contents 
-        printf("From client: %s\t To client : ", buff); 
+        }
+        else if (choice[0]=='3'){
+            write(clientsd,"Studente: Davide Somma\nMatricola:N86002618\n",100);
 
-        memset(buff, '\0', MAX);
-        n = 0; 
+        }
+        else if (strncmp("exit", choice, 4) == 0) { 
+                printf("Server Exit...\n"); 
+                close(*(int*)sockfd);
+                pthread_exit(NULL);
+        } 
+        else{
+            write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
+        }
+        memset(choice, '\0', MAX);
+    }
+
+   /* n = 0; 
         // copy server message in the buffer 
         while ((buff[n++] = getchar()) != '\n') 
             ; 
-  
+  */
         // and send that buffer to client 
-        write(*(int*)sockfd, buff, sizeof(buff)); 
+        //write(*(int*)sockfd, buff, sizeof(buff)); 
   
         // if msg contains "Exit" then server exit and chat ended. 
-        if (strncmp("exit", buff, 4) == 0) { 
-            printf("Server Exit...\n"); 
-            break; 
-        } 
-    } 
+      
     close(*(int*)sockfd);
-    pthread_exit(NULL);
+    pthread_exit(NULL); 
+
 }
   
 // Driver function 
@@ -94,7 +105,7 @@ int main()
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
-            pthread_create(&tid, NULL, game, (void *) thread_sd);
+            pthread_create(&tid, NULL, login, (void *) thread_sd);
     
         }
         
