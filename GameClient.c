@@ -82,5 +82,11 @@ void game(int server_sd){
         memset(buff, '\0', sizeof(buff));
         read(server_sd, buff, sizeof(buff)); 
         printf("%s\n", buff); 
+        memset(buff, '\0', MAX);
+        n = 0; 
+        // copy server message in the buffer 
+        while ((buff[n++] = getchar()) != '\n') 
+            ; 
+        write(server_sd, buff, sizeof(buff)); 
     } 
 }

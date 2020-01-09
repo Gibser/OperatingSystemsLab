@@ -24,6 +24,7 @@ void *login(void *sockfd)
     memset(choice, '\0', MAX);
     while(1){
         read(clientsd, choice, sizeof(choice)); 
+        printf("Lettera: %c\n",choice[0]);
         if(choice[0]=='1'){
         }
         else if(choice[0]=='2'){
