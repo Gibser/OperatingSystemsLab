@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #define MAX 80 
-#define PORT 8080 
+#define PORT 5000
 #define SA struct sockaddr 
 
 // Function designed for chat between client and server. 
@@ -51,7 +51,7 @@ void *func(void *sockfd)
 // Driver function 
 int main() 
 { 
-    int sockfd, connfd[10], len,i=0; 
+    int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
     pthread_t tid;
     // socket create and verification 
@@ -66,7 +66,7 @@ int main()
   
     // assign IP, PORT 
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = INADDR_ANY; //htonl(INADDR_ANY); 
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     servaddr.sin_port = htons(PORT); 
     
     // Binding newly created socket to given IP and verification 
@@ -87,12 +87,12 @@ int main()
     len = sizeof(cli); 
     while(1){
         // Accept the data packet from client and verification 
-        connfd[i] = accept(sockfd, (SA*)&cli, &len); 
-        if(connfd[i]>0){
+        connfd = accept(sockfd, (SA*)&cli, &len); 
+        if(connfd>0){
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
-            *thread_sd =  connfd[i];
-            printf("server: new connection from %d %s\n",connfd[i],inet_ntoa(cli.sin_addr));
+            *thread_sd =  connfd;
+            printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, func, (void *) thread_sd);
     
         }
