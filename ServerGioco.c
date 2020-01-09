@@ -94,7 +94,7 @@ int main()
 
         int *thread_sd = (int*) malloc(sizeof(int));
         *thread_sd =  connfd;
-        printf("server: new connection from %d \n",confd);
+        printf("server: new connection from %d \n",connfd);
         pthread_create(&tid, NULL, func, (void *) thread_sd);
     
         // After chatting close the socket 
