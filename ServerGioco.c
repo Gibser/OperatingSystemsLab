@@ -85,17 +85,17 @@ int main()
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if (connfd < 0) { 
-            printf("server acccept failed...\n"); 
+            printf("server accept failed...\n"); 
             exit(0); 
         } 
         else
-            printf("server acccept the client...\n"); 
+            printf("server accept the client...\n"); 
     
 
-        //int *thread_sd = (int*) malloc(sizeof(int));
-        //*thread_sd =  connfd;
+        int *thread_sd = (int*) malloc(sizeof(int));
+        *thread_sd =  connfd;
         printf("server: new connection from %d \n",connfd);
-        pthread_create(&tid, NULL, func, (void *) &connfd);
+        pthread_create(&tid, NULL, func, (void *) thread_sd);
     
         // After chatting close the socket 
         close(sockfd); 
