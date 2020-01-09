@@ -66,7 +66,7 @@ int main()
   
     // assign IP, PORT 
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+    servaddr.sin_addr.s_addr = INADDR_ANY; //htonl(INADDR_ANY); 
     servaddr.sin_port = htons(PORT); 
     
     // Binding newly created socket to given IP and verification 
@@ -84,9 +84,8 @@ int main()
     } 
     else
         printf("Server listening..\n"); 
-    //len = sizeof(cli); 
+    len = sizeof(cli); 
     while(1){
-        len = sizeof(cli); 
         // Accept the data packet from client and verification 
         connfd[i] = accept(sockfd, (SA*)&cli, &len); 
         if(connfd[i]>0){
