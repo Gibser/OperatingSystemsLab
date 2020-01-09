@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h> 
 #define MAX 80 
-#define PORT 8080 
+#define PORT 5000
 #define SA struct sockaddr 
 void func(int sockfd) 
 { 
