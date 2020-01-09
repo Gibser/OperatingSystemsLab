@@ -14,7 +14,7 @@
 #define SA struct sockaddr 
 
 // Function designed for chat between client and server. 
-void *func(int *sockfd) 
+void *func(void *sockfd) 
 { 
     char buff[MAX]; 
     int n; 
@@ -23,7 +23,7 @@ void *func(int *sockfd)
         memset(buff, '\0', MAX);
   
         // read the message from client and copy it in buffer 
-        read(*sockfd, buff, sizeof(buff)); 
+        read((int*)sockfd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
         printf("From client: %s\t To client : ", buff); 
 
@@ -34,7 +34,7 @@ void *func(int *sockfd)
             ; 
   
         // and send that buffer to client 
-        write(*sockfd, buff, sizeof(buff)); 
+        write((int*)sockfd, buff, sizeof(buff)); 
   
         // if msg contains "Exit" then server exit and chat ended. 
         if (strncmp("exit", buff, 4) == 0) { 
