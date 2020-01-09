@@ -51,7 +51,7 @@ void *func(void *sockfd)
 // Driver function 
 int main() 
 { 
-    int sockfd, connfd[10], len,int i=0; 
+    int sockfd, connfd[10], len,i=0; 
     struct sockaddr_in servaddr, cli; 
     pthread_t tid;
     // socket create and verification 
