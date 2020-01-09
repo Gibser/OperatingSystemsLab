@@ -21,7 +21,7 @@ void *func(void *sockfd)
     // infinite loop for chat 
     for (;;) { 
         memset(buff, '\0', MAX);
-  
+        //write(*(int*)sockfd,"Benvenuto!")
         // read the message from client and copy it in buffer 
         read(*(int*)sockfd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
@@ -85,8 +85,8 @@ int main()
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if (connfd < 0) { 
-            printf("server accept failed...\n"); 
-            exit(0); 
+            //printf("server accept failed...\n"); 
+            //exit(0); 
         } 
         else
             printf("server accept the client...\n"); 
