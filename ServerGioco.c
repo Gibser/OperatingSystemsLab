@@ -89,7 +89,7 @@ int main()
         len = sizeof(cli); 
         // Accept the data packet from client and verification 
         connfd[i] = accept(sockfd, (SA*)&cli, &len); 
-        if(connfd>0){
+        if(connfd[i]>0){
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd[i];
