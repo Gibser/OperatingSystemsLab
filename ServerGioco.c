@@ -42,7 +42,9 @@ void *func(void *sockfd)
             break; 
         } 
     } 
-} 
+    close(*(int*)sockfd);
+    pthread_exit(NULL);
+}
   
 // Driver function 
 int main() 
@@ -84,19 +86,14 @@ int main()
     while(1){
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
-        if (connfd < 0) { 
-            //printf("server accept failed...\n"); 
-            //exit(0); 
-        } 
-        else
-            printf("server accept the client...\n"); 
+        if(connfd>0){
+            int *thread_sd = (int*) malloc(sizeof(int));
+            *thread_sd =  connfd;
+            printf("server: new connection from %d \n",connfd);
+            pthread_create(&tid, NULL, func, (void *) thread_sd);
     
-
-        int *thread_sd = (int*) malloc(sizeof(int));
-        *thread_sd =  connfd;
-        printf("server: new connection from %d \n",connfd);
-        pthread_create(&tid, NULL, func, (void *) thread_sd);
-    
+        }
+        
         // After chatting close the socket 
         close(sockfd); 
     }
