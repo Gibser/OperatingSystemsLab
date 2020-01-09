@@ -18,13 +18,13 @@
 void *game(void *sockfd) 
 { 
     char buff[MAX]; 
-    int n,disconnect=0;
-    int clientsd=*(int*)sockfd; 
+    int n,connected=1,clientsd=*(int*)sockfd; 
     // infinite loop for chat 
-    while(disconnect) { 
-        //memset(buff, '\0', MAX);
+    while(connected) { 
+
         write(clientsd,"----PROGETTO LSO - GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",100);
         // read the message from client and copy it in buffer 
+        memset(buff, '\0', MAX);
         read(clientsd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
         printf("From client: %s\t To client : ", buff); 

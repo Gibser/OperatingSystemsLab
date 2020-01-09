@@ -18,7 +18,6 @@ struct config{
 
 void chooseServer(struct sockaddr_in *serverConfig);
 void game(int server_sd);
-
 int main() 
 { 
     int sockfd, connfd; 
@@ -77,5 +76,11 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 void game(int server_sd){
-    
+    char buff[MAX]; 
+    int n; 
+    while (1) { 
+        memset(buff, '\0', sizeof(buff));
+        read(server_sd, buff, sizeof(buff)); 
+        printf("%s\n", buff); 
+    } 
 }
