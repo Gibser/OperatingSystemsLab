@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/socket.h> 
 #include <sys/types.h> 
+#include <arpa/inet.h>
 #include <pthread.h>
 #define MAX 80 
 #define PORT 8080 
