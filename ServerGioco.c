@@ -23,7 +23,7 @@ void *func(void *sockfd)
         memset(buff, '\0', MAX);
   
         // read the message from client and copy it in buffer 
-        read((int*)sockfd, buff, sizeof(buff)); 
+        read(*(int*)sockfd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
         printf("From client: %s\t To client : ", buff); 
 
@@ -34,7 +34,7 @@ void *func(void *sockfd)
             ; 
   
         // and send that buffer to client 
-        write((int*)sockfd, buff, sizeof(buff)); 
+        write(*(int*)sockfd, buff, sizeof(buff)); 
   
         // if msg contains "Exit" then server exit and chat ended. 
         if (strncmp("exit", buff, 4) == 0) { 
@@ -92,10 +92,10 @@ int main()
             printf("server acccept the client...\n"); 
     
 
-        int *thread_sd = (int*) malloc(sizeof(int));
-        *thread_sd =  connfd;
+        //int *thread_sd = (int*) malloc(sizeof(int));
+        //*thread_sd =  connfd;
         printf("server: new connection from %d \n",connfd);
-        pthread_create(&tid, NULL, func, (void *) thread_sd);
+        pthread_create(&tid, NULL, func, (void *) &connfd);
     
         // After chatting close the socket 
         close(sockfd); 
