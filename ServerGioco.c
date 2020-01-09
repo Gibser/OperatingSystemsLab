@@ -82,8 +82,9 @@ int main()
     } 
     else
         printf("Server listening..\n"); 
-    len = sizeof(cli); 
+    //len = sizeof(cli); 
     while(1){
+        len = sizeof(cli); 
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
