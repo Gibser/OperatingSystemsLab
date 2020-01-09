@@ -90,7 +90,7 @@ int main()
         if(connfd>0){
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
-            printf("server: new connection from %d \n",connfd);
+            printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, func, (void *) thread_sd);
     
         }
