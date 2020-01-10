@@ -21,7 +21,7 @@ void *login(void *sockfd)
     int n,connected=1,clientsd=*(int*)sockfd; 
     write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto\n",sizeof(buffer));
     // read the message from client and copy it in buffer 
-    memset(choice, '\0', 10);
+    //memset(choice, '\0', 10);
     while(1){
         printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 

@@ -83,7 +83,7 @@ void game(int server_sd){
     printf("%s\n", buff);         
     while (1) { 
         printf("Scelta: ");
-        memset(buff, '\0', sizeof(buff));
+        memset(buff, 0, sizeof(buff));
         n = 0; 
         // copy server message in the buffer 
         while ((buff[n++] = getchar()) != '\n') 
