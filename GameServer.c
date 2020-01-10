@@ -27,27 +27,28 @@ void *login(void *sockfd)
 
     while(1){
         memset(buffer,'\0',MAX);
-        printf("Listening..\n");
-        read(clientsd, buffer, strlen(buffer)); 
-        printf("Lettera: %c\n",buffer[0]);
-        if(buffer[0]=='1'){
-        }
-        else if(buffer[0]=='2'){
+        if(strlen(buffer)>0){
+            printf("Listening..\n");
+            read(clientsd, buffer, strlen(buffer)); 
+            printf("Lettera: %c\n",buffer[0]);
+            if(buffer[0]=='1'){
+            }
+            else if(buffer[0]=='2'){
 
-        }
-        else if (buffer[0]=='3'){
-            write(clientsd,"Studente: Davide Somma\nMatricola:N86002618\n",100);
+            }
+            else if (buffer[0]=='3'){
+                write(clientsd,"Studente: Davide Somma\nMatricola:N86002618\n",100);
 
-        }
-        else if (strncmp("exit", buffer, 4) == 0) { 
-                printf("Server Exit...\n"); 
-                close(*(int*)sockfd);
-                pthread_exit(NULL);
-        } 
-        else{
-            write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
-        }
-        
+            }
+            else if (strncmp("exit", buffer, 4) == 0) { 
+                    printf("Server Exit...\n"); 
+                    close(*(int*)sockfd);
+                    pthread_exit(NULL);
+            } 
+            else{
+                write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
+            }
+        }    
     }
 
    /* n = 0; 
