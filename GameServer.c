@@ -26,7 +26,7 @@ void *login(void *sockfd)
     write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        read(clientsd, buffer, strlen(buffer));
+        read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
             printf("Lettera: %c\n",buffer[0]);

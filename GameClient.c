@@ -82,7 +82,7 @@ void game(int server_sd){
     write(STDOUT_FILENO,buff,n);
     printf("Scegli:\n");
     while(1){
-        memset(buff,'\0',MAX);
+        //memset(buff,'\0',MAX);
         scanf("%s",buff);
         write(server_sd,buff,strlen(buff));
         /*//write(STDOUT_FILENO,buff,sizeof(buff));
