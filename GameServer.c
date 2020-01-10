@@ -19,7 +19,8 @@ void *login(void *sockfd)
 { 
     char *choice,*buffer; 
     int n,connected=1,clientsd=*(int*)sockfd;
-    buffer=(char*)malloc(sizeof(char)*MAX);
+    //buffer=(char*)malloc(sizeof(char)*MAX);
+    sleep(1);
     write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",80);
     choice=(char*)malloc(sizeof(char)*10);
 
