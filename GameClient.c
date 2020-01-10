@@ -78,17 +78,18 @@ void chooseServer(struct sockaddr_in *serverConfig){
 void game(int server_sd){
     char buff[MAX]; 
     int n; 
-    memset(buff, '\0', MAX);
-    read(server_sd, buff, sizeof(buff)); 
-    printf("%s\n", buff);         
-    while (1) { 
+    while(1){
+        read(server_sd, buff, sizeof(buff)); 
+        printf("%s\n", buff);  
+        free(buff);       
+        char buff[MAX]; 
         printf("Scelta: ");
-        memset(buff, 0, sizeof(buff));
         n = 0; 
         // copy server message in the buffer 
         while ((buff[n++] = getchar()) != '\n') 
-            ;
-        printf("Boh\n");
+        ;
         write(server_sd, buff, sizeof(buff)); 
-    } 
+        } 
+        free(buff);
+    }
 }
