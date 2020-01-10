@@ -26,7 +26,6 @@ void *login(void *sockfd)
     write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        memset(buffer,'\0',MAX);
         read(clientsd, buffer, strlen(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
@@ -49,6 +48,7 @@ void *login(void *sockfd)
                 write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
             }
         }    
+        memset(buffer,'\0',MAX);
     }
 
    /* n = 0; 
