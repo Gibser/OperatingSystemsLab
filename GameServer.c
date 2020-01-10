@@ -19,7 +19,7 @@ void *login(void *sockfd)
 { 
     char *choice,buffer[100]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
     int n,connected=1,clientsd=*(int*)sockfd; 
-    *choice=(char*)malloc(10);
+    choice=(char*)malloc(10);
     while(1){
         printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
@@ -42,7 +42,7 @@ void *login(void *sockfd)
             write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
         }
         free(choice);
-        *choice=(char*)malloc(10);
+        choice=(char*)malloc(10);
     }
 
    /* n = 0; 
