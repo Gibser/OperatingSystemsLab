@@ -27,9 +27,9 @@ void *login(void *sockfd)
 
     while(1){
         memset(buffer,'\0',MAX);
+        read(clientsd, buffer, strlen(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
-            read(clientsd, buffer, strlen(buffer)); 
             printf("Lettera: %c\n",buffer[0]);
             if(buffer[0]=='1'){
             }
