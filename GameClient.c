@@ -81,7 +81,10 @@ void game(int server_sd){
     n=read(server_sd, buff, sizeof(buff)); 
     write(STDOUT_FILENO,buff,n);
     while(1){
-        
+        memset(buff,'\0',MAX);
+        while ((buff[n++] = getchar()) != '\n') 
+        ;
+        write(server_sd,buff,strlen(buff));
         /*//write(STDOUT_FILENO,buff,sizeof(buff));
         printf("%s",buff);
         free(buff);       

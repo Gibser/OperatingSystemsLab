@@ -18,16 +18,15 @@
 void *login(void *sockfd) 
 { 
     char *choice;//,buffer[MAX]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
-    char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto";
+    char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n";
+    char buffer[MAX];
     int n,connected=1,clientsd=*(int*)sockfd;
     //buffer=(char*)malloc(MAX);
     //sleep(1);
     write(clientsd,gameHome,sizeof(gameHome));
-    choice=(char*)malloc(sizeof(char)*10);
 
     while(1){
-
-       /* printf("Listening..\n");
+        printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
         printf("Lettera: %c\n",choice[0]);
         if(choice[0]=='1'){
@@ -48,7 +47,7 @@ void *login(void *sockfd)
             write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
         }
         free(choice);
-        choice=(char*)malloc(sizeof(char)*10);*/
+        choice=(char*)malloc(sizeof(char)*10);
     }
 
    /* n = 0; 
