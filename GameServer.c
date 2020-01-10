@@ -17,9 +17,13 @@
 // Login Function
 void *login(void *sockfd) 
 { 
-    char *choice,buffer[100]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
-    int n,connected=1,clientsd=*(int*)sockfd; 
+    char *choice,*buffer; 
+    int n,connected=1,clientsd=*(int*)sockfd;
+    buffer=(char*)malloc(MAX);
+    *buffer="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto";
+    write(clientsd,buffer,sizeof(buffer));
     choice=(char*)malloc(10);
+
     while(1){
         printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
