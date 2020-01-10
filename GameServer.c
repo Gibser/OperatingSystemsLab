@@ -19,7 +19,7 @@ void *login(void *sockfd)
 { 
     char choice[10],buffer[100]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
     int n,connected=1,clientsd=*(int*)sockfd; 
-    write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",strlen(buffer));
+    write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",sizeof(buffer));
     // read the message from client and copy it in buffer 
     memset(choice, '\0', MAX);
     while(1){
