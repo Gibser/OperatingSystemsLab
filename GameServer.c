@@ -10,7 +10,7 @@
 #include <sys/types.h> 
 #include <arpa/inet.h>
 #include <pthread.h>
-#define MAX 80 
+#define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
 
@@ -20,11 +20,12 @@ void *login(void *sockfd)
     char *choice,buffer[MAX]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
     int n,connected=1,clientsd=*(int*)sockfd;
     //buffer=(char*)malloc(sizeof(char)*MAX);
-    sleep(1);
+    //sleep(1);
     write(clientsd,buffer,sizeof(buffer));
     choice=(char*)malloc(sizeof(char)*10);
 
     while(1){
+
        /* printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
         printf("Lettera: %c\n",choice[0]);
