@@ -19,9 +19,9 @@ void *login(void *sockfd)
 { 
     char choice[10],buffer[100]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
     int n,connected=1,clientsd=*(int*)sockfd; 
-    write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto",sizeof(buffer));
+    write(clientsd,"----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto\n",sizeof(buffer));
     // read the message from client and copy it in buffer 
-    //memset(choice, '\0', 10);
+    memset(choice, '\0', 10);
     while(1){
         printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
@@ -43,7 +43,7 @@ void *login(void *sockfd)
         else{
             write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
         }
-        memset(choice, '\0', MAX);
+        memset(choice, '\0', 10);
     }
 
    /* n = 0; 
