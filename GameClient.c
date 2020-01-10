@@ -80,6 +80,7 @@ void game(int server_sd){
     int n; 
     buff=(char*)malloc(sizeof(char)*MAX);
     read(server_sd, buff, sizeof(buff)); 
+    printf("%s",buff);
     while(1){
         
         /*//write(STDOUT_FILENO,buff,sizeof(buff));
