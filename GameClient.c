@@ -81,7 +81,8 @@ void game(int server_sd){
     buff=(char*)malloc(MAX);
     while(1){
         read(server_sd, buff, sizeof(buff)); 
-        printf("%s\n", buff);  
+        //
+        write(STDOUT_FILENO,buff,strlen(buff)):
         free(buff);       
         buff=(char*)malloc(MAX);
         printf("Scelta: ");
