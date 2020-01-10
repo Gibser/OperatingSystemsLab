@@ -22,7 +22,7 @@ void *login(void *sockfd)
     int n,connected=1,clientsd=*(int*)sockfd;
     //buffer=(char*)malloc(MAX);
     //sleep(1);
-    write(clientsd,gameHome,sizeof(buffer));
+    write(clientsd,gameHome,sizeof(gameHome));
     choice=(char*)malloc(sizeof(char)*10);
 
     while(1){
