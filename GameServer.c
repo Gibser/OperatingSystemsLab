@@ -24,7 +24,7 @@ void *login(void *sockfd)
     choice=(char*)malloc(sizeof(char)*10);
 
     while(1){
-        printf("Listening..\n");
+       /* printf("Listening..\n");
         read(clientsd, choice, sizeof(choice)); 
         printf("Lettera: %c\n",choice[0]);
         if(choice[0]=='1'){
@@ -45,7 +45,7 @@ void *login(void *sockfd)
             write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
         }
         free(choice);
-        choice=(char*)malloc(sizeof(char)*10);
+        choice=(char*)malloc(sizeof(char)*10);*/
     }
 
    /* n = 0; 
