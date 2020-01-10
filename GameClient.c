@@ -76,11 +76,10 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 void game(int server_sd){
-    char *buff;
+    char buff[1000];
     int n; 
-    buff=(char*)malloc(sizeof(char)*MAX);
-    read(server_sd, buff, sizeof(buff)); 
-    printf("%s",buff);
+    n=read(server_sd, buff, sizeof(buff)); 
+    write(STDOUT_FILENO,buff,n);
     while(1){
         
         /*//write(STDOUT_FILENO,buff,sizeof(buff));
