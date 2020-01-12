@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#define MAX 10000000
+#define MAX 1000000
 #define PORT 5000
 #define SA struct sockaddr 
 
