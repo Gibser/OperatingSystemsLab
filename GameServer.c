@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#define MAX 1000000
+#define MAX 10000000
 #define PORT 5000
 #define SA struct sockaddr 
 
@@ -42,7 +42,7 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    n=read(fd,buffer,1000000);
+                    n=read(fd,buffer,MAX);
                     write(clientsd,buffer,n);
                     /*while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);*/
@@ -56,7 +56,7 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    n=read(fd,buffer,1000000);
+                    n=read(fd,buffer,MAX);
                     write(clientsd,buffer,n);
                     /*while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);*/
