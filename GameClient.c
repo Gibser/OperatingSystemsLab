@@ -93,7 +93,6 @@ void game(int server_sd){
             memset(buffer,'\0',sizeof(buffer));; 
             while(n=read(server_sd,buffer,1)>0)
                 write(STDOUT_FILENO,buffer,1);
-                printf("ok\n");
    
         }
         n=0;
