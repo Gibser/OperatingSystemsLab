@@ -86,25 +86,25 @@ void game(int server_sd){
     //usleep(300000);
     n=read(server_sd, buffer, 1000); 
     write(STDOUT_FILENO,buffer,n);
-    memset(buffer,'\0',1000);
+    memset(buffer,'\0',sizeof(buffer));
     n=0;
     while(1){
         printf("Scegli:\n");
         scanf("%s",buffer);
         if(strlen(buffer)>0){
             write(server_sd,buffer,strlen(buffer));
-            memset(buffer,'\0',1000);
-            //memset(buffer,'\0',sizeof(buffer));
+            //memset(buffer,'\0',1000);
+            memset(buffer,'\0',sizeof(buffer));
             //usleep(300000);
             system("clear");
             while(n=read(server_sd,buffer,1)>0)
-                write(STDOUT_FILENO,buffer,1)
+                write(STDOUT_FILENO,buffer,1);
             //n=read(server_sd,buffer,1000);
             //printf("n: %d\n",n);
-            /write(STDOUT_FILENO,buffer,n);
+            //write(STDOUT_FILENO,buffer,n);
         }
         n=0;
-        //memset(buffer,'\0',sizeof(buffer));
-        memset(buffer,'\0',1000);
+        memset(buffer,'\0',sizeof(buffer));
+        //memset(buffer,'\0',1000);
     }
 }
