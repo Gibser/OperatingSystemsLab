@@ -58,7 +58,6 @@ void *login(void *sockfd)
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
                     close(fd);
-                    printf("Finito di leggere");
                 }
             }
             else if (strncmp("exit", buffer, 4) == 0) { 
