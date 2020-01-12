@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#define MAX 1000
+#define MAX 1000000
 #define PORT 5000
 #define SA struct sockaddr 
 
@@ -42,8 +42,10 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);
+                    n=read(fd,buffer,1000000);
+                    write(clientsd,buffer,n);
+                    /*while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);*/
                     close(fd);
                 }
             }
@@ -54,8 +56,10 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);
+                    n=read(fd,buffer,1000000);
+                    write(clientsd,buffer,n);
+                    /*while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);*/
                     close(fd);
                 }
             }
@@ -69,18 +73,9 @@ void *login(void *sockfd)
             }
         }   
         n=0;
-        memset(buffer,'\0',sizeof(buffer));
+        memset(buffer,'\0',MAX);
     }
 
-   /* n = 0; 
-        // copy server message in the buffer 
-        while ((buff[n++] = getchar()) != '\n') 
-            ; 
-  */
-        // and send that buffer to client 
-        //write(*(int*)sockfd, buff, sizeof(buff)); 
-  
-        // if msg contains "Exit" then server exit and chat ended. 
       
     close(clientsd);
     pthread_exit(NULL); 
