@@ -23,10 +23,10 @@ void *login(void *sockfd)
     char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n";
     char buffer[MAX];
     int n,connected=1,clientsd=*(int*)sockfd,fd;
-    //write(clientsd,gameHome,sizeof(gameHome));
+    write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        write(clientsd,gameHome,sizeof(gameHome));
+        
         read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
@@ -47,6 +47,7 @@ void *login(void *sockfd)
                     //write(clientsd,buffer,n);
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }
@@ -61,6 +62,7 @@ void *login(void *sockfd)
                     //write(clientsd,buffer,n);
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }
@@ -105,8 +107,8 @@ int main()
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     servaddr.sin_port = htons(PORT); 
 
-    tv.tv_usec = 100000;
-    //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
+    tv.tv_usec = 200000;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
     // Binding newly created socket to given IP and verification 
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
         printf("socket bind failed...\n"); 
