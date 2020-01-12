@@ -38,7 +38,7 @@ void *login(void *sockfd)
             }
             else if (buffer[0]=='3'){
                 memset(buffer,'\0',MAX);
-                fd=open("GameGuide.txt",buffer,O_RDONLY);
+                fd=open("GameGuide.txt",O_RDONLY);
                 if(fd<0){
                     perror("Qualcosa è andato storto");
                 }
@@ -49,7 +49,7 @@ void *login(void *sockfd)
             }
             else if(buffer[0]=='4'){
                 memset(buffer,'\0',MAX);
-                fd=open("GameInfo.txt",buffer,O_RDONLY);
+                fd=open("GameInfo.txt",O_RDONLY);
                 if(fd<0){
                     perror("Qualcosa è andato storto");
                 }
