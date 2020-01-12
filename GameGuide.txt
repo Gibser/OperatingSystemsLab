@@ -26,5 +26,3 @@ W - Movimento Su
 A - Movimento Sinistra
 S - Movimento Giù
 D - Movimento Destra
-
-
