@@ -10,6 +10,7 @@
 #include <sys/types.h> 
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <fcntl.h>
 #define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
@@ -17,10 +18,10 @@
 // Login Function
 void *login(void *sockfd) 
 { 
-    char *choice;//,buffer[MAX]="----PROGETTO LSO-GIOCO----\nBenvenuto\n(1)Login\n(2)Registrati\n(3)Aiuto"; 
+    
     char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n";
     char buffer[MAX];
-    int n,connected=1,clientsd=*(int*)sockfd;
+    int n,connected=1,clientsd=*(int*)sockfd,fd;
     //buffer=(char*)malloc(MAX);
     //sleep(1);
     write(clientsd,gameHome,sizeof(gameHome));
@@ -36,18 +37,37 @@ void *login(void *sockfd)
 
             }
             else if (buffer[0]=='3'){
-                write(clientsd,"Studente: Davide Somma\nMatricola:N86002618\n",100);
-
+                memset(buffer,'\0',MAX);
+                fd=open("GameGuide.txt",buffer,O_RDONLY);
+                if(fd<0){
+                    perror("Qualcosa è andato storto");
+                }
+                else{
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
+                }
+            }
+            else if(buffer[0]=='4'){
+                memset(buffer,'\0',MAX);
+                fd=open("GameInfo.txt",buffer,O_RDONLY);
+                if(fd<0){
+                    perror("Qualcosa è andato storto");
+                }
+                else{
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
+                }
             }
             else if (strncmp("exit", buffer, 4) == 0) { 
                     printf("Server Exit...\n"); 
-                    close(*(int*)sockfd);
+                    close(clientsd);
                     pthread_exit(NULL);
             } 
             else{
                 write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
             }
-        }    
+        }   
+        n=0;
         memset(buffer,'\0',MAX);
     }
 

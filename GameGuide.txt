@@ -1,0 +1,29 @@
+---INTRODUZIONE---
+Benvenuto giovane avventuriero!
+Se non sai come giocare, sei venuto nel posto giusto.
+I villaggi del regno di Gandàbash, compreso il tuo, sono stati attaccati da un esercito di orchi delle Terre Ignote!
+Quei maledetti mostri la pagheranno cara ma prima è necessario che il regno si riprenda prima di correre alle armi.
+Hanno raso al suolo interi villaggi e hanno saccheggiato reliquie, armi e provviste per il prossimo inverno.
+Nella fuga, gli orchi hanno abbandonato alcune di quelle cose. Il Re ha chiesto espressamente di cercare di recuperare
+quelle provviste e di depositarle nei magazzini sparsi per tutto il Regno.
+I più valorosi riceveranno una cospicua ricompensa dal Re.
+
+---COME SI GIOCA---
+Ti ritroverai in una zona casuale del regno.
+Non sarai il solo che proverà a dimostrare il suo valore.
+Potrai visionare la posizione degli altri avventurieri, degli oggetti, dei magazzini ma non degli ostacoli.
+Quando proverai ad andare verso una posizione dove è presente un ostacolo o un altro avventuriero, ti verrà notificato.
+Lo spostamento non sarà effettuato. Nel caso dell'ostacolo,esso diventerà visibile sulla mappa e potrai evitarlo successivamente.
+Puoi portare massimo due oggetti alla volta.
+
+---TASTI---
+In Partita:
+P - Posizione Utenti/Oggetti/Magazzini/Ostacoli Incontrati
+R - Raccogliere oggetto (Sulla posizione dell'oggetto)
+D - Depositare oggetto  (Sulla posizione del magazzino)
+L - Lista degli utenti
+W - Movimento Su
+A - Movimento Sinistra
+S - Movimento Giù
+D - Movimento Destra
+

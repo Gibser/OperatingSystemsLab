@@ -76,26 +76,22 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 void game(int server_sd){
-    char buff[1000];
+    char buffer[1000];
     int n; 
-    n=read(server_sd, buff, sizeof(buff)); 
-    write(STDOUT_FILENO,buff,n);
+    n=read(server_sd, buffer, sizeof(buffer)); 
+    write(STDOUT_FILENO,buffer,n);
+    n=0;
     printf("Scegli:\n");
     while(1){
-        //memset(buff,'\0',MAX);
-        scanf("%s",buff);
-        write(server_sd,buff,strlen(buff));
-        /*//write(STDOUT_FILENO,buff,sizeof(buff));
-        printf("%s",buff);
-        free(buff);       
-        buff=(char*)malloc(sizeof(char)*MAX);
-        printf("Scelta: ");
-        n = 0; 
-        // copy server message in the buffer 
-        while ((buff[n++] = getchar()) != '\n') 
-        ;
-        write(server_sd, buff, sizeof(buff)); 
-         
-        free(buff);*/
+        scanf("%s",buffer);
+        if(strlen(buffer)>0){
+            write(server_sd,buffer,strlen(buffer));
+            memset(buffer,'\0',1000);
+            while(n=read(server_sd,buffer,1)>0)
+                write(STDOUT_FILENO,buffer,1);
+   
+        }
+        n=0;
+        memset(buffer,'\0',1000);
     }
 }
