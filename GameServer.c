@@ -24,9 +24,10 @@ void *login(void *sockfd)
     int n,connected=1,clientsd=*(int*)sockfd,fd;
     //buffer=(char*)malloc(MAX);
     //sleep(1);
-    write(clientsd,gameHome,sizeof(gameHome));
+    //write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
+        write(clientsd,gameHome,sizeof(gameHome));
         read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
