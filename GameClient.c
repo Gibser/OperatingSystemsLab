@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <errno.h>
+#include <fcntl.h>
 #define MAX 1000 
 extern int errno;
 
@@ -25,6 +26,7 @@ int main()
     struct sockaddr_in serverConfig;
     // socket create and varification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
+    
     if (sockfd == -1){ 
         printf("C'è stato un problema: chiusura imminente.\n"); 
         exit(0); 
@@ -34,11 +36,12 @@ int main()
         // connect the client socket to server socket 
         if (connect(sockfd, (struct sockaddr*)&serverConfig, sizeof(serverConfig)) != 0) { 
             //printf("Connessione con il server fallita...\n"); 
-            printf("Errore: %s\nHai inserito bene i parametri?",strerror(errno));
+            printf("Errore: %s\nHai inserito bene i parametri?\n",strerror(errno));
             exit(0); 
         } 
         else
             printf("Connesso al server!\n");
+            fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state*/	
             game(sockfd);
         }
 } 
@@ -79,7 +82,7 @@ void game(int server_sd){
     //char *buffer;
     char buffer[1000];
     int n;
-    //buffer=(char*)malloc(1000*sizeof(char)); 
+    usleep(300000);
     n=read(server_sd, buffer, sizeof(buffer)); 
     write(STDOUT_FILENO,buffer,n);
     n=0;
@@ -90,10 +93,11 @@ void game(int server_sd){
         scanf("%s",buffer);
         if(strlen(buffer)>0){
             write(server_sd,buffer,strlen(buffer));
-            memset(buffer,'\0',sizeof(buffer));; 
+            memset(buffer,'\0',sizeof(buffer));
+            usleep(300000);
             while(n=read(server_sd,buffer,1)>0)
                 write(STDOUT_FILENO,buffer,1);
-   
+            usleep(100000);
         }
         n=0;
         memset(buffer,'\0',sizeof(buffer));
