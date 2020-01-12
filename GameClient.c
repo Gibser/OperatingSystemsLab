@@ -81,8 +81,9 @@ void game(int server_sd){
     n=read(server_sd, buffer, sizeof(buffer)); 
     write(STDOUT_FILENO,buffer,n);
     n=0;
-    printf("Scegli:\n");
+    
     while(1){
+        printf("Scegli:\n");
         scanf("%s",buffer);
         if(strlen(buffer)>0){
             write(server_sd,buffer,strlen(buffer));

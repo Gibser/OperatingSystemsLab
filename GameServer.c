@@ -19,7 +19,7 @@
 void *login(void *sockfd) 
 { 
     
-    char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n";
+    char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n";
     char buffer[MAX];
     int n,connected=1,clientsd=*(int*)sockfd,fd;
     //buffer=(char*)malloc(MAX);
@@ -45,6 +45,7 @@ void *login(void *sockfd)
                 else{
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    close(fd);
                 }
             }
             else if(buffer[0]=='4'){
@@ -56,6 +57,7 @@ void *login(void *sockfd)
                 else{
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    close(fd);
                 }
             }
             else if (strncmp("exit", buffer, 4) == 0) { 
