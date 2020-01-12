@@ -8,10 +8,11 @@
 #include <unistd.h>
 #include <sys/socket.h> 
 #include <sys/types.h> 
+#include <sys/time.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#define MAX 1500000
+#define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
 
@@ -42,10 +43,10 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    n=read(fd,buffer,MAX);
-                    write(clientsd,buffer,n);
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
+                    //n=read(fd,buffer,MAX);
+                    //write(clientsd,buffer,n);
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
                     close(fd);
                 }
             }
@@ -56,10 +57,10 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    n=read(fd,buffer,MAX);
-                    write(clientsd,buffer,n);
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
+                    //n=read(fd,buffer,MAX);
+                    //write(clientsd,buffer,n);
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
                     close(fd);
                 }
             }
@@ -85,6 +86,7 @@ void *login(void *sockfd)
 // Driver function 
 int main() 
 { 
+    struct timeval tv;
     int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
     pthread_t tid;
@@ -102,7 +104,9 @@ int main()
     servaddr.sin_family = AF_INET; 
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     servaddr.sin_port = htons(PORT); 
-    
+
+    tv.tv_usec = 100000;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
     // Binding newly created socket to given IP and verification 
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
         printf("socket bind failed...\n"); 
