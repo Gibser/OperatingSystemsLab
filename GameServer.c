@@ -46,6 +46,7 @@ void *login(void *sockfd)
                 else{
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    sleep(1);
                     close(fd);
                 }
             }
@@ -58,6 +59,7 @@ void *login(void *sockfd)
                 else{
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
+                    sleep(1);
                     close(fd);
                 }
             }
