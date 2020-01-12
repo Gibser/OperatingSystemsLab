@@ -20,17 +20,12 @@ void *login(void *sockfd)
 { 
     
     char gameHome[]="----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n";
-    //char buffer[MAX];
-    char *buffer;
+    char buffer[MAX];
     int n,connected=1,clientsd=*(int*)sockfd,fd;
-    buffer=(char*)malloc(100*sizeof(char)); 
-    //buffer=(char*)malloc(MAX);
-    //sleep(1);
     //write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
         write(clientsd,gameHome,sizeof(gameHome));
-        buffer=(char*)malloc(100*sizeof(char)); 
         read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
@@ -41,34 +36,26 @@ void *login(void *sockfd)
 
             }
             else if (buffer[0]=='3'){
-                //memset(buffer,'\0',MAX);
-                free(buffer);
-                buffer=(char*)malloc(10000*sizeof(char)); 
+                memset(buffer,'\0',MAX);
                 fd=open("GameGuide.txt",O_RDONLY);
                 if(fd<0){
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
-                    n=read(fd,buffer,sizeof(buffer));
-                    write(clientsd,buffer,n);
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
                     close(fd);
                 }
             }
             else if(buffer[0]=='4'){
-                //memset(buffer,'\0',MAX);
-                free(buffer);
-                buffer=(char*)malloc(10000*sizeof(char)); 
+                memset(buffer,'\0',MAX);
                 fd=open("GameInfo.txt",O_RDONLY);
                 if(fd<0){
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
-                    n=read(fd,buffer,sizeof(buffer));
-                    write(clientsd,buffer,n);
+                    while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);
                     close(fd);
                 }
             }
@@ -82,8 +69,7 @@ void *login(void *sockfd)
             }
         }   
         n=0;
-        free(buffer);
-        //memset(buffer,'\0',sizeof(buffer));
+        memset(buffer,'\0',sizeof(buffer));
     }
 
    /* n = 0; 
