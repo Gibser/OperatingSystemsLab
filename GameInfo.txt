@@ -1,3 +1,4 @@
 Progetto per Laboratorio di Sistemi Operativi 2019/2020
-Studente: Davide Somma
-Matricola: N86002618
+Studenti:
+Davide Somma N86002618
+Giuseppe Rauso N8600
