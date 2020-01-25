@@ -101,26 +101,25 @@ void game(int server_sd){
     write(STDOUT_FILENO,buffer,n);
     memset(buffer,'\0',sizeof(buffer));
     n=0;
+    i=0;
     while(1){
         printf("Scegli:\n");
         scanf("%s",buffer);
         if(strlen(buffer)>0){
             n=strlen(buffer);
-            printf("Avviso il server che gli sto inviando %d caratteri\n",n);
-            write(server_sd,&n,sizeof(int));//Tell to server how many bytes you're going to send him
-            write(server_sd,buffer,strlen(buffer));
-            memset(buffer,'\0',sizeof(buffer));
-            system("clear");
-            read(server_sd,&n,sizeof(int));
-            printf("Il server mi invierà %d caratteri\n",n);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,buffer,strlen(buffer));//Then I send data
+            memset(buffer,'\0',sizeof(buffer));//Clear buffer
+            system("clear");//Clear shell for a better readability
+            read(server_sd,&n,sizeof(int));//Read how many bytes server is going to send me
             while(i<n){
-                nread=read(server_sd,buffer,100);
-                i+=write(server_sd,buffer,nread);
+                nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
+                i+=nread;
+                write(STDOUT_FILENO,buffer,nread);
             }
-            printf("Letti dal server %d caratteri\n",n);
-            write(STDOUT_FILENO,buffer,n);
   
         }
+        i=0;
         n=0;
         memset(buffer,'\0',sizeof(buffer));
     }

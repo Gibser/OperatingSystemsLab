@@ -26,12 +26,11 @@ void *login(void *sockfd)
     write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        if(read(clientsd,&nb,sizeof(int))!=-1){
-            printf("Mi arriveranno %d caratteri\n",nb);
-            read(clientsd, buffer, nb);
+        if(read(clientsd,&nb,sizeof(int))!=-1){//Read how many bytes client is going to send me
+            read(clientsd, buffer, nb); //Read data
             if(strlen(buffer)>0){
                 //printf("Listening..\n");
-                printf("Scelta client: %c\n",buffer[0]);
+                //printf("Scelta client: %c\n",buffer[0]);
                 if(buffer[0]=='1'){
                 }
                 else if(buffer[0]=='2'){
@@ -46,10 +45,9 @@ void *login(void *sockfd)
                     else{
                         n=read(fd,buffer,MAX);
                         strcat(buffer,gameHome);
-                        nb=n+sizeof(gameHome);
-                        printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
-                        write(clientsd,&nb,sizeof(int));
-                        printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
+                        nb=n+sizeof(gameHome);//Send Guide + Menu
+                        write(clientsd,&nb,sizeof(int));//Tell to client I'm going to send him nb bytes
+                        write(clientsd,buffer,n+sizeof(gameHome));//Send data
                         close(fd);
                     }
                 }
@@ -63,10 +61,9 @@ void *login(void *sockfd)
                         n=read(fd,buffer,MAX);
                         
                         strcat(buffer,gameHome);
-                        nb=n+sizeof(gameHome);
-                        printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
-                        write(clientsd,&nb,sizeof(int));
-                        printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
+                        nb=n+sizeof(gameHome);//Send Info + Menu
+                        write(clientsd,&nb,sizeof(int));//Tell to client I'm going to send him nb bytes
+                        write(clientsd,buffer,n+sizeof(gameHome));//Send data
                         close(fd);
                     }
                 }
