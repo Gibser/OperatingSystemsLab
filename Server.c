@@ -46,9 +46,6 @@ void *login(void *sockfd)
                     n=read(fd,buffer,MAX);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
-                    //write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }
@@ -62,9 +59,6 @@ void *login(void *sockfd)
                     n=read(fd,buffer,MAX);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
-                    /*while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);*/
-                    //write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }

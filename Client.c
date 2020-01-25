@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #define MAX 1000 
+#define clear() printf("\033[H\033[J")
 extern int errno;
 int epfd;
 struct epoll_event event;
@@ -47,7 +48,6 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            //fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state*/	
             game(sockfd);
         }
 } 
@@ -98,10 +98,9 @@ void game(int server_sd){
             write(server_sd,buffer,strlen(buffer));
             memset(buffer,'\0',sizeof(buffer));
             system("clear");
-            /*while(n=read(server_sd,buffer,1)>0)
-                write(STDOUT_FILENO,buffer,1);*/
             n=read(server_sd,buffer,5000);
             write(STDOUT_FILENO,buffer,n);
+  
         }
         n=0;
         memset(buffer,'\0',sizeof(buffer));
