@@ -96,20 +96,27 @@ void chooseServer(struct sockaddr_in *serverConfig){
 
 void game(int server_sd){
     char buffer[5000];
-    int n,num_ready,i;
+    int n,num_ready,i,nread;
     n=read(server_sd, buffer, 5000); 
     write(STDOUT_FILENO,buffer,n);
-    
     memset(buffer,'\0',sizeof(buffer));
     n=0;
     while(1){
         printf("Scegli:\n");
         scanf("%s",buffer);
         if(strlen(buffer)>0){
+            n=strlen(buffer);
+            printf("Avviso il server che gli sto inviando %d caratteri\n",n);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes you're going to send him
             write(server_sd,buffer,strlen(buffer));
             memset(buffer,'\0',sizeof(buffer));
             system("clear");
-            n=read(server_sd,buffer,5000);
+            read(server_sd,&n,sizeof(int));
+            printf("Il server mi invierà %d caratteri\n",n);
+            while(i<n){
+                nread=read(server_sd,buffer,100);
+                i+=write(server_sd,buffer,nread);
+            }
             printf("Letti dal server %d caratteri\n",n);
             write(STDOUT_FILENO,buffer,n);
   

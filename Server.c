@@ -22,12 +22,13 @@ void *login(void *sockfd)
     
     char gameHome[]="\n----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n";
     char buffer[MAX];
-    int n,connected=1,clientsd=*(int*)sockfd,fd;
+    int n,nb,connected=1,clientsd=*(int*)sockfd,fd;
     write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        
-        read(clientsd, buffer, sizeof(buffer));
+        read(clientsd,&nb,sizeof(int));
+        printf("Il client mi ha inviato %d caratteri\n",nb);
+        read(clientsd, buffer, nb);
         if(strlen(buffer)>0){
             //printf("Listening..\n");
             printf("Scelta client: %c\n",buffer[0]);
@@ -44,8 +45,10 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
-                    printf("Caratteri letti dal file sommato al menu circa:%d\n",n+sizeof(gameHome));
                     strcat(buffer,gameHome);
+                    nb=n+sizeof(gameHome);
+                    printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
+                    write(clientsd,&nb,sizeof(int));
                     printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
                     close(fd);
                 }
@@ -58,8 +61,11 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
-                    printf("Caratteri letti dal file sommato al menu circa:%d\n",n+sizeof(gameHome));
+                    
                     strcat(buffer,gameHome);
+                    nb=n+sizeof(gameHome);
+                    printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
+                    write(clientsd,&nb,sizeof(int));
                     printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
                     close(fd);
                 }
