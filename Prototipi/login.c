@@ -7,6 +7,15 @@
 #include <fcntl.h>
 #include <string.h>
 
+int hasSpace(char* string){
+	int i = 0;
+	while(i < strlen(string)){
+		if(string[i] == ' ')
+			return 1;
+		i++;
+	}
+	return 0;
+}
 
 int tmpCommand(char* cmd){
 	int fd;
@@ -17,6 +26,11 @@ int tmpCommand(char* cmd){
 	system(cmd);
 	
 	return fd;
+}
+
+void removeNewLine(char* string){
+	int dim = strlen(string);
+	string[dim] = '\0';
 }
 
 int usernameCheck(char* username){	
@@ -32,7 +46,6 @@ int usernameCheck(char* username){
 	read(fd, &buff, 1);
 	
 	n_users = atoi(&buff);
-	printf("%d\n", n_users);
 	close(fd);
 	system("rm tmp");
 
@@ -55,9 +68,23 @@ void copyStringFromFile(char* string, int fd){
 
 int loginF(char* username, char* password){
 	printf("Nome utente: ");
-	scanf("%s", username);
+	getchar();
+	scanf("%[^\n]", username);
+	removeNewLine(username);
+	if(hasSpace(username)){
+		printf("Il nome utente non può contenere spazi.\n\n");
+		return 0;
+	}
+
+	
 	printf("Password: ");
-	scanf("%s", password);
+	getchar();
+	scanf("%[^\n]", password);
+	removeNewLine(password);
+	if(hasSpace(password)){
+		printf("La password non può contenere spazi.\n\n");
+		return 0;
+	}
 
 	if(usernameCheck(username)){
 		printf("Username non esistente!\n");
@@ -85,11 +112,27 @@ int loginF(char* username, char* password){
 
 }
 
+
 int regF(char* username, char* password){
 	printf("Nome utente: ");
-	scanf("%s", username);
+	getchar();
+	scanf("%[^\n]", username);
+	removeNewLine(username);
+	if(hasSpace(username)){
+		printf("Il nome utente non può contenere spazi.\n\n");
+		return 0;
+	}
+
+
 	printf("Password: ");
-	scanf("%s", password);
+	getchar();
+	scanf("%[^\n]", password);
+	removeNewLine(password);
+	if(hasSpace(password)){
+		printf("La password non può contenere spazi.\n\n");
+		return 0;
+	}
+	
 	if(!usernameCheck(username)){
 		printf("Username già esistente!\n");
 		return 0;
