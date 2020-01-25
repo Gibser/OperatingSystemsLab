@@ -95,9 +95,9 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 void game(int server_sd){
-    char buffer[1000];
+    char buffer[5000];
     int n,num_ready,i;
-    n=read(server_sd, buffer, 1000); 
+    n=read(server_sd, buffer, 5000); 
     write(STDOUT_FILENO,buffer,n);
     memset(buffer,'\0',sizeof(buffer));
     n=0;
