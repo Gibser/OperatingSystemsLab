@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #define MAX 5000
-#define PORT 5000
+#define PORT 80
 #define SA struct sockaddr 
 
 // Login Function
