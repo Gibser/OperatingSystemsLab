@@ -56,7 +56,9 @@ void chooseServer(struct sockaddr_in *serverConfig){
     int chooseOption;
     unsigned int port;
     char ip[28];
+    char hostname[100];
     serverConfig->sin_family = AF_INET; 
+    struct hostent *p;
     printf("Benvenuto!\n");
     printf("Specificare come vuoi selezionare il server:\n(1)Tramite IP\n(2)Tramite Hostname\n");
     scanf("%d",&chooseOption);
@@ -71,7 +73,15 @@ void chooseServer(struct sockaddr_in *serverConfig){
         }   
         break;
     case 2:
+        //Da testare
         printf("Inserisci hostname\n");
+        scanf("%s",hostname);
+        p=gethostbyname(hostname);
+        if(!p){
+            herror("gethostbyname");
+            exit(1);
+        }
+        serverConfig->sin_addr.s_addr=*(uint32_t*)(p->h_addr_list[0]);
         break;
     
     default:

@@ -30,7 +30,6 @@ void *login(void *sockfd)
         read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
             printf("Listening..\n");
-            printf("Lettera: %c\n",buffer[0]);
             if(buffer[0]=='1'){
             }
             else if(buffer[0]=='2'){
