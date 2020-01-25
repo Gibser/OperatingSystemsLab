@@ -46,7 +46,7 @@ void *login(void *sockfd)
                     n=read(fd,buffer,MAX);
                     printf("Caratteri letti dal file sommato al menu circa:%d\n",n+sizeof(gameHome));
                     strcat(buffer,gameHome);
-                    write(clientsd,buffer,n+sizeof(gameHome));
+                    printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
                     close(fd);
                 }
             }
@@ -60,7 +60,7 @@ void *login(void *sockfd)
                     n=read(fd,buffer,MAX);
                     printf("Caratteri letti dal file sommato al menu circa:%d\n",n+sizeof(gameHome));
                     strcat(buffer,gameHome);
-                    write(clientsd,buffer,n+sizeof(gameHome));
+                    printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
                     close(fd);
                 }
             }
