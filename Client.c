@@ -110,6 +110,7 @@ void game(int server_sd){
             memset(buffer,'\0',sizeof(buffer));
             system("clear");
             n=read(server_sd,buffer,5000);
+            printf("Letti dal server %d caratteri\n",n);
             write(STDOUT_FILENO,buffer,n);
   
         }

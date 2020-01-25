@@ -29,7 +29,8 @@ void *login(void *sockfd)
         
         read(clientsd, buffer, sizeof(buffer));
         if(strlen(buffer)>0){
-            printf("Listening..\n");
+            //printf("Listening..\n");
+            printf("Scelta client: %c\n",buffer[0]);
             if(buffer[0]=='1'){
             }
             else if(buffer[0]=='2'){
@@ -43,6 +44,7 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
+                    printf("Caratteri letti dal file:%d\n",n);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
                     close(fd);
@@ -56,6 +58,7 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
+                    printf("Caratteri letti dal file:%d\n",n);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
                     close(fd);
