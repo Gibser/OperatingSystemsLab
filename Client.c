@@ -100,7 +100,7 @@ void game(int server_sd){
             system("clear");
             /*while(n=read(server_sd,buffer,1)>0)
                 write(STDOUT_FILENO,buffer,1);*/
-            n=read(server_sd,buffer,1000);
+            n=read(server_sd,buffer,5000);
             write(STDOUT_FILENO,buffer,n);
         }
         n=0;
