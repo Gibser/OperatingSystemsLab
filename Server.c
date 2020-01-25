@@ -26,60 +26,60 @@ void *login(void *sockfd)
     write(clientsd,gameHome,sizeof(gameHome));
 
     while(1){
-        if(read(clientsd,&nb,sizeof(int))==-1){
-            printf("sto qua\n");
-        }
-        read(clientsd, buffer, nb);
-        if(strlen(buffer)>0){
-            //printf("Listening..\n");
-            printf("Scelta client: %c\n",buffer[0]);
-            if(buffer[0]=='1'){
-            }
-            else if(buffer[0]=='2'){
+        if(read(clientsd,&nb,sizeof(int))!=-1){
+            printf("Mi arriveranno %d caratteri\n",nb);
+            read(clientsd, buffer, nb);
+            if(strlen(buffer)>0){
+                //printf("Listening..\n");
+                printf("Scelta client: %c\n",buffer[0]);
+                if(buffer[0]=='1'){
+                }
+                else if(buffer[0]=='2'){
 
-            }
-            else if (buffer[0]=='3'){
-                memset(buffer,'\0',MAX);
-                fd=open("GameGuide.txt",O_RDONLY);
-                if(fd<0){
-                    perror("Qualcosa è andato storto");
                 }
+                else if (buffer[0]=='3'){
+                    memset(buffer,'\0',MAX);
+                    fd=open("GameGuide.txt",O_RDONLY);
+                    if(fd<0){
+                        perror("Qualcosa è andato storto");
+                    }
+                    else{
+                        n=read(fd,buffer,MAX);
+                        strcat(buffer,gameHome);
+                        nb=n+sizeof(gameHome);
+                        printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
+                        write(clientsd,&nb,sizeof(int));
+                        printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
+                        close(fd);
+                    }
+                }
+                else if(buffer[0]=='4'){
+                    memset(buffer,'\0',MAX);
+                    fd=open("GameInfo.txt",O_RDONLY);
+                    if(fd<0){
+                        perror("Qualcosa è andato storto");
+                    }
+                    else{
+                        n=read(fd,buffer,MAX);
+                        
+                        strcat(buffer,gameHome);
+                        nb=n+sizeof(gameHome);
+                        printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
+                        write(clientsd,&nb,sizeof(int));
+                        printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
+                        close(fd);
+                    }
+                }
+                else if (strncmp("exit", buffer, 4) == 0) { 
+                        printf("Server Exit...\n"); 
+                        close(clientsd);
+                        pthread_exit(NULL);
+                } 
                 else{
-                    n=read(fd,buffer,MAX);
-                    strcat(buffer,gameHome);
-                    nb=n+sizeof(gameHome);
-                    printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
-                    write(clientsd,&nb,sizeof(int));
-                    printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
-                    close(fd);
+                    write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
                 }
-            }
-            else if(buffer[0]=='4'){
-                memset(buffer,'\0',MAX);
-                fd=open("GameInfo.txt",O_RDONLY);
-                if(fd<0){
-                    perror("Qualcosa è andato storto");
-                }
-                else{
-                    n=read(fd,buffer,MAX);
-                    
-                    strcat(buffer,gameHome);
-                    nb=n+sizeof(gameHome);
-                    printf("Avviso il client che sto per inviargli %d caratteri\n",nb);
-                    write(clientsd,&nb,sizeof(int));
-                    printf("Scritti %d caratteri\n",write(clientsd,buffer,n+sizeof(gameHome)));
-                    close(fd);
-                }
-            }
-            else if (strncmp("exit", buffer, 4) == 0) { 
-                    printf("Server Exit...\n"); 
-                    close(clientsd);
-                    pthread_exit(NULL);
-            } 
-            else{
-                write(clientsd,"Per favore, immettere una scelta valida, altrimenti exit per uscire",50);
-            }
-        }   
+            }   
+        }
         n=0;
         memset(buffer,'\0',MAX);
     }
