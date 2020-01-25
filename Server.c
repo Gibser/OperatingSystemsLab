@@ -43,10 +43,10 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    //n=read(fd,buffer,MAX);
-                    //write(clientsd,buffer,n);
-                    while(n=read(fd,buffer,1)>0)
-                        write(clientsd,buffer,1);
+                    n=read(fd,buffer,MAX);
+                    write(clientsd,buffer,n);
+                    /*while(n=read(fd,buffer,1)>0)
+                        write(clientsd,buffer,1);*/
                     //write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
@@ -58,11 +58,11 @@ void *login(void *sockfd)
                     perror("Qualcosa è andato storto");
                 }
                 else{
-                    n=read(fd,buffer,5000);
+                    n=read(fd,buffer,MAX);
                     write(clientsd,buffer,n);
                     /*while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);*/
-                    write(clientsd,gameHome,sizeof(gameHome));
+                    //write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }
