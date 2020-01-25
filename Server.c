@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#define MAX 1000
+#define MAX 5000
 #define PORT 5000
 #define SA struct sockaddr 
 
@@ -47,7 +47,7 @@ void *login(void *sockfd)
                     //write(clientsd,buffer,n);
                     while(n=read(fd,buffer,1)>0)
                         write(clientsd,buffer,1);
-                    write(clientsd,gameHome,sizeof(gameHome));
+                    //write(clientsd,gameHome,sizeof(gameHome));
                     close(fd);
                 }
             }
