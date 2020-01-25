@@ -43,6 +43,7 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
+                    printf("n %d\n",n);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
                     close(fd);
@@ -56,6 +57,7 @@ void *login(void *sockfd)
                 }
                 else{
                     n=read(fd,buffer,MAX);
+                    printf("n %d\n",n);
                     strcat(buffer,gameHome);
                     write(clientsd,buffer,n+sizeof(gameHome));
                     close(fd);

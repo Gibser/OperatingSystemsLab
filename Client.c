@@ -99,6 +99,7 @@ void game(int server_sd){
     int n,num_ready,i;
     n=read(server_sd, buffer, 5000); 
     write(STDOUT_FILENO,buffer,n);
+    
     memset(buffer,'\0',sizeof(buffer));
     n=0;
     while(1){
