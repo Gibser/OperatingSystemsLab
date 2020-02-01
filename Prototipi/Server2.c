@@ -15,6 +15,9 @@
 #define MAX 5000
 #define PORT 5000
 #define SA struct sockaddr 
+void gameMenu(int clientsd);
+int isClientConnClose(int clientsd,char buffer[]);
+
 
 // Game Function
 void *gameThread(void *sockfd) 
@@ -27,8 +30,6 @@ void *gameThread(void *sockfd)
 
 }
 
-void gameMenu(int clientsd);
-int isClientConnClose(int clientsd,char buffer[]);
 
 // Driver function 
 int main() 
@@ -158,7 +159,7 @@ void gameMenu(int clientsd){
 }
 int isClientConnClose(int clientsd,char buffer[]){
     if(strlen(buffer)==4){
-        if(memcmp(buffer,'exit',4))
+        if(memcmp(buffer,"exit",4))
             return 1;
     }
     return 0;
