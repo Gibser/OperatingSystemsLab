@@ -110,7 +110,7 @@ void receiveMessage(int server_sd){
 
 int isExit(char buffer[]){
     if(strlen(buffer)==4){
-        if(memcmp(buffer,'exit',4)==0)
+        if(memcmp(buffer,"exit",4)==0)
             return 1;
     }
     return 0;
