@@ -104,7 +104,6 @@ void gameMenu(int clientsd){
                     close(clientsd);
                     pthread_exit(NULL); 
                 }
-                printf("m\n");
                 if(buffer[0]=='1'){
                 }
                 else if(buffer[0]=='2'){
@@ -152,7 +151,7 @@ void gameMenu(int clientsd){
 }
 int isClientConnClose(int clientsd,char buffer[]){
     if(strlen(buffer)==4){
-        if(memcmp(buffer,"exit",4))
+        if(memcmp(buffer,"exit",4)==0)
             return 1;
     }
     return 0;
