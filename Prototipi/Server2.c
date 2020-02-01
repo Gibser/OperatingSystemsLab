@@ -116,11 +116,7 @@ void gameMenu(int clientsd){
                         perror("Qualcosa è andato storto");
                     }
                     else{
-                        n=0;
-                        while((nread=read(fd,buffer,5))>0){//Reading file in little chunks of bytes
-                            n+=nread;
-                        }
-                        printf("n %d\n",n);
+                        n=read(fd,buffer,MAX);
                         strcat(buffer,gameHome);
                         nb=n+sizeof(gameHome);//Send Guide + Menu
                         write(clientsd,&nb,sizeof(int));//Tell to client I'm going to send him nb bytes
@@ -135,11 +131,7 @@ void gameMenu(int clientsd){
                         perror("Qualcosa è andato storto");
                     }
                     else{
-                        n=0;
-                        while((nread=read(fd,buffer,5))>0){//Reading file in little chunks of bytes
-                            n+=nread;
-                        }
-                        printf("n %d\n",n);
+                        n=read(fd,buffer,MAX);
                         strcat(buffer,gameHome);
                         nb=n+sizeof(gameHome);//Send Info + Menu
                         write(clientsd,&nb,sizeof(int));//Tell to client I'm going to send him nb bytes

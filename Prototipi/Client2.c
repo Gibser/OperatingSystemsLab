@@ -101,6 +101,7 @@ void receiveMessage(int server_sd){
     int i=0,nread,nbytes;
     char buffer[5000];
     read(server_sd,&nbytes,sizeof(int));//Read how many bytes server is going to send me
+    printf("Il server mi manda %d caratteri\n",nbytes);
     while(i<nbytes){//Ready to read message and write on STDOUT
         nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
         i+=nread;
@@ -135,7 +136,7 @@ void game(int server_sd){
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,buffer,strlen(buffer));//Then I send data
             memset(buffer,'\0',sizeof(buffer));//Clear buffer
-            system("clear");//Clear shell for a better readability
+            //system("clear");//Clear shell for a better readability
             receiveMessage(server_sd);
   
         }
