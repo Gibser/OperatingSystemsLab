@@ -104,6 +104,7 @@ void gameMenu(int clientsd){
                     close(clientsd);
                     pthread_exit(NULL); 
                 }
+                printf("m\n");
                 if(buffer[0]=='1'){
                 }
                 else if(buffer[0]=='2'){
