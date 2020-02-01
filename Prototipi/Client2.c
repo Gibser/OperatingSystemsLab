@@ -127,14 +127,14 @@ void game(int server_sd){
         printf("Scegli:\n");
         scanf("%s",buffer);
         if(strlen(buffer)>0){
+            n=strlen(buffer);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,buffer,strlen(buffer));//Then I send data
             if(isExit(buffer)){
                 close(server_sd);
                 printf("Disconnesso.\n");
                 break;
             }
-            n=strlen(buffer);
-            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
-            write(server_sd,buffer,strlen(buffer));//Then I send data
             memset(buffer,'\0',sizeof(buffer));//Clear buffer
             system("clear");//Clear shell for a better readability
             receiveMessage(server_sd);
