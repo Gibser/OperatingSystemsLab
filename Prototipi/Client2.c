@@ -136,7 +136,7 @@ void game(int server_sd){
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,buffer,strlen(buffer));//Then I send data
             memset(buffer,'\0',sizeof(buffer));//Clear buffer
-            //system("clear");//Clear shell for a better readability
+            system("clear");//Clear shell for a better readability
             receiveMessage(server_sd);
   
         }
