@@ -11,11 +11,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #define MAX 1000 
-#define clear() printf("\033[H\033[J")
 extern int errno;
-int epfd;
-struct epoll_event event;
-struct epoll_event events[64];
+
 
 struct config{
     unsigned int port;
@@ -45,7 +42,6 @@ int main()
         chooseServer(&serverConfig);
         // connect the client socket to server socket 
         if (connect(sockfd, (struct sockaddr*)&serverConfig, sizeof(serverConfig)) != 0) { 
-            //printf("Connessione con il server fallita...\n"); 
             printf("Errore: %s\nHai inserito bene i parametri?\n",strerror(errno));
             exit(0); 
         } 
@@ -101,7 +97,6 @@ void receiveMessage(int server_sd){
     int i=0,nread,nbytes;
     char buffer[5000];
     read(server_sd,&nbytes,sizeof(int));//Read how many bytes server is going to send me
-    printf("Il server mi manda %d caratteri\n",nbytes);
     while(i<nbytes){//Ready to read message and write on STDOUT
         nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
         i+=nread;
