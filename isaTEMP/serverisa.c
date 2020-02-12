@@ -961,6 +961,7 @@ void SwitchMenu(int scelta, int connection){
 
 	char buffer[MAX];
 	int nbytes=0, flag=0, var=0, index1=0, index2=0;
+	int i,j;
 
 	switch(scelta){
 
@@ -991,7 +992,12 @@ void SwitchMenu(int scelta, int connection){
 				write(connection,buffer,MAX);
 				InsertUser(connection);
 				nbytes=sprintf(buffer,"[+]YOU'RE THE PLAYER: [%c]\n\n", 'A'+connection);
-				printf("I'm gonna send to client %d\n",sizeof(game));
+				for(i=0;i<ROWS;i++){
+					for(j=0;j<COLS;j++){
+						printf("%c ",game[i][j]);
+					}
+					printf("\n");
+				}
 				write(connection,game,sizeof(game));
 				write(connection,buffer,nbytes);
 

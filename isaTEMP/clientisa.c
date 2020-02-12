@@ -81,7 +81,6 @@ struct package *MakePackage(struct package *top, int riga, int colonna){
 
 /* Print the matrix game and information about packages left */
 void PrintMatrix(){
-
 	int index1=0, index2=0, count=0;
 	struct package *top=NULL;
 
@@ -171,7 +170,7 @@ void printMenu(){
 
 void MatrixMenu(){
 
-	system("clear");
+	//system("clear");
 	printf("\n\t\t\t* * *G A M E* * *\n\n");
 	printf(">: %s",player);
 	PrintMatrix();
@@ -182,7 +181,7 @@ void ClientMenu(){
 
 	char buffer[MAX], message[MAX];
 	int nbytes=0, flag=0;
-
+	int i,j;
 	system("clear");
 	printMenu();
 
@@ -208,12 +207,11 @@ void ClientMenu(){
 
 			if(read(sockfd,buffer,MAX)&&strcmp(buffer,"OK")==0){
 				nbytes=read(sockfd,game,sizeof(game));//puntatore alla matrice di gioco inizializzata nel server
-				printf("letti %d bytes\n",nbytes);
 				nbytes=read(sockfd,message,MAX);
 				message[nbytes]='\0';
 				strcpy(player,message); 
 				MatrixMenu();
-
+				
 				while(1){ //menu di gioco
 				
 					printf("\n[S]left\n[N]down\n[O]right\n[E]up\n*To exit write [exit]*\n");
