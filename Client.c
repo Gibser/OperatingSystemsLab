@@ -25,6 +25,8 @@ struct config{
 
 void chooseServer(struct sockaddr_in *serverConfig);
 void game(int server_sd);
+
+
 int main() 
 { 
 

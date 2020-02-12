@@ -14,13 +14,13 @@
 
 #define MAX 2048
 #define MAX_USERS 50
-#define ROWS 10
-#define COLS 20
+#define ROWS 8
+#define COLS 8
 
 int connectedClients=0;
 int disconnectedClients=0;
 int pack=0; //pacchi totali nella matrice: il gioco termina quando si azzerano i pacchi
-int flagGame=0; //flag per dare il via ad una nuova sessione di gioco una volta terminata quella corrente
+int flagGame=1; //flag per dare il via ad una nuova sessione di gioco una volta terminata quella corrente
 char game[ROWS][COLS]; //matrice di gioco
 
 pthread_mutex_t ClientMutex = PTHREAD_MUTEX_INITIALIZER; //per la sincronizzazione tra i thread client
@@ -284,12 +284,11 @@ void Registration(int connection){
 	}
 	else if(CheckLogged(connection)==0){
 
-		nbytes=sprintf(buffer,"[!]Insert username:\n");
+		nbytes=sprintf(buffer,"OK");
 		write(connection,buffer,nbytes);
+
 		nbytes=read(connection,buffer,MAX);
 		buffer[nbytes]='\0';
-		nbytes2=sprintf(buffer2,"[!]Insert password:\n");
-		write(connection,buffer2,nbytes2);
 		nbytes2=read(connection,buffer2,MAX);
 		buffer2[nbytes2]='\0';
 		strcat(buffer," ");
@@ -343,12 +342,8 @@ void Login(int connection){
 	int nbytes=0, nbytes2=0;
 	time_t TimeNULL;
 
-	nbytes=sprintf(buffer,"[!]Insert username:\n");
-	write(connection,buffer,nbytes);
 	nbytes=read(connection,buffer,MAX);
 	buffer[nbytes]='\0';
-	nbytes2=sprintf(buffer2,"[!]Insert password:\n");
-	write(connection,buffer2,nbytes2);
 	nbytes2=read(connection,buffer2,MAX);
 	buffer2[nbytes2]='\0';
 	strcat(buffer," ");
@@ -436,11 +431,13 @@ void InsertUser(int connection){
 				pthread_mutex_lock(&MatrixMutex);
 				game[index1][index2]='A'+connection;
 				pthread_mutex_unlock(&MatrixMutex);
+				pthread_mutex_lock(&ClientMutex);
 				OnlineUsers[SearchUser(connection)]->x=index1;
 				OnlineUsers[SearchUser(connection)]->y=index2;
 				OnlineUsers[SearchUser(connection)]->inGame=1;
 				OnlineUsers[SearchUser(connection)]->packages=0;
 				OnlineUsers[SearchUser(connection)]->totalPack=0;
+				pthread_mutex_unlock(&ClientMutex);
 			}
 		}
 	}
@@ -485,18 +482,28 @@ void MakeMatrix(){
 	for(int i=0;i<COLS;i++){
 		index1=rand()%COLS;
 		index2=rand()%COLS;
-		if(game[index1][index2]==' ')game[index1][index2]='o'; //pongo un ostacolo in posizione random
+		if(game[index1][index2]==' '){
+			pthread_mutex_lock(&MatrixMutex);
+			game[index1][index2]='o'; //pongo un ostacolo in posizione random
+			pthread_mutex_unlock(&MatrixMutex);
+		}
 		index1=rand()%COLS;
 		index2=rand()%COLS;
 		if(game[index1][index2]==' '){
+			pthread_mutex_lock(&MatrixMutex);
 			game[index1][index2]='+'; //pongo un pacco in posizione random
+			pthread_mutex_unlock(&MatrixMutex);
 			packTime[index1][index2].time=(rand()%(12-7))+7; //minimo di 7 secondi massimo 11
 			packTime[index1][index2].check=0;
 			pack++; //incremento numero totale di pacchi
 		}
 		index1=rand()%COLS;
 		index2=rand()%COLS;
-		if(game[index1][index2]==' ')game[index1][index2]='x'; //pongo una destinazione in posizione random
+		if(game[index1][index2]==' '){
+			pthread_mutex_lock(&MatrixMutex);
+			game[index1][index2]='x'; //pongo una destinazione in posizione random
+			pthread_mutex_unlock(&MatrixMutex);
+		}
 	}
 
 	pthread_create(&tid,NULL,&HandleTime,NULL); //creo un thread che analizza costantemente la validità dei pacchi prelevati dagli utenti
@@ -541,412 +548,352 @@ int SearchPack(int connection, int flag){
 //MOVIMENTI NELLA MATRICE
 
 
-void PressN(int connection, int *index1, int *index2){
+void PressN(int connection){
 
-	int nbytes=0, nbytes2=0,indexUser=SearchUser(connection);
-	char buffer[MAX], buffer2[MAX];
+	int nbytes=0, index1=0, index2=0, indexUser=SearchUser(connection);
+	char buffer[MAX];
 
-	//inizializzo i due indici con le coordinate correnti dell'utente
-	*index1=OnlineUsers[indexUser]->x;
-	*index2=OnlineUsers[indexUser]->y;
+	index1=OnlineUsers[indexUser]->x;
+	index2=OnlineUsers[indexUser]->y;
 
-	if((*index1+1)<ROWS){ // non esce dalla matrice
-		if (game[*index1+1][*index2]==' '){ // non c'è un ostacolo
+	if((index1+1)<ROWS){ // non esce dalla matrice
+		if (game[index1+1][index2]==' '){ // non c'è un ostacolo
 			pthread_mutex_lock(&MatrixMutex);
-			game[*index1][*index2]=' ';
-			game[*index1+1][*index2]='A'+connection;
+			game[index1][index2]=' ';
+			game[index1+1][index2]='A'+connection;
 			pthread_mutex_unlock(&MatrixMutex);
-			OnlineUsers[indexUser]->x=*index1+1;
-			OnlineUsers[indexUser]->y=*index2;
-			nbytes=sprintf(buffer,"one");
-			nbytes2=sprintf(buffer2,"any_message");
+			OnlineUsers[indexUser]->x=index1+1;
+			OnlineUsers[indexUser]->y=index2;
+			nbytes=sprintf(buffer,"s");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
-			write(connection,game,sizeof(game));
 		}
-		else if(game[*index1+1][*index2]=='o' || game[*index1+1][*index2]=='-'){ // ostacolo
-			game[*index1+1][*index2]='-';
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]Took an obstacle, retry.\n");
+		else if(game[index1+1][index2]=='-' || game[index1+1][index2]=='o'){ // ostacolo
+			if(game[index1+1][index2]=='o'){
+				pthread_mutex_lock(&MatrixMutex);
+				game[index1+1][index2]='-';
+				pthread_mutex_unlock(&MatrixMutex);
+			}
+			nbytes=sprintf(buffer,"-");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1+1][*index2]!='x' && game[*index1+1][*index2]!='+'
-			&& game[*index1+1][*index2]!='-' && game[*index1+1][*index2]!=' ' && game[*index1+1][*index2]!='o'){ // scontro con un altro giocatore
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]You ran into another user, retry.\n");
+		else if(game[index1+1][index2]!='x'&&game[index1+1][index2]!='+'&&game[index1+1][index2]!='o'&&game[index1+1][index2]!='-'&& game[index1+1][index2]!=' '){ // scontro con un altro giocatore
+			nbytes=sprintf(buffer,"u");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1+1][*index2]=='+'){ // pacco
+		else if(game[index1+1][index2]=='+'){ // pacco
 			if(OnlineUsers[indexUser]->packages==0){
 				pthread_mutex_lock(&MatrixMutex);
-				game[*index1+1][*index2]=' ';
+				game[index1+1][index2]=' ';
 				pthread_mutex_unlock(&MatrixMutex);
 				OnlineUsers[indexUser]->packages++;
-				OnlineUsers[indexUser]->xp=*index1+1;
-				OnlineUsers[indexUser]->yp=*index2;
-				packTime[*index1+1][*index2].check=1;
-				nbytes=sprintf(buffer,"one");
-				nbytes=sprintf(buffer2,"[+]Package picked up->[%.2f]seconds left.\n", packTime[*index1+1][*index2].time);
-				time(&(packTime[*index1+1][*index2].timePick));
-				nbytes=sprintf(buffer,"one");
+				OnlineUsers[indexUser]->xp=index1+1;
+				OnlineUsers[indexUser]->yp=index2;
+				packTime[index1+1][index2].check=1;
+				nbytes=sprintf(buffer,"[+]Package picked up->[%.2f]seconds left.\n", packTime[index1+1][index2].time);
+				time(&(packTime[index1+1][index2].timePick));
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
-				write(connection,game,sizeof(game));
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You have to deliver the package you have yet.\n");
+				nbytes=sprintf(buffer,"np");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
-		else if(game[*index1+1][*index2]=='x'){ // destinazione
+		else if(game[index1+1][index2]=='x'){ // destinazione
 			if(OnlineUsers[indexUser]->packages!=0){
 				if(FindPack(SearchPack(connection,1),SearchPack(connection,2))==1){
-					time(&(packTime[*index1+1][*index2].timeDeliver));
-					FileLogUser(connection,packTime[*index1+1][*index2].timeDeliver);
+					time(&(packTime[index1+1][index2].timeDeliver));
+					FileLogUser(connection,packTime[index1+1][index2].timeDeliver);
 					OnlineUsers[indexUser]->totalPack++;
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package placed.\n");
+					pack--;
+					nbytes=sprintf(buffer,"p");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 				else{
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package lost, time out.\n");
+					pack--;
+					nbytes=sprintf(buffer,"pl");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You haven't packages to deliver.\n");
+				nbytes=sprintf(buffer,"npd");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
 	}
 	else {
-		nbytes=sprintf(buffer,"two");
-		nbytes2=sprintf(buffer2,"[!]Move not valid, retry.\n");
+		nbytes=sprintf(buffer,"move");
 		write(connection,buffer,MAX);
-		write(connection,buffer2,MAX);
 	}
+
+	write(connection,game,sizeof(game));
 
 }
 
-void PressS(int connection, int *index1, int *index2){
+void PressS(int connection){
 
-	int nbytes=0, nbytes2=0,indexUser=SearchUser(connection);
-	char buffer[MAX], buffer2[MAX];
+	int nbytes=0, index1=0, index2=0, indexUser=SearchUser(connection);
+	char buffer[MAX];
 
-	//inizializzo i due indici con le coordinate correnti dell'utente
-	*index1=OnlineUsers[indexUser]->x;
-	*index2=OnlineUsers[indexUser]->y;
+	index1=OnlineUsers[indexUser]->x;
+	index2=OnlineUsers[indexUser]->y;
 
-	if((*index2-1)>=0){ // non esce dalla matrice
-		if (game[*index1][*index2-1]==' '){ // non c'è un ostacolo
+	if((index2-1)>=0){ // non esce dalla matrice
+		if (game[index1][index2-1]==' '){ // non c'è un ostacolo
 			pthread_mutex_lock(&MatrixMutex);
-			game[*index1][*index2]=' ';
-			game[*index1][*index2-1]='A'+connection;
+			game[index1][index2]=' ';
+			game[index1][index2-1]='A'+connection;
 			pthread_mutex_unlock(&MatrixMutex);
-			OnlineUsers[indexUser]->x=*index1;
-			OnlineUsers[indexUser]->y=*index2-1;
-			nbytes=sprintf(buffer,"one");
-			nbytes2=sprintf(buffer2,"any_message");
+			OnlineUsers[indexUser]->x=index1;
+			OnlineUsers[indexUser]->y=index2-1;
+			nbytes=sprintf(buffer,"s");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
-			write(connection,game,sizeof(game));
 		}
-		else if(game[*index1][*index2-1]=='o' || game[*index1][*index2-1]=='-'){ // ostacolo
-			game[*index1][*index2-1]='-';
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[-]Took an obstacle, retry.\n");
+		else if(game[index1][index2-1]=='-' || game[index1][index2+1]=='o'){ // ostacolo
+			if(game[index1][index2-1]=='o'){
+				pthread_mutex_lock(&MatrixMutex);
+				game[index1][index2-1]='-';
+				pthread_mutex_unlock(&MatrixMutex);
+			}
+			nbytes=sprintf(buffer,"-");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1][*index2-1]!='x' && game[*index1][*index2-1]!='+' && game[*index1][*index2-1]!='o' && game[*index1][*index2-1]!='-' && game[*index1][*index2-1]!=' '){ // scontro con un altro giocatore
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]You ran into another user, retry.\n");
+		else if(game[index1][index2-1]!='x'&&game[index1][index2-1]!='+'&&game[index1][index2-1]!='o'&&game[index1][index2-1]!='-'&& game[index1][index2-1]!=' '){ // scontro con un altro giocatore
+			nbytes=sprintf(buffer,"u");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1][*index2-1]=='+'){ // pacco
+		else if(game[index1][index2-1]=='+'){ // pacco
 			if(OnlineUsers[indexUser]->packages==0){
 				pthread_mutex_lock(&MatrixMutex);
-				game[*index1][*index2-1]=' ';
+				game[index1][index2-1]=' ';
 				pthread_mutex_unlock(&MatrixMutex);
 				OnlineUsers[indexUser]->packages++;
-				OnlineUsers[indexUser]->xp=*index1;
-				OnlineUsers[indexUser]->yp=*index2-1;
-				packTime[*index1][*index2-1].check=1;
-				nbytes=sprintf(buffer,"one");
-				nbytes=sprintf(buffer2,"[+]Package picked up->[%.2f]seconds left.\n", packTime[*index1][*index2-1].time);
-				time(&(packTime[*index1][*index2-1].timePick));
+				OnlineUsers[indexUser]->xp=index1;
+				OnlineUsers[indexUser]->yp=index2-1;
+				packTime[index1][index2-1].check=1;
+				nbytes=sprintf(buffer,"[+]Package picked up->[%.2f]seconds left.\n", packTime[index1][index2-1].time);
+				time(&(packTime[index1][index2-1].timePick));
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
-				write(connection,game,sizeof(game));
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You have to deliver the package you have yet.\n");
+				nbytes=sprintf(buffer,"np");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
-		else if(game[*index1][*index2-1]=='x'){ // destinazione
+		else if(game[index1][index2-1]=='x'){ // destinazione
 			if(OnlineUsers[indexUser]->packages!=0){
 				if(FindPack(SearchPack(connection,1),SearchPack(connection,2))==1){
-					time(&(packTime[*index1][*index2-1].timeDeliver));
-					FileLogUser(connection,packTime[*index1][*index2-1].timeDeliver);
+					time(&(packTime[index1][index2-1].timeDeliver));
+					FileLogUser(connection,packTime[index1][index2-1].timeDeliver);
 					OnlineUsers[indexUser]->totalPack++;
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package placed.\n");
+					pack--;
+					nbytes=sprintf(buffer,"p");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 				else{
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package lost, time out.\n");
+					pack--;
+					nbytes=sprintf(buffer,"pl");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You haven't packages to deliver.\n");
+				nbytes=sprintf(buffer,"npd");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
 	}
 	else {
-		nbytes=sprintf(buffer,"two");
-		nbytes2=sprintf(buffer2,"[!]Move not valid, retry.\n");
+		nbytes=sprintf(buffer,"move");
 		write(connection,buffer,MAX);
-		write(connection,buffer2,MAX);
 	}
+
+	write(connection,game,sizeof(game));
 
 }
 
-void PressO(int connection, int *index1, int *index2){
+void PressO(int connection){
 
-	int nbytes=0, nbytes2=0,indexUser=SearchUser(connection);
-	char buffer[MAX], buffer2[MAX];
+	int nbytes=0, index1=0, index2=0, indexUser=SearchUser(connection);
+	char buffer[MAX];
 
-	//inizializzo i due indici con le coordinate correnti dell'utente
-	*index1=OnlineUsers[indexUser]->x;
-	*index2=OnlineUsers[indexUser]->y;
+	index1=OnlineUsers[indexUser]->x;
+	index2=OnlineUsers[indexUser]->y;
 
-	if((*index2+1)<COLS){ // non esce dalla matrice
-		if (game[*index1][*index2+1]==' '){ // non c'è un ostacolo
+	if((index2+1)<COLS){ // non esce dalla matrice
+		if (game[index1][index2+1]==' '){ // non c'è un ostacolo
 			pthread_mutex_lock(&MatrixMutex);
-			game[*index1][*index2]=' ';
-			game[*index1][*index2+1]='A'+connection;
+			game[index1][index2]=' ';
+			game[index1][index2+1]='A'+connection;
 			pthread_mutex_unlock(&MatrixMutex);
-			OnlineUsers[indexUser]->x=*index1;
-			OnlineUsers[indexUser]->y=*index2+1;
-			nbytes=sprintf(buffer,"one");
-			nbytes2=sprintf(buffer2,"any_message");
+			OnlineUsers[indexUser]->x=index1;
+			OnlineUsers[indexUser]->y=index2+1;
+			nbytes=sprintf(buffer,"s");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
-			write(connection,game,sizeof(game));
 		}
-		else if(game[*index1][*index2+1]=='o' || game[*index1][*index2+1]=='-'){ // ostacolo
-			game[*index1][*index2+1]='-';
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]Took an obstacle, retry.\n");
+		else if(game[index1][index2+1]=='-' || game[index1][index2+1]=='o'){ // ostacolo
+			if(game[index1][index2+1]=='o'){
+				pthread_mutex_lock(&MatrixMutex);
+				game[index1][index2+1]='-';
+				pthread_mutex_unlock(&MatrixMutex);
+			}
+			nbytes=sprintf(buffer,"-");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1][*index2+1]!='x' && game[*index1][*index2+1]!='o' && game[*index1][*index2+1]!='+' && game[*index1][*index2+1]!='-' && game[*index1][*index2+1]!=' '){ // scontro con un altro giocatore
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]You ran into another user, retry.\n");
+		else if(game[index1][index2+1]!='x'&&game[index1][index2+1]!='+'&&game[index1][index2+1]!='o'&&game[index1][index2+1]!='-'&& game[index1][index2+1]!=' '){ // scontro con un altro giocatore
+			nbytes=sprintf(buffer,"u");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1][*index2+1]=='+'){ // pacco
+		else if(game[index1][index2+1]=='+'){ // pacco
 			if(OnlineUsers[indexUser]->packages==0){
 				pthread_mutex_lock(&MatrixMutex);
-				game[*index1][*index2+1]=' ';
+				game[index1][index2+1]=' ';
 				pthread_mutex_unlock(&MatrixMutex);
 				OnlineUsers[indexUser]->packages++;
-				OnlineUsers[indexUser]->xp=*index1;
-				OnlineUsers[indexUser]->yp=*index2+1;
-				packTime[*index1][*index2+1].check=1;
-				nbytes=sprintf(buffer,"one");
-				nbytes=sprintf(buffer2,"[+]Package picked up->[%.2f]seconds left.\n", packTime[*index1][*index2+1].time);
-				time(&(packTime[*index1][*index2+1].timePick));
+				OnlineUsers[indexUser]->xp=index1;
+				OnlineUsers[indexUser]->yp=index2+1;
+				packTime[index1][index2+1].check=1;
+				nbytes=sprintf(buffer,"[+]Package picked up->[%.2f]seconds left.\n", packTime[index1][index2+1].time);
+				time(&(packTime[index1][index2+1].timePick));
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
-				write(connection,game,sizeof(game));
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You have to deliver the package you have yet.\n");
+				nbytes=sprintf(buffer,"np");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
-		else if(game[*index1][*index2+1]=='x'){ // destinazione
+		else if(game[index1][index2+1]=='x'){ // destinazione
 			if(OnlineUsers[indexUser]->packages!=0){
 				if(FindPack(SearchPack(connection,1),SearchPack(connection,2))==1){
-					time(&(packTime[*index1][*index2+1].timeDeliver));
-					FileLogUser(connection,packTime[*index1][*index2+1].timeDeliver);
+					time(&(packTime[index1][index2+1].timeDeliver));
+					FileLogUser(connection,packTime[index1][index2+1].timeDeliver);
 					OnlineUsers[indexUser]->totalPack++;
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package placed.\n");
+					pack--;
+					nbytes=sprintf(buffer,"p");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 				else{
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package lost, time out.\n");
+					pack--;
+					nbytes=sprintf(buffer,"pl");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You haven't packages to deliver.\n");
+				nbytes=sprintf(buffer,"npd");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
 	}
 	else {
-		nbytes=sprintf(buffer,"two");
-		nbytes2=sprintf(buffer2,"[!]Move not valid, retry.\n");
+		nbytes=sprintf(buffer,"move");
 		write(connection,buffer,MAX);
-		write(connection,buffer2,MAX);
 	}
+
+	write(connection,game,sizeof(game));
 
 }
 
-void PressE(int connection, int *index1, int *index2){
+void PressE(int connection){
 
-	int nbytes=0, nbytes2=0,indexUser=SearchUser(connection);
-	char buffer[MAX], buffer2[MAX];
+	int nbytes=0, index1=0, index2=0, indexUser=SearchUser(connection);
+	char buffer[MAX];
 
-	//inizializzo i due indici con le coordinate correnti dell'utente
-	*index1=OnlineUsers[indexUser]->x;
-	*index2=OnlineUsers[indexUser]->y;
+	index1=OnlineUsers[indexUser]->x;
+	index2=OnlineUsers[indexUser]->y;
 
-	if((*index1-1)>=0){ // non esce dalla matrice
-		if (game[*index1-1][*index2]==' '){ // non c'è un ostacolo
+	if((index1-1)>=0){ // non esce dalla matrice
+		if (game[index1-1][index2]==' '){ // non c'è un ostacolo
 			pthread_mutex_lock(&MatrixMutex);
-			game[*index1][*index2]=' ';
+			game[index1][index2]=' ';
+			game[index1-1][index2]='A'+connection;
 			pthread_mutex_unlock(&MatrixMutex);
-			game[*index1-1][*index2]='A'+connection;
-			OnlineUsers[indexUser]->x=*index1-1;
-			OnlineUsers[indexUser]->y=*index2;
-			nbytes=sprintf(buffer,"one");
-			nbytes2=sprintf(buffer2,"any_message");
+			OnlineUsers[indexUser]->x=index1-1;
+			OnlineUsers[indexUser]->y=index2;
+			nbytes=sprintf(buffer,"s");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
-			write(connection,game,sizeof(game));
 		}
-		else if(game[*index1-1][*index2]=='-' || game[*index1-1][*index2]=='o'){ // ostacolo
-			game[*index1-1][*index2]='-';
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]Took an obstacle, retry.\n");
+		else if(game[index1-1][index2]=='-' || game[index1-1][index2]=='o'){ // ostacolo
+			if(game[index1-1][index2]=='o'){
+				pthread_mutex_lock(&MatrixMutex);
+				game[index1-1][index2]='-';
+				pthread_mutex_unlock(&MatrixMutex);
+			}
+			nbytes=sprintf(buffer,"-");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1-1][*index2]!='x' && game[*index1-1][*index2]!='+' && game[*index1-1][*index2]=='o' && game[*index1-1][*index2]!='-' && game[*index1-1][*index2]!=' '){ // scontro con un altro giocatore
-			nbytes=sprintf(buffer,"two");
-			nbytes2=sprintf(buffer2,"[+]You ran into another user, retry.\n");
+		else if(game[index1-1][index2]!='x'&&game[index1-1][index2]!='+'&&game[index1-1][index2]!='o'&&game[index1-1][index2]!='-'&& game[index1-1][index2]!=' '){ // scontro con un altro giocatore
+			nbytes=sprintf(buffer,"u");
 			write(connection,buffer,MAX);
-			write(connection,buffer2,MAX);
 		}
-		else if(game[*index1-1][*index2]=='+'){ // pacco
+		else if(game[index1-1][index2]=='+'){ // pacco
 			if(OnlineUsers[indexUser]->packages==0){
 				pthread_mutex_lock(&MatrixMutex);
-				game[*index1-1][*index2]=' ';
+				game[index1-1][index2]=' ';
 				pthread_mutex_unlock(&MatrixMutex);
 				OnlineUsers[indexUser]->packages++;
-				OnlineUsers[indexUser]->xp=*index1-1;
-				OnlineUsers[indexUser]->yp=*index2;
-				packTime[*index1-1][*index2].check=1;
-				nbytes=sprintf(buffer,"one");
-				nbytes=sprintf(buffer2,"[+]Package picked up->[%.2f]seconds left.\n", packTime[*index1-1][*index2].time);
-				time(&(packTime[*index1-1][*index2].timePick));
+				OnlineUsers[indexUser]->xp=index1-1;
+				OnlineUsers[indexUser]->yp=index2;
+				packTime[index1-1][index2].check=1;
+				nbytes=sprintf(buffer,"[+]Package picked up->[%.2f]seconds left.\n", packTime[index1-1][index2].time);
+				time(&(packTime[index1-1][index2].timePick));
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
-				write(connection,game,sizeof(game));
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You have to deliver the package you have yet.\n");
+				nbytes=sprintf(buffer,"np");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
-		else if(game[*index1-1][*index2]=='x'){ // destinazione
+		else if(game[index1-1][index2]=='x'){ // destinazione
 			if(OnlineUsers[indexUser]->packages!=0){
 				if(FindPack(SearchPack(connection,1),SearchPack(connection,2))==1){
-					time(&(packTime[*index1-1][*index2].timeDeliver));
-					FileLogUser(connection,packTime[*index1-1][*index2].timeDeliver);
+					time(&(packTime[index1-1][index2].timeDeliver));
+					FileLogUser(connection,packTime[index1-1][index2].timeDeliver);
 					OnlineUsers[indexUser]->totalPack++;
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package placed.\n");
+					pack--;
+					nbytes=sprintf(buffer,"p");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 				else{
-					pack--;
 					OnlineUsers[indexUser]->packages--;
-					nbytes=sprintf(buffer,"two");
-					nbytes2=sprintf(buffer2,"[+]Package lost, time out.\n");
+					pack--;
+					nbytes=sprintf(buffer,"pl");
 					write(connection,buffer,MAX);
-					write(connection,buffer2,MAX);
 				}
 			}
 			else{
-				nbytes=sprintf(buffer,"two");
-				nbytes2=sprintf(buffer2,"[+]You haven't packages to deliver.\n");
+				nbytes=sprintf(buffer,"npd");
 				write(connection,buffer,MAX);
-				write(connection,buffer2,MAX);
 			}
 		}
 	}
 	else {
-		nbytes=sprintf(buffer,"two");
-		nbytes2=sprintf(buffer2,"[!]Move not valid, retry.\n");
+		nbytes=sprintf(buffer,"move");
 		write(connection,buffer,MAX);
-		write(connection,buffer2,MAX);
 	}
+
+	write(connection,game,sizeof(game));
 
 }
 
 /* If an user quit the game, he's removed from the matrix game */
-void RemoveFromGame(int connection, int *index1, int *index2){
+void RemoveFromGame(int connection){
 
-	int indexUser=SearchUser(connection), nbytes=0;
+	int nbytes=0, index1=0, index2=0, indexUser=SearchUser(connection);
 
+	pthread_mutex_lock(&ClientMutex);
 	OnlineUsers[indexUser]->inGame=0;
 	OnlineUsers[indexUser]->totalPack=0;
 	OnlineUsers[indexUser]->packages=0;
-	*index1=OnlineUsers[indexUser]->x;
-	*index2=OnlineUsers[indexUser]->y;
+	pthread_mutex_unlock(&ClientMutex);
+	index1=OnlineUsers[indexUser]->x;
+	index2=OnlineUsers[indexUser]->y;
 	pthread_mutex_lock(&MatrixMutex);
-	game[*index1][*index2]=' ';
+	game[index1][index2]=' ';
 	pthread_mutex_unlock(&MatrixMutex);
 
 }
@@ -956,7 +903,7 @@ void RemoveFromGame(int connection, int *index1, int *index2){
 
 
 /* Switch that manages the movement into the matrix game */
-void SwitchMatrix(int scelta,int connection, int *x, int *y){
+void SwitchMatrix(int scelta,int connection){
 
 	int nbytes=0;
 	char buffer[MAX];
@@ -966,24 +913,19 @@ void SwitchMatrix(int scelta,int connection, int *x, int *y){
 	switch(scelta){
 
 		case 101: //E: up
-			PressE(connection,&(*x),&(*y));
+			PressE(connection);
 			break;
 
 		case 110: //N: down
-			PressN(connection,&(*x),&(*y));
+			PressN(connection);
 			break;
 
 		case 111: //O: right
-			PressO(connection,&(*x),&(*y));
+			PressO(connection);
 			break;
 
 		case 115: //S: left
-			PressS(connection,&(*x),&(*y));
-			break;
-
-		default:
-			nbytes=sprintf(buffer,"[!]Command not valid, retry.\n");
-			write(connection,buffer,nbytes);
+			PressS(connection);
 			break;
 	}
 
@@ -1003,7 +945,7 @@ void *HandleMatrix(){
 
 	while(1){
 		if(pack==0&&flagGame==1) {
-			sleep(4);
+			sleep(3);
 			flagGame=0;
 			MakeMatrix();
 		}
@@ -1060,23 +1002,17 @@ void SwitchMenu(int scelta, int connection){
 
 					if(strcmp(buffer,"exit\n")==0){
 						flag=1;
-						RemoveFromGame(connection,&index1,&index2);
+						RemoveFromGame(connection);
 					}
-					else if(strcmp(buffer,"\n")==0) continue;
+					else if((strcmp(buffer,"\n")==0)||(strcmp(buffer,"s\n")!=0&&strcmp(buffer,"o\n")!=0&&strcmp(buffer,"e\n")!=0 &&strcmp(buffer,"n\n")!=0))continue;
 
 					else{
+						if(strcmp(buffer,"s\n")==0) var=115;
+						else if(strcmp(buffer,"e\n")==0) var=101;
+						else if(strcmp(buffer,"o\n")==0) var=111;
+						else if(strcmp(buffer,"n\n")==0) var=110;
 
-						if(strcmp(buffer,"s\n")==0 || strcmp(buffer,"S\n")==0) var=115;
-
-						else if(strcmp(buffer,"e\n")==0 || strcmp(buffer,"E\n")==0) var=101;
-
-						else if(strcmp(buffer,"o\n")==0 || strcmp(buffer,"O\n")==0) var=111;
-
-						else if(strcmp(buffer,"n\n")==0 || strcmp(buffer,"N\n")==0) var=110;
-					
-						else var=100; //un caso unico per movimenti non validi
-
-						SwitchMatrix(var,connection,&index1,&index2);
+						SwitchMatrix(var,connection);
 					}
 				}
 				flagGame=1;
@@ -1147,16 +1083,21 @@ void *HandleClient(void *arg){
 }
 
 /* Base function that creates client threads */
-void MainThread(int sockfd, socklen_t client_len, struct sockaddr_in Caddr){
-
-	int connection=0, count=0;
-	int *thread_sd;
-	pthread_t tid;
+void MainThread(int sockfd){
 
 	while(1){
 
-		client_len=sizeof(Caddr);
-		connection=accept(sockfd,(struct sockaddr*)&Caddr,&client_len); //connessione del client
+		int connection=0;
+		int *thread_sd;
+		pthread_t tid;
+
+		if(listen(sockfd,10)==0) printf("[+]Listening...\n\n");
+		else printf("[-]Error Listening...\n");
+		connection=accept(sockfd,NULL,NULL); //connessione del client
+
+		struct sockaddr_in Caddr;
+		socklen_t client_len=sizeof(Caddr);
+		if(getpeername(connection,(struct sockaddr *)&Caddr,&client_len)<0) perror("[-]Error peername.\n");
 
 		if((connectedClients+1)==MAX_USERS){ //verifica se il numero massimo di client è stato raggiunto
 			printf("[-]Server: max clients reached.\n");
@@ -1184,9 +1125,12 @@ void MainThread(int sockfd, socklen_t client_len, struct sockaddr_in Caddr){
 void SocketTCP(int PORT){
 
 	int sockfd, bind_var, connection;
-	struct sockaddr_in Saddr, Caddr;
-	socklen_t client_len;
-	pthread_t tid, tidm;
+	struct sockaddr_in Saddr;
+	pthread_t tidm;
+
+	Saddr.sin_family=AF_INET;
+	Saddr.sin_port=htons(PORT);
+	Saddr.sin_addr.s_addr=htonl(INADDR_ANY);
 
 	if((sockfd=socket(AF_INET,SOCK_STREAM,0))<0){
 		printf("[-]Error socket.\n");
@@ -1194,10 +1138,10 @@ void SocketTCP(int PORT){
 	}
 	else printf("[+]ServerSocket created.\n");
 
-	memset(&Saddr,'\0',sizeof(Saddr));
-	Saddr.sin_family=AF_INET;
-	Saddr.sin_port=htons(PORT);
-	Saddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	if((setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&(int){1},sizeof(int))<0)){
+		printf("[-]Error sockopt.\n");
+		exit(1);
+	}
 
 	signal(SIGPIPE,SIG_IGN); //se un client termina in modo anomalo gestisco SIGPIPE e non faccio terminare il server
 
@@ -1205,15 +1149,11 @@ void SocketTCP(int PORT){
 		printf("[-]Error binding.\n");
 		exit(1);
 	}
-
 	else printf("[+]Bing to port_number[%d]\n", PORT);
-	if(listen(sockfd,10)==0) printf("[+]Listening...\n\n");
-	else printf("[-]Error Listening...\n");
 
-	MakeMatrix(); //prima sessione di gioco
 	pthread_create(&tidm,NULL,&HandleMatrix,NULL); //thread che valuta lo stato dei giocatori per creare una nuova sessione
 
-	MainThread(sockfd,client_len,Caddr);
+	MainThread(sockfd);
 
 }
 
