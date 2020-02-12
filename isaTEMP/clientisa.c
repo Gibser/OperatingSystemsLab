@@ -206,7 +206,12 @@ void ClientMenu(){
 		else if(strcmp(buffer,"6\n")==0){ //se ha inizio la sessione di gioco
 
 			if(read(sockfd,buffer,MAX)&&strcmp(buffer,"OK")==0){
-				nbytes=read(sockfd,game,sizeof(game));//puntatore alla matrice di gioco inizializzata nel server
+				for(i=0;i<ROWS;i++){
+					for(j=0;j<COLS;j++){
+						read(sockfd,&game[i][j],1);
+					}
+				}
+				//nbytes=read(sockfd,game,sizeof(game));//puntatore alla matrice di gioco inizializzata nel server
 				nbytes=read(sockfd,message,MAX);
 				message[nbytes]='\0';
 				strcpy(player,message); 

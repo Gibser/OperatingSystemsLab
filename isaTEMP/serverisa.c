@@ -992,13 +992,13 @@ void SwitchMenu(int scelta, int connection){
 				write(connection,buffer,MAX);
 				InsertUser(connection);
 				nbytes=sprintf(buffer,"[+]YOU'RE THE PLAYER: [%c]\n\n", 'A'+connection);
+				//write(connection,game,sizeof(game));
 				for(i=0;i<ROWS;i++){
 					for(j=0;j<COLS;j++){
-						printf("%c ",game[i][j]);
+						write(connection,&game[i][j],1);
 					}
 					printf("\n");
 				}
-				write(connection,game,sizeof(game));
 				write(connection,buffer,nbytes);
 
 				while(pack>0){
