@@ -87,10 +87,7 @@ void PrintMatrix(){
 
 	for(int i=0;i<ROWS;i++){
 		for(int j=0;j<COLS;j++){
-			if(game[i][j]=='+'){ 
-				printf("Trovato pacco\n");
-				top=MakePackage(top,i,j);
-			}
+			if(game[i][j]=='+') top=MakePackage(top,i,j);
 		}
 	}
 	for(int i=0;i<ROWS;i++){
@@ -207,8 +204,8 @@ void ClientMenu(){
 		else if(strcmp(buffer,"6\n")==0){ //se ha inizio la sessione di gioco
 
 			if(read(sockfd,buffer,MAX)&&strcmp(buffer,"OK")==0){
+
 				nbytes=read(sockfd,game,sizeof(game));//puntatore alla matrice di gioco inizializzata nel server
-				printf("letti %d bytes\n",nbytes);
 				nbytes=read(sockfd,message,MAX);
 				message[nbytes]='\0';
 				strcpy(player,message); 
