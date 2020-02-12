@@ -12,9 +12,13 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include "login.h"
 #define MAX 5000
 #define PORT 5000
 #define SA struct sockaddr 
+
+
+pthread_mutex_t signup_mutex;
 
 // Login Function
 void *login(void *sockfd) 
@@ -87,11 +91,19 @@ void *login(void *sockfd)
 
 }
   
+void* login_thread(void *socketfd){
+	char buffer[MAX];
+	int clientsd = *(int *)socketfd;
+	loginMain(clientsd, signup_mutex);
+	close(clientsd);
+	pthread_exit(NULL);
+}
+
 // Driver function 
 int main() 
 { 
    
-    int sockfd, connfd, len,i=0; 
+    int sockfd, connfd, len, i=0; 
     struct sockaddr_in servaddr, cli; 
     pthread_t tid;
     // socket create and verification 
@@ -126,6 +138,14 @@ int main()
     else
         printf("Server listening..\n"); 
     len = sizeof(cli); 
+
+    //Inizializzazione mutex per reg
+    if(pthread_mutex_init(&signup_mutex, NULL)){
+    	printf("Init mutex error");
+    	return 1;
+    }
+
+
     while(1){
 
         // Accept the data packet from client and verification 
@@ -134,8 +154,8 @@ int main()
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
-            printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
-            pthread_create(&tid, NULL, login, (void *) thread_sd);
+            printf("server: new connection from %d %s\n", connfd, inet_ntoa(cli.sin_addr));
+            pthread_create(&tid, NULL, login_thread, (void *) thread_sd);
     
         }
         

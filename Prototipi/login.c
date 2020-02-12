@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <pthread.h>
 
 int hasSpace(char* string){
 	int i = 0;
@@ -66,28 +67,43 @@ void copyStringFromFile(char* string, int fd){
 	string[i-1] = '\0';
 }
 
-int loginF(char* username, char* password){
-	printf("Nome utente: ");
-	getchar();
-	scanf("%[^\n]", username);
-	removeNewLine(username);
-	if(hasSpace(username)){
-		printf("Il nome utente non può contenere spazi.\n\n");
+int loginF(char* username, char* password, int clientsd){
+	int bytes_r;
+
+	write(clientsd, "Nome utente: ", 13);
+	if(read(clientsd, &bytes_r, sizeof(int))!=-1){	
+		//getchar();
+		//scanf("%[^\n]", username);
+		read(clientsd, username, bytes_r);
+		removeNewLine(username);
+		if(hasSpace(username)){
+			write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
+			return 0;
+		}
+	}
+	else{
+		perror("Errore lettura username");
 		return 0;
 	}
-
-	
-	printf("Password: ");
-	getchar();
-	scanf("%[^\n]", password);
-	removeNewLine(password);
-	if(hasSpace(password)){
-		printf("La password non può contenere spazi.\n\n");
+		
+	write(clientsd, "Password: ", 10);
+	if(read(clientsd, &bytes_r, sizeof(int)) != -1){
+		//getchar();
+		//scanf("%[^\n]", password);
+		read(clients, password, bytes_r);
+		removeNewLine(password);
+		if(hasSpace(password)){
+			write(clientsd, "La password non può contenere spazi.\n\n", 38);
+			return 0;
+		}
+	}
+	else{
+		perror("Errore lettura password");
 		return 0;
 	}
 
 	if(usernameCheck(username)){
-		printf("Username non esistente!\n");
+		write(clientsd, "Username non esistente!\n", 24);
 		return 0;
 	}
 	char cmd[100] = "echo $(cat users | sed -n 's/";
@@ -102,39 +118,45 @@ int loginF(char* username, char* password){
 	close(fd);
 	system("rm tmp");
 	if(strcmp(password, passwd) == 0){
-		printf("Login effettuato!\n\n");
+		write(clientsd, "Login effettuato!\n\n", 19);
 		return 1;
 	}
 	else{
-		printf("Password non valida.\n\n");
-		return 0;
-	}
-
-}
-
-
-int regF(char* username, char* password){
-	printf("Nome utente: ");
-	getchar();
-	scanf("%[^\n]", username);
-	removeNewLine(username);
-	if(hasSpace(username)){
-		printf("Il nome utente non può contenere spazi.\n\n");
-		return 0;
-	}
-
-
-	printf("Password: ");
-	getchar();
-	scanf("%[^\n]", password);
-	removeNewLine(password);
-	if(hasSpace(password)){
-		printf("La password non può contenere spazi.\n\n");
+		write(clientsd, "Password non valida.\n\n", 22);
 		return 0;
 	}
 	
+}
+
+
+int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
+	int bytes_r;
+	write(clientsd, "Nome utente: ", 13);
+	//getchar();
+	//scanf("%[^\n]", username);
+	if(read(clientsd, &bytes_r, sizeof(int))){
+		read(clients, username, bytes_r);
+		removeNewLine(username);
+		if(hasSpace(username)){
+			write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
+			return 0;
+		}
+	}
+
+	write(clientsd, "Password: ", 10);
+	//getchar();
+	//scanf("%[^\n]", password);
+	if(read(clientsd, &bytes_r, sizeof(int))){
+		read(clientsd, password, bytes_r);
+		removeNewLine(password);
+		if(hasSpace(password)){
+			write(clientsd, "La password non può contenere spazi.\n\n", 38);
+			return 0;
+		}
+	}
+
 	if(!usernameCheck(username)){
-		printf("Username già esistente!\n");
+		write(clientsd, "Username già esistente!\n", 24);
 		return 0;
 	}
 
@@ -151,48 +173,45 @@ int regF(char* username, char* password){
 	strcat(regString, " ");
 	strcat(password, "\n");
 	strcat(regString, password);
-	//scrivo il nome utente
+	//registro l'utente, sezione critica
+	pthread_mutex_lock(&lock);
 	if(write(fd, regString, strlen(regString)) != strlen(regString)){
 		perror("Errore scrittura users");
 		exit(1);
 	}
+	pthread_mutex_unlock(&lock);
 
 	printf("Registrazine effettuata!\n\n");
 	return 1;
 }
 
 
-void loginMain(){
+void loginMain(int clientsd, pthread_mutex_t lock){
 	char nome[100], passwd[100];
-	int scelta = 0;
-	int log;
-	while(scelta != 3){
-		printf("1 - Login\n2 - Registrazione\n3 - Esci\n\nScelta: ");
-		scanf("%d", &scelta);
-		switch(scelta){
-			case 1:
-				if((log = loginF(nome, passwd)) == 0)
-					printf("Errore login. Riprovare.\n");
-				break;
-			case 2:
-				if(!regF(nome, passwd))
-					printf("Registrazione fallita\n");
-				break;
+	char scelta = '0';
+	int log, bytes_r;
+	char gameLogin[] = "\n1 - Login\n2 - Registrazione\n3 - Esci\n\nScelta: ";
+	while(scelta != '3'){
+		//Scrivo le opzioni sul socket, quindi visualizzate dal client
+		write(clientsd, gameLogin, sizeof(gameLogin));
+		if(read(clientsd, &bytes_r,sizeof(int))!=-1){     //Controllo quanti bytes invia il client
+			read(clientsd, &scelta, nb);
+			switch(scelta){
+				case '1':
+					if((log = loginF(nome, passwd, clientsd)) == 0)
+						write(clientsd, "Errore login. Riprovare.\n", 25);
+					break;
+				case '2':
+					if(!regF(nome, passwd, clientsd, lock))
+						write(clientsd, "Registrazione fallita\n", 22);
+					break;
 
-			default:
+				default:
+					break;
+			}
+
+			if(log == 1)
 				break;
 		}
-
-		if(log == 1)
-			break;
-		
 	}
-}
-
-
-
-
-int main(){
-	loginMain();
-	return 0;
 }
