@@ -132,6 +132,7 @@ int loginF(char* username, char* password, int clientsd){
 int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	char buffer[200];
 	memset(buffer,'\0',sizeof(buffer));
+	write(clientsd,"OK",2);
 	read(clientsd,buffer,200);
 	extractUsername(buffer,username);
 	printf("username inserito: %s", username);

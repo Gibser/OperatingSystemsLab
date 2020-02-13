@@ -200,6 +200,7 @@ void regCred(int server_sd){
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
+    read(server_sd,msg,sizeof(msg));
     printf("Inserisci nome utente: ");
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
