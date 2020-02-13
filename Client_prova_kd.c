@@ -148,10 +148,11 @@ char loginCred(int server_sd){
     char username[100];
     char password[100];
     char creds[200];
-    char msg;
+    char msg[20];
     int n;
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
+    memset(msg,'\0',sizeof(msg));
     printf("Inserisci nome utente: \n");
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
@@ -164,20 +165,19 @@ char loginCred(int server_sd){
             strcat(creds,password);
             printf("%s\n",creds);
             write(server_sd,creds,sizeof(creds));
-            read(server_sd,&msg,1);
-            switch(msg){
-                case('1'):
-                    printf("Login effettuato!\n");
-                    return '1';
-                case('2'):
-                    printf("Password non valida.\n");
-                    return '0';
-                case('3'):
-                    printf("Username non esistente.\n");
-                    return '0';
-                default:
-                    printf("Qualcosa non ha funzionato...\n");
-                    return '0';
+            read(server_sd,msg,sizeof(msg));
+            printf("blabla\n");
+            if(strcmp(msg,"~OKLOGIN")==0){
+                printf("Login effettuato!\n");
+            }
+            else if(strcmp(msg,"~USRNOTEXISTS")==0){
+                printf("L'utente non esiste\n");
+            }
+            else if(strcmp(msg,"~NOVALIDPW")==0){
+                printf("La password inserita non è corretta\n");
+            }
+            else{
+                printf("Qualcosa è andato storto\n");
             }
         }
         else{
