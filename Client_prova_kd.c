@@ -153,13 +153,16 @@ char loginCred(int server_sd){
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     printf("Inserisci nome utente: \n");
-    fgets(username,sizeof(username),stdin);
+    getchar(); //scarico il buffer
+    scanf("%[^\n]", username); 
     if(strstr(username," ")==NULL){ //Check if username contains space character
         printf("Per favore inserire password\n");
-        fgets(password,sizeof(password),stdin);
+        getchar(); //scarico il buffer
+        scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
             strcpy(creds,username);
             strcat(creds,password);
+            printf("%s\n",creds);
             write(server_sd,creds,sizeof(creds));
             read(server_sd,&msg,1);
             switch(msg){
@@ -197,17 +200,21 @@ void regCred(int server_sd){
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
-    printf("Inserisci nome utente: \n");
-    fgets(username,sizeof(username),stdin);
+    printf("Inserisci nome utente: ");
+    getchar(); //scarico il buffer
+    scanf("%[^\n]", username); 
     if(strstr(username," ")==NULL){ //Check if username contains space character
-        printf("Per favore inserire password\n");
-        fgets(password,sizeof(password),stdin);
+        printf("Per favore inserire password ");
+        getchar(); //scarico il buffer
+        scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
             strcpy(creds,username);
+            strcat(creds,"\n");
             strcat(creds,password);
+            printf("%s\n",creds);
             write(server_sd,creds,sizeof(creds));
             read(server_sd,msg,sizeof(msg));
-            if(strcmp(msg,"~SIGNUPOK")==0){
+            if(strcmp(msg,"1")==0){
                 printf("Registrazione effettuata con successo!\n");
             }
             else{
@@ -249,7 +256,7 @@ void homeClient(int server_sd){
         write(server_sd, &dim, sizeof(dim));*/
         write(server_sd, &scelta, 1);
         
-        if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4')
+        if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
             printf("Scelta non valida.\n\n");
         
         switch(scelta){

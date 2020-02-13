@@ -30,6 +30,18 @@ int tmpCommand(char* cmd){
 	return fd;
 }
 
+char *extractUsername(char *buffer){
+	char user[100];
+	int i;
+	memset(user,'\0',sizeof(user));
+	i=0;
+	while(buffer[i]!='\n'){
+		user[i]=buffer[i];
+		i++;
+	}
+	return user;
+}
+
 void removeNewLine(char* string){
 	int dim = strlen(string);
 	string[dim] = '\0';
@@ -129,11 +141,10 @@ int loginF(char* username, char* password, int clientsd){
 
 
 int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
-	int bytes_r;
-
-	
-	read(clientsd, username, 200);
-	removeNewLine(username);
+	char buffer[200];
+	memset(buffer,'\0',sizeof(buffer));
+	read(clientsd,buffer,200);
+	strcpy(username,extractUsername(buffer));
 	printf("username inserito: %s\n", username);
 	if(hasSpace(username)){
 		//write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
