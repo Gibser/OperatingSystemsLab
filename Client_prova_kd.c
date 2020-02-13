@@ -164,7 +164,7 @@ char loginCred(int server_sd){
             strcpy(creds,username);
             strcat(creds,"\n");
             strcat(creds,password);
-            write(server_sd,creds,sizeof(creds));
+            write(server_sd,creds,strlen(creds));
             read(server_sd,msg,sizeof(msg));
             printf("blabla\n");
             if(strcmp(msg,"~OKLOGIN")==0){
