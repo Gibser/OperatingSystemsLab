@@ -51,7 +51,7 @@ char *extractPassword(char *buffer, char *password){
 	while(buffer[i]!='\n'){
 		i++;
 	}
-	printf("Lunghezza buffer %d\n",strlen(buffer));
+	printf("Lunghezza buffer %d e i %d\n",strlen(buffer),i);
 	while(i<strlen(buffer)){
 		password[j]=buffer[i];
 		j++;
