@@ -173,13 +173,11 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 		read(clientsd,msg,sizeof(msg));
 		printf("msg %s",msg);
 		if(strcmp(msg,"~USRLOGIN")==0){
-			write(clientsd,"OK",2);
 			if((log = loginF(nome, passwd, clientsd)) == 0)
 				printf("Errore login\n");
 				//write(clientsd, "Errore login. Riprovare.\n", 25);
 		}
 		else if(strcmp(msg,"~USRSIGNUP")==0){
-			write(clientsd,"OK",2);
 			printf("Sto per effettuare una registrazione..\n");
 			if(!regF(nome, passwd, clientsd, lock))
 				printf("Errore registrazione\n");
