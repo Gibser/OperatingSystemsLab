@@ -71,31 +71,39 @@ void copyStringFromFile(char* string, int fd){
 int loginF(char* username, char* password, int clientsd){
 	int bytes_r;
 
-	
-	//getchar();
-	//scanf("%[^\n]", username);
-	read(clientsd, username, 200);
-	removeNewLine(username);
-	if(hasSpace(username)){
-		write(clientsd, "2", 1); //Il nome utente non può contenere spazi
+	if(read(clientsd, &bytes_r, sizeof(int))!=-1){	
+		//getchar();
+		//scanf("%[^\n]", username);
+		read(clientsd, username, bytes_r);
+		removeNewLine(username);
+		if(hasSpace(username)){
+			write(clientsd, "2", 1); //Il nome utente non può contenere spazi
+			return 0;
+		}
+		else
+			write(clientsd, "1", 1); //Username valido, si procede con la password
+	}
+	else{
+		perror("Errore lettura username");
 		return 0;
 	}
-	else
-		write(clientsd, "1", 1); //Username valido, si procede con la password
-
 		
-
-	//getchar();
-	//scanf("%[^\n]", password);
-	read(clientsd, password, 200);
-	removeNewLine(password);
-	if(hasSpace(password)){
-		write(clientsd, "2", 1); //La password non può contenere spazi.
+	if(read(clientsd, &bytes_r, sizeof(int)) != -1){
+		//getchar();
+		//scanf("%[^\n]", password);
+		read(clientsd, password, bytes_r);
+		removeNewLine(password);
+		if(hasSpace(password)){
+			write(clientsd, "2", 1); //La password non può contenere spazi.
+			return 0;
+		}
+		else
+			write(clientsd, "1", 1); //Password valida
+	}
+	else{
+		perror("Errore lettura password");
 		return 0;
 	}
-	else
-		write(clientsd, "1", 1); //Password valida
-	
 
 	if(usernameCheck(username)){
 		write(clientsd, "3", 1); //Username non esistente!
@@ -131,34 +139,34 @@ int loginF(char* username, char* password, int clientsd){
 int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	int bytes_r;
 
-	
-	read(clientsd, username, 200);
-	removeNewLine(username);
-	printf("username inserito: %s\n", username);
-	if(hasSpace(username)){
-		//write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
-		write(clientsd, "2", 1);
-		return 0;
+	if(read(clientsd, &bytes_r, sizeof(int))){
+		read(clientsd, username, bytes_r);
+		removeNewLine(username);
+		printf("username inserito: %s\n", username);
+		if(hasSpace(username)){
+			//write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
+			write(clientsd, "2", 1);
+			return 0;
+		}
+		else
+			write(clientsd, "1", 1); //Username valido, si procede con la password
 	}
-	else
-		write(clientsd, "1", 1); //Username valido, si procede con la password
-
 
 	//write(clientsd, "Password: ", 10);
 	//getchar();
 	//scanf("%[^\n]", password);
-
-	read(clientsd, password, 200);
-	removeNewLine(password);
-	printf("password inserita: %s\n", password);
-	if(hasSpace(password)){
-		write(clientsd, "2", 1);
-		return 0;
+	if(read(clientsd, &bytes_r, sizeof(int))){
+		read(clientsd, password, bytes_r);
+		removeNewLine(password);
+		printf("password inserita: %s\n", password);
+		if(hasSpace(password)){
+			write(clientsd, "2", 1);
+			return 0;
+		}
+		else
+			write(clientsd, "1", 1); //Password valida
 	}
-	else
-		write(clientsd, "1", 1); //Password valida
 
-	
 	if(!usernameCheck(username)){
 		write(clientsd, "3", 1); //Username già esistente
 		return 0;

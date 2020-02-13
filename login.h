@@ -6,12 +6,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <pthread.h>
 
 int hasSpace(char* string);
 int tmpCommand(char* cmd);
 void removeNewLine(char* string);
 int usernameCheck(char* username);
 void copyStringFromFile(char* string, int fd);
-int loginF(char* username, char* password);
-int regF(char* username, char* password);
-void loginMain();
+int loginF(char* username, char* password, int clientsd);
+int regF(char* username, char* password, int clientsd, pthread_mutex_t lock);
+void loginMain(int clientsd, pthread_mutex_t lock);
