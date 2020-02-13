@@ -173,6 +173,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 	int log;
 	while(1){
 		memset(msg,'\0',sizeof(msg));
+		printf("Waiting...\n");
 		read(clientsd,msg,sizeof(msg));
 		printf("msg %s",msg);
 		if(strcmp(msg,"~USRLOGIN")==0){

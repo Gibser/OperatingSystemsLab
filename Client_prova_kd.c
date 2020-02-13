@@ -198,8 +198,8 @@ void regCred(int server_sd){
     char msg[20];
     int n;                
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
-    memset(creds,'\0',sizeof(creds));
-    memset(msg,'\0',sizeof(msg));
+    /*memset(creds,'\0',sizeof(creds));
+    memset(msg,'\0',sizeof(msg));*/
     read(server_sd,msg,sizeof(msg));
     printf("msg %s\n",msg);
     if(strcmp(msg,"OK")==0)
