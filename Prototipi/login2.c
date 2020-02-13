@@ -145,14 +145,15 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 		exit(1);
 	}
 	printf("sto qua\n");
-	char regString[200] = "";
+	/*char regString[200] = "";
 	strcat(regString, username);
-	strcat(regString, " ");
-	strcat(password, "\n");
-	strcat(regString, password);
+	strcat(regString, " ");*/
+	strcat(username," ");
+	strcat(username,password);
+	strcat(username, "\n");
 	//registro l'utente, sezione critica
 	pthread_mutex_lock(&lock);
-	if(write(fd, regString, strlen(regString)) != strlen(regString)){
+	if(write(fd, username, strlen(username)) != strlen(username)){
 		perror("Errore scrittura users");
 		exit(1);
 	}
