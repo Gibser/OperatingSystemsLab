@@ -30,32 +30,28 @@ int tmpCommand(char* cmd){
 	return fd;
 }
 
-char *extractUsername(char *buffer){
-	char user[100];
+void *extractUsername(char *buffer,char *username){
 	int i;
-	memset(user,'\0',sizeof(user));
+	memset(username,'\0',sizeof(username));
 	i=0;
 	while(buffer[i]!='\n'){
-		user[i]=buffer[i];
+		username[i]=buffer[i];
 		i++;
 	}
-	return user;
 }
 
 
-char *extractPassword(char *buffer){
-	char pw[100];
+char *extractPassword(char *buffer, char *password){
 	int i,j;
-	memset(pw,'\0',sizeof(pw));
+	memset(password,'\0',sizeof(password));
 	i=0;
 	j=0;
 	while(buffer[i]!='\n'){
 	}
 	while(i<strlen(buffer)){
-		pw[j]=buffer[i];
+		password[j]=buffer[i];
 		j++;
 	}
-	return pw;
 }
 
 
@@ -161,9 +157,9 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	char buffer[200];
 	memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,buffer,200);
-	strcpy(username,extractUsername(buffer));
+	extractUsername(buffer,username);
 	printf("username inserito: %s", username);
-	strcpy(password,extractPassword(buffer));
+	extractPassword(buffer,password);
 	printf("password inserita: %s", password);
 	if(!usernameCheck(username)){
 		write(clientsd, "~USREXISTS", 10); //Username già esistente
