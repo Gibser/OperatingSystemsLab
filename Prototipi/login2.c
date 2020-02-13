@@ -51,7 +51,6 @@ void extractPassword(char *buffer, char *password){
 	}
 	i++;
 	while(i<strlen(buffer)){
-		printf("%c ",buffer[i]);
 		password[j]=buffer[i];
 		i++;
 		j++;
@@ -134,7 +133,6 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	char buffer[200];
 	memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,buffer,200);
-	printf("buffer %s\n",buffer);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(!usernameCheck(username)){
@@ -146,6 +144,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 		perror("Errore apertura users");
 		exit(1);
 	}
+	printf("sto qua\n");
 	char regString[200] = "";
 	strcat(regString, username);
 	strcat(regString, " ");
