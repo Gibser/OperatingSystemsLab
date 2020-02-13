@@ -42,6 +42,23 @@ char *extractUsername(char *buffer){
 	return user;
 }
 
+
+char *extractPassword(char *buffer){
+	char pw[100];
+	int i,j;
+	memset(pw,'\0',sizeof(pw));
+	i=0;
+	j=0;
+	while(buffer[i]!='\n'){
+	}
+	while(i<strlen(buffer)){
+		pw[j]=buffer[i];
+		j++;
+	}
+	return pw;
+}
+
+
 void removeNewLine(char* string){
 	int dim = strlen(string);
 	string[dim] = '\0';
@@ -146,38 +163,12 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	read(clientsd,buffer,200);
 	strcpy(username,extractUsername(buffer));
 	printf("username inserito: %s\n", username);
-	if(hasSpace(username)){
-		//write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
-		write(clientsd, "2", 1);
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Username valido, si procede con la password
-
-
-	//write(clientsd, "Password: ", 10);
-	//getchar();
-	//scanf("%[^\n]", password);
-
-	read(clientsd, password, 200);
-	removeNewLine(password);
+	strcpy(password,extractPassword(buffer));
 	printf("password inserita: %s\n", password);
-	if(hasSpace(password)){
-		write(clientsd, "2", 1);
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Password valida
-
-	
 	if(!usernameCheck(username)){
-		write(clientsd, "3", 1); //Username già esistente
+		write(clientsd, "~USREXISTS", 10); //Username già esistente
 		return 0;
 	}
-	else
-		write(clientsd, "1", 1); //Username non esistente, si procede
-
-
 	int fd;
 	if((fd = open("users", O_RDWR | O_APPEND)) < 0){
 		perror("Errore apertura users");
@@ -197,7 +188,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	}
 	pthread_mutex_unlock(&lock);
 
-	write(clientsd, "1", 1);  //Registrazione effettuata
+	write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
 	return 1;
 }
 

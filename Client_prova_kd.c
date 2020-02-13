@@ -211,10 +211,9 @@ void regCred(int server_sd){
             strcpy(creds,username);
             strcat(creds,"\n");
             strcat(creds,password);
-            printf("%s\n",creds);
             write(server_sd,creds,sizeof(creds));
             read(server_sd,msg,sizeof(msg));
-            if(strcmp(msg,"1")==0){
+            if(strcmp(msg,"~SIGNUPOK")==0){
                 printf("Registrazione effettuata con successo!\n");
             }
             else{
