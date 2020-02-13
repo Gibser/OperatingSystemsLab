@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include "login2.h"
+#include "login2.c"
 #define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
