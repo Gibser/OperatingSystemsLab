@@ -38,6 +38,7 @@ void *extractUsername(char *buffer,char *username){
 		username[i]=buffer[i];
 		i++;
 	}
+	printf("username estrato %s",username);
 	printf("Fine estrazione user\n");
 }
 
@@ -45,6 +46,7 @@ void *extractUsername(char *buffer,char *username){
 char *extractPassword(char *buffer, char *password){
 	int i,j;
 	memset(password,'\0',sizeof(password));
+	printf("Inizio estrazione pw\n");
 	i=0;
 	j=0;
 	while(buffer[i]!='\n'){
