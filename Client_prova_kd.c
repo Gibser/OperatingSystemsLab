@@ -200,7 +200,6 @@ void regCred(int server_sd){
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
-    read(server_sd,msg,sizeof(msg));
     printf("Inserisci nome utente: ");
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
@@ -243,18 +242,13 @@ void printGuide(){
 }
 
 void homeClient(int server_sd){
-    char buffer[100];
     char scelta;
-    char cred[200];
-    memset(buffer, '\0', sizeof(buffer));
     char log = '0';
-    int dim;
     while(log != '1'){
         printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
         scanf(" %c", &scelta);
         if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
             printf("Scelta non valida.\n\n");
-        
         switch(scelta){
             case '1':
                 log = loginCred(server_sd);
