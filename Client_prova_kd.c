@@ -153,17 +153,17 @@ char loginCred(int server_sd){
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
-    printf("Inserisci nome utente: \n");
+    printf("Inserisci nome utente: ");
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
     if(strstr(username," ")==NULL){ //Check if username contains space character
-        printf("Per favore inserire password\n");
+        printf("Per favore inserire password ");
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
             strcpy(creds,username);
+            strcat(creds,"\n");
             strcat(creds,password);
-            printf("%s\n",creds);
             write(server_sd,creds,sizeof(creds));
             read(server_sd,msg,sizeof(msg));
             printf("blabla\n");
@@ -198,8 +198,8 @@ void regCred(int server_sd){
     char msg[20];
     int n;                
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
-    /*memset(creds,'\0',sizeof(creds));
-    memset(msg,'\0',sizeof(msg));*/
+    memset(creds,'\0',sizeof(creds));
+    memset(msg,'\0',sizeof(msg));
     read(server_sd,msg,sizeof(msg));
     printf("msg %s\n",msg);
     if(strcmp(msg,"OK")==0)
@@ -256,10 +256,6 @@ void homeClient(int server_sd){
     while(log != '1'){
         printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
         scanf(" %c", &scelta);
-        /*dim = htonl(1);
-        write(server_sd, &dim, sizeof(dim));*/
-        write(server_sd, &scelta, 1);
-        
         if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
             printf("Scelta non valida.\n\n");
         

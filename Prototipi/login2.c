@@ -38,12 +38,10 @@ void *extractUsername(char *buffer,char *username){
 		username[i]=buffer[i];
 		i++;
 	}
-	printf("username estratto %s",username);
-	printf("Fine estrazione user\n");
 }
 
 
-char *extractPassword(char *buffer, char *password){
+void *extractPassword(char *buffer, char *password){
 	int i,j;
 	memset(password,'\0',sizeof(password));
 	i=0;
@@ -52,13 +50,11 @@ char *extractPassword(char *buffer, char *password){
 		i++;
 	}
 	i++;
-	printf("Lunghezza buffer %d e i %d\n",strlen(buffer),i);
 	while(i<strlen(buffer)){
 		password[j]=buffer[i];
 		i++;
 		j++;
 	}
-	printf("Fine estrazione pw\n");
 }
 
 
