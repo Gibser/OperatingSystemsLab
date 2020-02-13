@@ -38,6 +38,7 @@ void *extractUsername(char *buffer,char *username){
 		username[i]=buffer[i];
 		i++;
 	}
+	printf("Fine estrazione user\n");
 }
 
 
@@ -202,6 +203,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 				//write(clientsd, "Errore login. Riprovare.\n", 25);
 		}
 		else if(strcmp(msg,"~USRSIGNUP")==0){
+			printf("Sto per effettuare una registrazione..\n");
 			if(!regF(nome, passwd, clientsd, lock))
 				printf("Errore registrazione\n");
 				//write(clientsd, "Registrazione fallita\n", 22);
