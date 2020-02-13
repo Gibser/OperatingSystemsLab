@@ -211,6 +211,7 @@ void regCred(int server_sd){
             strcpy(creds,username);
             strcat(creds,"\n");
             strcat(creds,password);
+            printf("%s",creds);
             write(server_sd,creds,strlen(creds));
             read(server_sd,msg,sizeof(msg));
             if(strcmp(msg,"~SIGNUPOK")==0){

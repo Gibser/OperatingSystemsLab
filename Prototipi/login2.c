@@ -135,6 +135,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	char buffer[200];
 	memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,buffer,200);
+	printf("buffer %s\n",buffer);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(!usernameCheck(username)){
