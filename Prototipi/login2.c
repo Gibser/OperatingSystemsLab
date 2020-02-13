@@ -48,11 +48,13 @@ char *extractPassword(char *buffer, char *password){
 	i=0;
 	j=0;
 	while(buffer[i]!='\n'){
+		i++;
 	}
 	while(i<strlen(buffer)){
 		password[j]=buffer[i];
 		j++;
 	}
+	printf("Fine estrazione pw\n");
 }
 
 
