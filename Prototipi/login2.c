@@ -162,9 +162,9 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,buffer,200);
 	strcpy(username,extractUsername(buffer));
-	printf("username inserito: %s\n", username);
+	printf("username inserito: %s", username);
 	strcpy(password,extractPassword(buffer));
-	printf("password inserita: %s\n", password);
+	printf("password inserita: %s", password);
 	if(!usernameCheck(username)){
 		write(clientsd, "~USREXISTS", 10); //Username già esistente
 		return 0;
