@@ -144,10 +144,6 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 		perror("Errore apertura users");
 		exit(1);
 	}
-	printf("sto qua\n");
-	/*char regString[200] = "";
-	strcat(regString, username);
-	strcat(regString, " ");*/
 	strcat(username," ");
 	strcat(username,password);
 	strcat(username, "\n");
