@@ -181,7 +181,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 void loginMain(int clientsd, pthread_mutex_t lock){
 	char msg[30];
 	char nome[100], passwd[100];
-	int log;
+	int log=0;
 	while(1){
 		printf("Waiting...\n");
 		memset(msg,'\0',sizeof(msg));
