@@ -28,6 +28,9 @@ void homeClient(int server_sd);
 char loginCred(int server_sd);
 void regCred(int server_sd);
 void printGuide();
+int checkLoginStatus(char *msg);
+int combineStr(char *creds,char *username, char *password);
+
 
 int main() 
 { 
@@ -142,6 +145,29 @@ void game(int server_sd){
         memset(buffer,'\0',sizeof(buffer));
     }
 }
+int checkLoginStatus(char *msg){
+    if(strcmp(msg,"~OKLOGIN")==0){
+        printf("Login effettuato!\n");
+        return 1;
+    }
+    else if(strcmp(msg,"~USRNOTEXISTS")==0){
+        printf("L'utente non esiste\n");
+    }
+    else if(strcmp(msg,"~NOVALIDPW")==0){
+        printf("La password inserita non è corretta\n");
+    }
+    else{
+        printf("Qualcosa è andato storto\n");
+    }
+    return 0;
+}
+
+int combineStr(char *creds,char *username,char *password){
+    strcpy(creds,username);
+    strcat(creds,"\n");
+    strcat(creds,password);
+    return strlen(creds);
+}
 
 //Gestione del login nel client
 char loginCred(int server_sd){
@@ -161,36 +187,26 @@ char loginCred(int server_sd){
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
-            strcpy(creds,username);
-            strcat(creds,"\n");
-            strcat(creds,password);
-            printf("Stringa: %s\n", creds);
-            creds[strlen(creds)] = '\0';
-            printf("Stringa: %s\n", creds);
-            //int len = strlen(creds);
-            //write(server_sd, &len, sizeof(len));
-            write(server_sd,creds,strlen(creds));
-            read(server_sd,msg,sizeof(msg));
-            //printf("blabla\n");
-            if(strcmp(msg,"~OKLOGIN")==0){
-                printf("Login effettuato!\n");
-            }
-            else if(strcmp(msg,"~USRNOTEXISTS")==0){
-                printf("L'utente non esiste\n");
-            }
-            else if(strcmp(msg,"~NOVALIDPW")==0){
-                printf("La password inserita non è corretta\n");
-            }
-            else{
-                printf("Qualcosa è andato storto\n");
-            }
+            n=combineStr(creds,username,password);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,creds,strlen(creds));//Then I send data
+            read(server_sd,msg,sizeof(msg));//Receive msg about login status
+            if(checkLoginStatus(msg))
+                return '1';
+            else
+                return '0';
+            
         }
         else{
             printf("La password non può contenere spazi.\n");
+            n=0;
+            write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
+        n=0;
+        write(server_sd,&n,sizeof(int));
     }
     
 }
@@ -213,11 +229,9 @@ void regCred(int server_sd){
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
-            strcpy(creds,username);
-            strcat(creds,"\n");
-            strcat(creds,password);
-            printf("%s",creds);
-            write(server_sd,creds,strlen(creds));
+            n=combineStr(creds,username,password);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,creds,strlen(creds));//Then I send data
             read(server_sd,msg,sizeof(msg));
             if(strcmp(msg,"~SIGNUPOK")==0){
                 printf("Registrazione effettuata con successo!\n");
@@ -228,10 +242,14 @@ void regCred(int server_sd){
         }
         else{
             printf("La password non può contenere spazi.\n");
+            n=0;
+            write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
+        n=0;
+        write(server_sd,&n,sizeof(int));
     }
 }
 
@@ -248,30 +266,38 @@ void printGuide(){
 }
 
 void homeClient(int server_sd){
-    char scelta;
+    char scelta[30];
     char log = '0';
     while(log != '1'){
         printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
-        scanf(" %c", &scelta);
-        if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
-            printf("Scelta non valida.\n\n");
-        switch(scelta){
-            case '1':
-                log = loginCred(server_sd);
-                break;
-            case '2':
-                regCred(server_sd);
-                break;
-            case '3':
-                printGuide(); // si deve fare
-                break;
-            case '4':
-                //printInfo();
-                break;
-            case '5':
-                printf("Uscita...\n");
-                return;
+        scanf("%s", scelta);
+        if(strlen(scelta)==1){
+            switch(scelta[0]){
+                case '1':
+                    log=loginCred(server_sd);
+                    break;
+                case '2':
+                    regCred(server_sd);
+                    break;
+                case '3':
+                    printGuide();
+                    break;
+                case '4':
+                    //printInfo();
+                    break;
+                case '5':
+                    printf("Uscita...\n");
+                    break;
+                default:
+                    printf("Scelta non valida, riprovare.\n");
+                    break;
+                
+            }            
         }
+        else{
+            printf("Scelta non valida, riprovare.\n");
+        }
+    
         
     }
 
