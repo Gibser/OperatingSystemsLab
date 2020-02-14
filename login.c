@@ -147,9 +147,15 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		return 0;
 	}
 	if(loggedUser(username)){
+		printf("Utente già loggato");
 		write(clientsd, "~USRLOGGED", 10); //Utente già loggato
 		return 0;
 	}
+	else
+	{
+		printf("okay");
+	}
+	
 
 	char cmd[100] = "echo $(cat users | sed -n 's/";
 	strcat(cmd, username);
