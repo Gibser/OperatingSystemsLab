@@ -111,7 +111,7 @@ int loginF(char* username, char* password, int clientsd){
 		return -1;
 	}
 	read(clientsd,buffer,n);
-	printf("Buffer ricevuto: %s\n\n", buffer);
+	printf("Buffer ricevuto: %s", buffer);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(usernameCheck(username)){
