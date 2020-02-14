@@ -193,7 +193,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 			if((log = loginF(nome, passwd, clientsd)) == 0)
 				printf("Errore login\n");
 			else if(log==-1){
-				printf("Utente disconnesso\n"); //Qui si dovrà gestire la disconnessione improvvisa dell'utente durante il login
+				printf("Utente disconnesso durante login\n"); //Qui si dovrà gestire la disconnessione improvvisa dell'utente durante il login
 				break;
 			}
 		}
