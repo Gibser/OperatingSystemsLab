@@ -10,31 +10,39 @@
 #include <pthread.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #define MAX 1000 
 extern int errno;
-
-
+int userStatus=0; //0 Menu 1 login 2 sign up
+int server_sd;
 struct config{
     unsigned int port;
     char ip[28];
     char hostname[100];
 };
-
+void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
-void game(int server_sd);
-void receiveMessage(int server_sd);
-int isExit(char buffer[]);
-void homeClient(int server_sd);
-char loginCred(int server_sd);
-void regCred(int server_sd);
+//void game(int server_sd);
+//void receiveMessage(int server_sd);
+//int isExit(char buffer[]);
+void homeClient();//aveva server_sd
+char loginCred();//aveva server_sd
+void regCred();//aveva server_sd
 void printGuide();
 int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
 
+void clientAbort(int signalvalue){
+    printf("Sono il gestore dei segnali\n");
+    if(userStatus==0){
+        write(server_sd,"~USREXIT",8);
+    }
+}
+
 
 int main() 
 { 
-
+    signal(SIGINT,clientAbort);
     int sockfd, connfd; 
     pthread_t tid;
     struct sockaddr_in serverConfig;
@@ -54,7 +62,8 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            homeClient(sockfd);
+            server_sd=sockfd;
+            homeClient();
         }
 } 
 
@@ -99,7 +108,7 @@ void chooseServer(struct sockaddr_in *serverConfig){
     scanf("%u",&port);
     serverConfig->sin_port=htons(port);
 }
-
+/*
 void receiveMessage(int server_sd){
     int i=0,nread,nbytes;
     char buffer[5000];
@@ -145,6 +154,7 @@ void game(int server_sd){
         memset(buffer,'\0',sizeof(buffer));
     }
 }
+*/
 int checkLoginStatus(char *msg){
     if(strcmp(msg,"~OKLOGIN")==0){
         printf("Login effettuato!\n");
@@ -170,7 +180,7 @@ int combineStr(char *creds,char *username,char *password){
 }
 
 //Gestione del login nel client
-char loginCred(int server_sd){
+char loginCred(){
     char username[100];
     char password[100];
     char creds[200];
@@ -212,7 +222,7 @@ char loginCred(int server_sd){
 }
 
 //Gestione della registrazione nel client
-void regCred(int server_sd){
+void regCred(){
     char username[100];
     char password[100];
     char creds[200];
@@ -230,7 +240,6 @@ void regCred(int server_sd){
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
             n=combineStr(creds,username,password);
-            printf("n %d\n",n);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
             read(server_sd,msg,sizeof(msg));
@@ -266,7 +275,7 @@ void printGuide(){
     }*/
 }
 
-void homeClient(int server_sd){
+void homeClient(){
     char scelta[30];
     char log = '0';
     while(log != '1'){

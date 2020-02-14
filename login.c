@@ -104,7 +104,7 @@ int loginF(char* username, char* password, int clientsd){
 	int n;
 	memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,&n,sizeof(int));//read how many bytes client is going to send me
-	if(n==0){
+	if(n==0){ 
 		return 0;
 	}
 	read(clientsd,buffer,n);
@@ -183,22 +183,20 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 	char nome[100], passwd[100];
 	int log=0;
 	while(1){
-		printf("Waiting...\n");
 		memset(msg,'\0',sizeof(msg));
 		read(clientsd,msg,sizeof(msg));
-		printf("msg %s",msg);
 		if(strcmp(msg,"~USRLOGIN")==0){
 			if((log = loginF(nome, passwd, clientsd)) == 0)
 				printf("Errore login\n");
-				//write(clientsd, "Errore login. Riprovare.\n", 25);
 		}
 		else if(strcmp(msg,"~USRSIGNUP")==0){
-			printf("Sto per effettuare una registrazione..\n");
 			if(!regF(nome, passwd, clientsd, lock))
 				printf("Errore registrazione\n");
-				//write(clientsd, "Registrazione fallita\n", 22);
 		}
-
+		else if(strcmp(msg,"~USREXIT")==0){
+			printf("Utente disconnesso\n");
+			break;
+		}
 		if(log == 1){
 			break;
 		}
