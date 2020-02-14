@@ -174,6 +174,9 @@ char loginCred(int server_sd){
             else if(strcmp(msg,"~USRNOTEXISTS")==0){
                 printf("L'utente non esiste\n");
             }
+            else if(strcmp(msg, "~USRLOGGED") == 0){
+                printf("L'utente è già loggato\n");
+            }
             else if(strcmp(msg,"~NOVALIDPW")==0){
                 printf("La password inserita non è corretta\n");
             }

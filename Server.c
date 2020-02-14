@@ -18,12 +18,13 @@
 #define SA struct sockaddr 
 
 pthread_mutex_t signup_mutex;
+pthread_mutex_t login_mutex;
 
 // Game Function
 void *clientThread(void *sockfd) 
 { 
     int clientsd=*(int*)sockfd;
-    loginMain(clientsd, signup_mutex);
+    loginMain(clientsd, signup_mutex, login_mutex);
 	close(clientsd);
 	pthread_exit(NULL);
 

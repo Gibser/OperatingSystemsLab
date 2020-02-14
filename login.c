@@ -92,6 +92,41 @@ int usernameCheck(char* username){
 
 }
 
+int loggedUser(char* username){
+	char cmd[100] = "echo $(cat logged_users | grep -c \"";
+	strcat(cmd, username);
+	strcat(cmd, " \") > tmp");
+	int fd = tmpCommand(cmd);
+
+	int n_users;
+	char buff;
+	read(fd, &buff, 1);
+	n_users = atoi(&buff);
+	close(fd);
+	system("rm tmp");
+
+	if(n_users == 1)
+		return 1;
+	else
+		return 0;
+	
+}
+
+void logUser(char* username, pthread_mutex_t login){
+	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0777);
+	if(fd < 0){
+		perror("Errore apertura file utenti loggati.");
+		exit(1);
+	}
+
+	//sezione critica: scrittura logged_users
+	pthread_mutex_lock(&login);
+	write(fd, username, strlen(username));
+	write(fd, "\n", 1);
+	pthread_mutex_unlock(&login);
+	close(fd);
+}
+
 void copyStringFromFile(char* string, int fd){
 	char tempChar;
 	int i = 0;
@@ -102,13 +137,17 @@ void copyStringFromFile(char* string, int fd){
 	string[i-1] = '\0';
 }
 
-int loginF(char* username, char* password, int clientsd){
+int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 	char buffer[200];
 	read(clientsd,buffer,200);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(usernameCheck(username)){
 		write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
+		return 0;
+	}
+	if(loggedUser(username)){
+		write(clientsd, "~USRLOGGED", 10); //Utente già loggato
 		return 0;
 	}
 
@@ -125,6 +164,7 @@ int loginF(char* username, char* password, int clientsd){
 	system("rm tmp");
 	if(strcmp(password, passwd) == 0){
 		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
+		logUser(username);
 		return 1;
 	}
 	else{
@@ -165,7 +205,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 }
 
 
-void loginMain(int clientsd, pthread_mutex_t lock){
+void loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login){
 	char msg[30];
 	char nome[100], passwd[100];
 	int log;
@@ -175,7 +215,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 		read(clientsd,msg,sizeof(msg));
 		printf("msg %s",msg);
 		if(strcmp(msg,"~USRLOGIN")==0){
-			if((log = loginF(nome, passwd, clientsd)) == 0)
+			if((log = loginF(nome, passwd, clientsd, login)) == 0)
 				printf("Errore login\n");
 				//write(clientsd, "Errore login. Riprovare.\n", 25);
 		}
