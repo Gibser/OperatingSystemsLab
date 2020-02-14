@@ -50,11 +50,14 @@ void extractPassword(char *buffer, char *password){
 		i++;
 	}
 	i++;
-	while(i<strlen(buffer)){
+	while(buffer[i] != '\0'){
 		password[j]=buffer[i];
 		i++;
 		j++;
 	}
+	password[j] = '\0';
+	printf("Buffer: %s\n", buffer);
+	printf("%s\n", password);
 }
 
 
@@ -98,7 +101,9 @@ void copyStringFromFile(char* string, int fd){
 
 int loginF(char* username, char* password, int clientsd){
 	char buffer[200];
-	read(clientsd,buffer,200);
+	read(clientsd,buffer,12);
+	buffer[11] = '\0';
+	printf("Buffer ricevuto: %s\n\n", buffer);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(usernameCheck(username)){
@@ -117,6 +122,7 @@ int loginF(char* username, char* password, int clientsd){
 
 	close(fd);
 	system("rm tmp");
+	printf("\n%s %s\n", password, passwd);
 	if(strcmp(password, passwd) == 0){
 		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 		return 1;
