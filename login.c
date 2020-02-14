@@ -130,7 +130,7 @@ int loginF(char* username, char* password, int clientsd){
 
 	close(fd);
 	system("rm tmp");
-	//printf("\n%s %s\n", password, passwd);
+	printf("\n%s %s\n", password, passwd);
 	if(strcmp(password, passwd) == 0){
 		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 		printf("Login effettuato con successo.\n");
