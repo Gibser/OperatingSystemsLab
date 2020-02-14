@@ -11,8 +11,6 @@
 int hasSpace(char* string);
 int tmpCommand(char* cmd);
 void removeNewLine(char* string);
-void extractUsername(char *buffer,char* username);
-void extractPassword(char *buffer, char* password);
 int usernameCheck(char* username);
 void copyStringFromFile(char* string, int fd);
 int loginF(char* username, char* password, int clientsd);

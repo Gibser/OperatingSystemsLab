@@ -30,6 +30,34 @@ int tmpCommand(char* cmd){
 	return fd;
 }
 
+void extractUsername(char *buffer,char *username){
+	int i;
+	memset(username,'\0',sizeof(username));
+	i=0;
+	while(buffer[i]!='\n'){
+		username[i]=buffer[i];
+		i++;
+	}
+}
+
+
+void extractPassword(char *buffer, char *password){
+	int i,j;
+	memset(password,'\0',sizeof(password));
+	i=0;
+	j=0;
+	while(buffer[i]!='\n'){
+		i++;
+	}
+	i++;
+	while(i<strlen(buffer)){
+		password[j]=buffer[i];
+		i++;
+		j++;
+	}
+}
+
+
 void removeNewLine(char* string){
 	int dim = strlen(string);
 	string[dim] = '\0';
@@ -69,41 +97,14 @@ void copyStringFromFile(char* string, int fd){
 }
 
 int loginF(char* username, char* password, int clientsd){
-	int bytes_r;
-
-	
-	//getchar();
-	//scanf("%[^\n]", username);
-	read(clientsd, username, 200);
-	removeNewLine(username);
-	if(hasSpace(username)){
-		write(clientsd, "2", 1); //Il nome utente non può contenere spazi
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Username valido, si procede con la password
-
-		
-
-	//getchar();
-	//scanf("%[^\n]", password);
-	read(clientsd, password, 200);
-	removeNewLine(password);
-	if(hasSpace(password)){
-		write(clientsd, "2", 1); //La password non può contenere spazi.
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Password valida
-	
-
+	char buffer[200];
+	read(clientsd,buffer,200);
+	extractUsername(buffer,username);
+	extractPassword(buffer,password);
 	if(usernameCheck(username)){
-		write(clientsd, "3", 1); //Username non esistente!
+		write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
 		return 0;
 	}
-	else
-		write(clientsd, "1", 1); //Username esistente, si procede
-
 
 	char cmd[100] = "echo $(cat users | sed -n 's/";
 	strcat(cmd, username);
@@ -117,11 +118,11 @@ int loginF(char* username, char* password, int clientsd){
 	close(fd);
 	system("rm tmp");
 	if(strcmp(password, passwd) == 0){
-		write(clientsd, "1", 1); //Login effettuato!
+		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 		return 1;
 	}
 	else{
-		write(clientsd, "2", 1); //Password non valida
+		write(clientsd, "~NOVALIDPW", 10); //Password non valida
 		return 0;
 	}
 	
@@ -129,97 +130,58 @@ int loginF(char* username, char* password, int clientsd){
 
 
 int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
-	int bytes_r;
-
-	
-	read(clientsd, username, 200);
-	removeNewLine(username);
-	printf("username inserito: %s\n", username);
-	if(hasSpace(username)){
-		//write(clientsd, "Il nome utente non può contenere spazi.\n\n", 41);
-		write(clientsd, "2", 1);
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Username valido, si procede con la password
-
-
-	//write(clientsd, "Password: ", 10);
-	//getchar();
-	//scanf("%[^\n]", password);
-
-	read(clientsd, password, 200);
-	removeNewLine(password);
-	printf("password inserita: %s\n", password);
-	if(hasSpace(password)){
-		write(clientsd, "2", 1);
-		return 0;
-	}
-	else
-		write(clientsd, "1", 1); //Password valida
-
-	
+	char buffer[200];
+	memset(buffer,'\0',sizeof(buffer));
+	read(clientsd,buffer,200);
+	extractUsername(buffer,username);
+	extractPassword(buffer,password);
 	if(!usernameCheck(username)){
-		write(clientsd, "3", 1); //Username già esistente
+		write(clientsd, "~USREXISTS", 10); //Username già esistente
 		return 0;
 	}
-	else
-		write(clientsd, "1", 1); //Username non esistente, si procede
-
-
 	int fd;
 	if((fd = open("users", O_RDWR | O_APPEND)) < 0){
 		perror("Errore apertura users");
 		exit(1);
 	}
-
-	char regString[200] = "";
-	strcat(regString, username);
-	strcat(regString, " ");
-	strcat(password, "\n");
-	strcat(regString, password);
+	strcat(username," ");
+	strcat(username,password);
+	strcat(username, "\n");
 	//registro l'utente, sezione critica
 	pthread_mutex_lock(&lock);
-	if(write(fd, regString, strlen(regString)) != strlen(regString)){
+	if(write(fd, username, strlen(username)) != strlen(username)){
 		perror("Errore scrittura users");
 		exit(1);
 	}
 	pthread_mutex_unlock(&lock);
-
-	write(clientsd, "1", 1);  //Registrazione effettuata
+	write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
 	return 1;
 }
 
 
 void loginMain(int clientsd, pthread_mutex_t lock){
+	char msg[30];
 	char nome[100], passwd[100];
-	char scelta = '0';
-	int log, bytes_r;
-	//char gameLogin[] = "\n1 - Login\n2 - Registrazione\n3 - Esci\n\nScelta: ";
-	while(scelta != '4'){
-		//Scrivo le opzioni sul socket, quindi visualizzate dal client
-		//write(clientsd, gameLogin, sizeof(gameLogin));
-		if(read(clientsd, &bytes_r, sizeof(int))!=-1){     //Controllo quanti bytes invia il client
-			read(clientsd, &scelta, ntohl(bytes_r));
-			switch(scelta){
-				case '1':
-					if((log = loginF(nome, passwd, clientsd)) == 0)
-						printf("Errore login\n");
-						//write(clientsd, "Errore login. Riprovare.\n", 25);
-					break;
-				case '2':
-					if(!regF(nome, passwd, clientsd, lock))
-						printf("Errore registrazione\n");
-						//write(clientsd, "Registrazione fallita\n", 22);
-					break;
+	int log;
+	while(1){
+		memset(msg,'\0',sizeof(msg));
+		printf("Waiting...\n");
+		read(clientsd,msg,sizeof(msg));
+		printf("msg %s",msg);
+		if(strcmp(msg,"~USRLOGIN")==0){
+			if((log = loginF(nome, passwd, clientsd)) == 0)
+				printf("Errore login\n");
+				//write(clientsd, "Errore login. Riprovare.\n", 25);
+		}
+		else if(strcmp(msg,"~USRSIGNUP")==0){
+			printf("Sto per effettuare una registrazione..\n");
+			if(!regF(nome, passwd, clientsd, lock))
+				printf("Errore registrazione\n");
+				//write(clientsd, "Registrazione fallita\n", 22);
+		}
 
-				default:
-					break;
-			}
-
-			if(log == 1){
-				break;
-			}
+		if(log == 1){
+			break;
 		}
 	}
 }

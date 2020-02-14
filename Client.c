@@ -11,11 +11,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #define MAX 1000 
-#define clear() printf("\033[H\033[J")
 extern int errno;
-int epfd;
-struct epoll_event event;
-struct epoll_event events[64];
+
 
 struct config{
     unsigned int port;
@@ -25,7 +22,13 @@ struct config{
 
 void chooseServer(struct sockaddr_in *serverConfig);
 void game(int server_sd);
-
+void receiveMessage(int server_sd);
+int isExit(char buffer[]);
+void homeClient(int server_sd);
+char loginCred(int server_sd);
+void regCred(int server_sd);
+void printGuide();
+void printInfo(){};
 
 int main() 
 { 
@@ -44,13 +47,12 @@ int main()
         chooseServer(&serverConfig);
         // connect the client socket to server socket 
         if (connect(sockfd, (struct sockaddr*)&serverConfig, sizeof(serverConfig)) != 0) { 
-            //printf("Connessione con il server fallita...\n"); 
             printf("Errore: %s\nHai inserito bene i parametri?\n",strerror(errno));
             exit(0); 
         } 
         else
             printf("Connesso al server!\n");
-            game(sockfd);
+            homeClient(sockfd);
         }
 } 
 
@@ -96,14 +98,31 @@ void chooseServer(struct sockaddr_in *serverConfig){
     serverConfig->sin_port=htons(port);
 }
 
+void receiveMessage(int server_sd){
+    int i=0,nread,nbytes;
+    char buffer[5000];
+    read(server_sd,&nbytes,sizeof(int));//Read how many bytes server is going to send me
+    while(i<nbytes){//Ready to read message and write on STDOUT
+        nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
+        i+=nread;
+        write(STDOUT_FILENO,buffer,nread);
+    }
+}
+
+int isExit(char buffer[]){
+    if(strlen(buffer)==4){
+        if(memcmp(buffer,"exit",4)==0)
+            return 1;
+    }
+    return 0;
+}
+
+
 void game(int server_sd){
     char buffer[5000];
     int n,num_ready,i,nread;
-    n=read(server_sd, buffer, 5000); 
-    write(STDOUT_FILENO,buffer,n);
+    receiveMessage(server_sd); 
     memset(buffer,'\0',sizeof(buffer));
-    n=0;
-    i=0;
     while(1){
         printf("Scegli:\n");
         scanf("%s",buffer);
@@ -111,18 +130,150 @@ void game(int server_sd){
             n=strlen(buffer);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,buffer,strlen(buffer));//Then I send data
+            if(isExit(buffer)){
+                close(server_sd);
+                printf("Disconnesso.\n");
+                break;
+            }
             memset(buffer,'\0',sizeof(buffer));//Clear buffer
             system("clear");//Clear shell for a better readability
-            read(server_sd,&n,sizeof(int));//Read how many bytes server is going to send me
-            while(i<n){
-                nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
-                i+=nread;
-                write(STDOUT_FILENO,buffer,nread);
-            }
+            receiveMessage(server_sd);
   
         }
-        i=0;
-        n=0;
         memset(buffer,'\0',sizeof(buffer));
     }
+}
+
+//Gestione del login nel client
+char loginCred(int server_sd){
+    char username[100];
+    char password[100];
+    char creds[200];
+    char msg[20];
+    int n;
+    write(server_sd,"~USRLOGIN",9); //Notifying server about new login
+    memset(creds,'\0',sizeof(creds));
+    memset(msg,'\0',sizeof(msg));
+    printf("Inserisci nome utente: ");
+    getchar(); //scarico il buffer
+    scanf("%[^\n]", username); 
+    if(strstr(username," ")==NULL){ //Check if username contains space character
+        printf("Per favore inserire password ");
+        getchar(); //scarico il buffer
+        scanf("%[^\n]", password);
+        if(strstr(password," ")==NULL){
+            strcpy(creds,username);
+            strcat(creds,"\n");
+            strcat(creds,password);
+            write(server_sd,creds,strlen(creds));
+            read(server_sd,msg,sizeof(msg));
+            printf("blabla\n");
+            if(strcmp(msg,"~OKLOGIN")==0){
+                printf("Login effettuato!\n");
+            }
+            else if(strcmp(msg,"~USRNOTEXISTS")==0){
+                printf("L'utente non esiste\n");
+            }
+            else if(strcmp(msg,"~NOVALIDPW")==0){
+                printf("La password inserita non è corretta\n");
+            }
+            else{
+                printf("Qualcosa è andato storto\n");
+            }
+        }
+        else{
+            printf("La password non può contenere spazi.\n");
+        }
+    }
+    else{
+        printf("Il nome utente non può contenere spazi.\n");
+    }
+    
+}
+
+//Gestione della registrazione nel client
+void regCred(int server_sd){
+    char username[100];
+    char password[100];
+    char creds[200];
+    char msg[20];
+    int n;                
+    write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
+    memset(creds,'\0',sizeof(creds));
+    memset(msg,'\0',sizeof(msg));
+    printf("Inserisci nome utente: ");
+    getchar(); //scarico il buffer
+    scanf("%[^\n]", username); 
+    if(strstr(username," ")==NULL){ //Check if username contains space character
+        printf("Per favore inserire password ");
+        getchar(); //scarico il buffer
+        scanf("%[^\n]", password);
+        if(strstr(password," ")==NULL){
+            strcpy(creds,username);
+            strcat(creds,"\n");
+            strcat(creds,password);
+            printf("%s",creds);
+            write(server_sd,creds,strlen(creds));
+            read(server_sd,msg,sizeof(msg));
+            if(strcmp(msg,"~SIGNUPOK")==0){
+                printf("Registrazione effettuata con successo!\n");
+            }
+            else{
+                printf("Utente già registrato.\n");
+            }
+        }
+        else{
+            printf("La password non può contenere spazi.\n");
+        }
+    }
+    else{
+        printf("Il nome utente non può contenere spazi.\n");
+    }
+}
+
+void printGuide(){
+    char buffer[1024];
+    int fd=open("GameGuide.txt",O_RDONLY);
+    if(fd<0){
+        perror("Qualcosa è andato storto");
+    }
+    else{
+        while(read(fd, buffer, 1024)){
+            write(STDOUT_FILENO, buffer, 1024);
+            memset(buffer, '\0', sizeof(buffer));
+        }   
+        close(fd);
+    }
+    printf("\n\n");
+}
+
+void homeClient(int server_sd){
+    char scelta;
+    char log = '0';
+    while(log != '1'){
+        printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
+        scanf(" %c", &scelta);
+        if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
+            printf("Scelta non valida.\n\n");
+        switch(scelta){
+            case '1':
+                log = loginCred(server_sd);
+                break;
+            case '2':
+                regCred(server_sd);
+                break;
+            case '3':
+                printGuide(); // si deve fare
+                break;
+            case '4':
+                printInfo();
+                break;
+            case '5':
+                printf("Uscita...\n");
+                return;
+        }
+        
+    }
+
+    printf("Gioco...\n");
 }
