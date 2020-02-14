@@ -96,7 +96,7 @@ void copyStringFromFile(char* string, int fd){
 		string[i] = tempChar;
 		i++;
 	}
-	string[i-1] = '\0';
+	string[i] = '\0'; //era i-1
 }
 
 int loginF(char* username, char* password, int clientsd){
