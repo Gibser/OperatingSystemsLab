@@ -33,9 +33,14 @@ int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
 
 void clientAbort(int signalvalue){
-    printf("Sono il gestore dei segnali\n");
+    printf("\nSono il gestore dei segnali\n");
     if(userStatus==0){
         write(server_sd,"~USREXIT",8);
+        exit(0);
+    }
+    else if(userStatus==1){
+        write(server_sd,&(int){-1},sizeof(int));
+        exit(0);
     }
 }
 
@@ -186,6 +191,7 @@ char loginCred(){
     char creds[200];
     char msg[20];
     int n;
+    userStatus=1;
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -279,6 +285,7 @@ void homeClient(){
     char scelta[30];
     char log = '0';
     while(log != '1'){
+        userStatus=0;
         printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
         scanf("%s", scelta);
         if(strlen(scelta)==1){

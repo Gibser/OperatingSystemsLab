@@ -107,6 +107,9 @@ int loginF(char* username, char* password, int clientsd){
 	if(n==0){ 
 		return 0;
 	}
+	else if(n==-1){
+		return -1;
+	}
 	read(clientsd,buffer,n);
 	//printf("Buffer ricevuto: %s\n\n", buffer);
 	extractUsername(buffer,username);
@@ -151,6 +154,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	if(n==0){
 		return 0;
 	}
+
 	read(clientsd,buffer,n);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
@@ -188,6 +192,10 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 		if(strcmp(msg,"~USRLOGIN")==0){
 			if((log = loginF(nome, passwd, clientsd)) == 0)
 				printf("Errore login\n");
+			else if(log==-1){
+				printf("Utente disconnesso\n"); //Qui si dovrà gestire la disconnessione improvvisa dell'utente durante il login
+				break;
+			}
 		}
 		else if(strcmp(msg,"~USRSIGNUP")==0){
 			if(!regF(nome, passwd, clientsd, lock))
