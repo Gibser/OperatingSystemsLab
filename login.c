@@ -36,7 +36,6 @@ void extractUsername(char *buffer,char *username){
 	i=0;
 	while(buffer[i]!='\n'){
 		username[i]=buffer[i];
-		printf("%c\n", buffer[i]);
 		i++;
 	}
 	username[i] = '\0';
@@ -55,7 +54,6 @@ void extractPassword(char *buffer, char *password){
 	i++;
 	while(i<strlen(buffer)){
 		password[j]=buffer[i];
-		printf("%c\n", buffer[i]);
 		i++;
 		j++;
 	}
@@ -142,6 +140,7 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 	read(clientsd,buffer,200);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
+	printf("Okay\n");
 	if(usernameCheck(username)){
 		write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
 		return 0;
