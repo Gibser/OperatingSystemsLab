@@ -164,7 +164,7 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 	system("rm tmp");
 	if(strcmp(password, passwd) == 0){
 		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
-		logUser(username);
+		logUser(username, login);
 		return 1;
 	}
 	else{
