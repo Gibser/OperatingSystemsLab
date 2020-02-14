@@ -34,6 +34,7 @@ void extractUsername(char *buffer,char *username){
 	int i;
 	memset(username,'\0',sizeof(username));
 	i=0;
+	printf("buffer: %s", buffer);
 	while(buffer[i]!='\n'){
 		username[i]=buffer[i];
 		i++;
