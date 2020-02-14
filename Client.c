@@ -230,6 +230,7 @@ void regCred(int server_sd){
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
             n=combineStr(creds,username,password);
+            printf("n %d\n",n);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
             read(server_sd,msg,sizeof(msg));
