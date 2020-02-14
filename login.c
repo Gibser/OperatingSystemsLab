@@ -143,7 +143,7 @@ int loginF(char* username, char* password, int clientsd){
 int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 	char buffer[200];
 	int n;
-	memset(buffer,'\0',sizeof(buffer));
+	//memset(buffer,'\0',sizeof(buffer));
 	read(clientsd,&n,sizeof(int));//read how many bytes client is going to send me
 	if(n==0){
 		return 0;
