@@ -56,8 +56,8 @@ void extractPassword(char *buffer, char *password){
 		j++;
 	}
 	password[j] = '\0';
-	printf("Buffer: %s\n", buffer);
-	printf("%s\n", password);
+	//printf("Buffer: %s\n", buffer);
+	//printf("%s\n", password);
 }
 
 
@@ -108,7 +108,7 @@ int loginF(char* username, char* password, int clientsd){
 		return 0;
 	}
 	read(clientsd,buffer,n);
-	printf("Buffer ricevuto: %s\n\n", buffer);
+	//printf("Buffer ricevuto: %s\n\n", buffer);
 	extractUsername(buffer,username);
 	extractPassword(buffer,password);
 	if(usernameCheck(username)){
@@ -127,13 +127,15 @@ int loginF(char* username, char* password, int clientsd){
 
 	close(fd);
 	system("rm tmp");
-	printf("\n%s %s\n", password, passwd);
+	//printf("\n%s %s\n", password, passwd);
 	if(strcmp(password, passwd) == 0){
 		write(clientsd, "~OKLOGIN", 8); //Login effettuato!
+		printf("Login effettuato con successo.\n");
 		return 1;
 	}
 	else{
-		write(clientsd, "~NOVALIDPW", 10); //Password non valida
+		write(clientsd, "~NOVALIDPW", 10); //Password non validaù
+		printf("Password non valida\n");
 		return 0;
 	}
 	
