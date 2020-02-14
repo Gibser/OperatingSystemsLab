@@ -38,6 +38,7 @@ void extractUsername(char *buffer,char *username){
 		username[i]=buffer[i];
 		i++;
 	}
+	printf("Username inserito: %s\n", username);
 }
 
 
@@ -55,6 +56,7 @@ void extractPassword(char *buffer, char *password){
 		i++;
 		j++;
 	}
+	printf("Password inserita: %s\n", password);
 }
 
 
