@@ -31,9 +31,10 @@ void printInfo();
 int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
 
-/*void clientAbort(int signalvalue){
+void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
-    if(userStatus==0){
+    exit(0);
+    /*if(userStatus==0){
         write(server_sd,"~USREXIT",8);
         exit(0);
     }
@@ -44,13 +45,13 @@ int combineStr(char *creds,char *username, char *password);
     else if(userStatus==2){
         write(server_sd,&(int){-1},sizeof(int));
         exit(0);
-    }
-}*/
+    }*/
+}
 
 
 int main() 
 { 
-    //signal(SIGINT,clientAbort);
+    signal(SIGINT,clientAbort);
     int sockfd, connfd; 
     pthread_t tid;
     struct sockaddr_in serverConfig;
@@ -200,13 +201,13 @@ char loginCred(){
         }
         else{
             printf("La password non può contenere spazi.\n");
-            n=0;//Notifies server that an error occurred
+            n=-1;//Notifies server that an error occurred
             write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
-        n=0;//Notifies server that an error occurred
+        n=-1;//Notifies server that an error occurred
         write(server_sd,&n,sizeof(int));
     }
     return '0';
@@ -245,13 +246,13 @@ void regCred(){
         }
         else{
             printf("La password non può contenere spazi.\n");
-            n=0;//Notifies server that an error occurred
+            n=-1;//Notifies server that an error occurred
             write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
-        n=0;//Notifies server that an error occurred
+        n=-1;//Notifies server that an error occurred
         write(server_sd,&n,sizeof(int));
     }
 }

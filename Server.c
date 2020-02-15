@@ -89,9 +89,9 @@ int main()
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
+        }
             pthread_join(tid,&result);
             printf("Restituito: %d\n",result);
-        }
         
 
     }
