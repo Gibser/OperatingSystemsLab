@@ -76,6 +76,9 @@ int main()
     else
         printf("Server listening..\n"); 
     len = sizeof(cli); 
+
+    /*METTERE QUI THREAD DEL GIOCO PRINCIPALEPUNZ*/ 
+    
     while(1){
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
