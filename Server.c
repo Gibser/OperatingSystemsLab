@@ -18,12 +18,32 @@
 #define SA struct sockaddr 
 
 pthread_mutex_t signup_mutex;
+pthread_mutex_t login;
+
 
 // Game Function
+void game(int clientsd){
+    char msg[30];
+    while(1){
+        if(read(clientsd,msg,sizeof(msg))>0){
+            printf("%s\n", msg);
+        }
+        else{
+            logout(clientsd);
+            break;
+        }
+    }
+}
+
+
 void *clientThread(void *sockfd) 
 { 
     int clientsd=*(int*)sockfd;
-    loginMain(clientsd, signup_mutex);
+    int log = 0;
+    log = loginMain(clientsd, signup_mutex, login);
+    if(log == 1){
+        game(clientsd);
+    }
 	close(clientsd);
 	pthread_exit(NULL);
 
@@ -38,6 +58,17 @@ int main()
     struct sockaddr_in servaddr, cli; 
     void *result;
     pthread_t tid;
+
+    if (pthread_mutex_init(&signup_mutex, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&login, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
     // socket create and verification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
@@ -55,7 +86,7 @@ int main()
 
     //set timeout for socket input/output
     struct timeval timeout;      
-    timeout.tv_sec = 10;
+    timeout.tv_sec = 60;
     timeout.tv_usec = 0;
 
     if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,

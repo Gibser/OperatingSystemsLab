@@ -9,6 +9,23 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 
+
+
+void logout(int clientsd){
+	char sd[10];
+	//converto clientsd in stringa
+	snprintf(sd, 10, "%d", clientsd);
+
+	char cmd[100] = "sed -i '/";
+	strcat(cmd, sd);
+	strcat(cmd, "/d' logged_users");
+	system(cmd);
+
+	//sed -n 's/\(.*\) 1/\1/p' -- comando per prendere solo il nome utente con clientsd = 1
+}
+
+
+
 int hasSpace(char* string){
 	int i = 0;
 	while(i < strlen(string)){
@@ -100,7 +117,50 @@ void copyStringFromFile(char* string, int fd){
 	string[i-1] = '\0';
 }
 
-int loginF(char* username, char* password, int clientsd){
+int loggedUser(char* username){
+	char cmd[100] = "echo $(cat logged_users | grep -c \"";
+	strcat(cmd, username);
+	strcat(cmd, " \") > tmp");
+	int fd = tmpCommand(cmd);
+
+	int n_users;
+	char buff;
+	read(fd, &buff, 1);
+	n_users = atoi(&buff);
+	close(fd);
+	system("rm tmp");
+
+	if(n_users == 1)
+		return 1;
+	else
+		return 0;
+	
+}
+
+void logUser(char* username, int clientsd, pthread_mutex_t login){
+	char sd[10];
+	//converto clientsd in stringa
+	snprintf(sd, 10, "%d", clientsd);
+
+	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0777);
+	if(fd < 0){
+		perror("Errore apertura file utenti loggati.");
+		exit(1);
+	}
+	char file_string[200];
+	strncpy(file_string, username, strlen(username)+1);
+	strcat(file_string, " ");
+	strcat(file_string, sd);
+	//sezione critica: scrittura logged_users
+	pthread_mutex_lock(&login);
+	write(fd, file_string, strlen(file_string));
+	write(fd, "\n", 1);
+	pthread_mutex_unlock(&login);
+	close(fd);
+}
+
+
+int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 	char buffer[200];
 	int n;
 	memset(buffer,'\0',sizeof(buffer));
@@ -109,11 +169,16 @@ int loginF(char* username, char* password, int clientsd){
 			return 0;
 		}
 		read(clientsd,buffer,n);
-		printf("Buffer ricevuto: %s", buffer);
 		extractUsername(buffer,username);
 		extractPassword(buffer,password);
 		if(usernameCheck(username)){
 			write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
+			return 0;
+		}
+
+		if(loggedUser(username)){
+			printf("Utente già loggato");
+			write(clientsd, "~USRLOGGED", 10); //Utente già loggato
 			return 0;
 		}
 
@@ -132,6 +197,7 @@ int loginF(char* username, char* password, int clientsd){
 		if(strcmp(password, passwd) == 0){
 			write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 			printf("Login effettuato con successo.\n");
+			logUser(username, clientsd, login);
 			return 1;
 		}
 		else{
@@ -252,7 +318,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 }
 
 
-void loginMain(int clientsd, pthread_mutex_t lock){
+int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login){
 	char msg[30];
 	char nome[100], passwd[100];
 	int log=0;
@@ -262,7 +328,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 		memset(msg,'\0',sizeof(msg));
 		if(read(clientsd,msg,sizeof(msg))>0){
 			if(strcmp(msg,"~USRLOGIN")==0){
-				if((log = loginF(nome, passwd, clientsd)) == 0)
+				if((log = loginF(nome, passwd, clientsd, login)) == 0)
 					printf("Errore login\n");
 				else if(log==-1){
 					printf("Utente disconnesso durante login\n"); //Qui si dovrà gestire la disconnessione improvvisa dell'utente durante il login
@@ -286,7 +352,7 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 			}
 		}
 		else{
-			printf("Il client si è disconnesso, ma che porco è iddio\n");
+			printf("Client disconnesso.\n");
 			break;
 		}
 		/*
@@ -315,4 +381,6 @@ void loginMain(int clientsd, pthread_mutex_t lock){
 		}
 		*/
 	}
+
+	return log;
 }
