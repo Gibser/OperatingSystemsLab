@@ -38,6 +38,7 @@ void extractUsername(char *buffer,char *username){
 		username[i]=buffer[i];
 		i++;
 	}
+	username[i] = '\0';
 }
 
 
