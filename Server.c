@@ -53,6 +53,20 @@ int main()
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0) 
         perror("setsockopt(SO_REUSEPORT) failed");
 
+    //set timeout for socket input/output
+    struct timeval timeout;      
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+
+    if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
+                sizeof(timeout)) < 0)
+        perror("setsockopt failed\n");
+
+    if (setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
+                sizeof(timeout)) < 0)
+        perror("setsockopt failed\n");
+
+    //------------------------------------------------------------------------------------------------------------------
     memset(&servaddr, '\0', sizeof(servaddr));
     
     // assign IP, PORT 
@@ -91,7 +105,7 @@ int main()
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
         }
             pthread_join(tid,&result);
-            printf("Restituito: %d\n",result);
+            printf("Restituito: %ld\n",(long)result);
         
 
     }
