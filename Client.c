@@ -31,7 +31,7 @@ void printInfo();
 int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
 
-void clientAbort(int signalvalue){
+/*void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
     if(userStatus==0){
         write(server_sd,"~USREXIT",8);
@@ -45,12 +45,12 @@ void clientAbort(int signalvalue){
         write(server_sd,&(int){-1},sizeof(int));
         exit(0);
     }
-}
+}*/
 
 
 int main() 
 { 
-    signal(SIGINT,clientAbort);
+    //signal(SIGINT,clientAbort);
     int sockfd, connfd; 
     pthread_t tid;
     struct sockaddr_in serverConfig;

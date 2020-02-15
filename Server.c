@@ -36,6 +36,7 @@ int main()
    
     int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
+    void *result;
     pthread_t tid;
     // socket create and verification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
@@ -78,7 +79,7 @@ int main()
     len = sizeof(cli); 
 
     /*METTERE QUI THREAD DEL GIOCO PRINCIPALEPUNZ*/ 
-    
+
     while(1){
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
@@ -88,7 +89,8 @@ int main()
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
-    
+            pthread_join(tid,&result);
+            printf("Restituito: %d\n",result);
         }
         
 
