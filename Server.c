@@ -24,7 +24,9 @@ pthread_mutex_t login;
 // Game Function
 void game(int clientsd){
     char msg[30];
+    
     while(1){
+        memset(msg,'\0',sizeof(msg));
         if(read(clientsd,msg,sizeof(msg))>0){
             printf("%s\n", msg);
         }
