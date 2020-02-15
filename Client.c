@@ -185,7 +185,7 @@ char loginCred(){
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
     if(strstr(username," ")==NULL){ //Check if username contains space character
-        printf("Per favore inserire password ");
+        printf("Per favore inserire password: ");
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
