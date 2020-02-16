@@ -8,8 +8,22 @@
 #include <string.h>
 #include <pthread.h>
 #include <arpa/inet.h>
+#include "login.h"
 
+int maxUsers(){
+	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > tmp";
+	int fd = tmpCommand(cmd);
+	char buff[4];
 
+	read(fd, buff, 4);
+	close(fd);
+	system("rm tmp");
+	printf("Utenti connessi: %d\n", atoi(buff));
+	if(atoi(buff) >= MAX_USERS)
+		return 1;
+	else
+		return 0;
+}
 
 void logout(int clientsd){
 	char sd[10];
@@ -161,10 +175,17 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		}
 
 		if(loggedUser(username)){
-			printf("Utente già loggato");
+			printf("Utente già loggato\n");
 			write(clientsd, "~USRLOGGED", 10); //Utente già loggato
 			return 0;
 		}
+
+		if(maxUsers()){
+			printf("Il server è pieno\n");
+			write(clientsd, "~SERVERISFULL", 13); //Server pieno
+			return 0;
+		}
+
 
 		char cmd[100] = "echo $(cat users | sed -n 's/";
 		strcat(cmd, username);

@@ -129,6 +129,9 @@ int checkLoginStatus(char *msg){
     else if(strcmp(msg,"~NOVALIDPW")==0){
         printf("La password inserita non è corretta\n");
     }
+    else if(strcmp(msg,"~SERVERISFULL")==0){
+        printf("Il server è pieno\n");
+    }
     else{
         printf("Qualcosa è andato storto\n");
     }
