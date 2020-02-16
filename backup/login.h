@@ -8,7 +8,9 @@
 #include <string.h>
 #include <pthread.h>
 
+int hasSpace(char* string);
 int tmpCommand(char* cmd);
+void removeNewLine(char* string);
 void extractUsername(char *buffer,char* username);
 void extractPassword(char *buffer, char* password);
 int usernameCheck(char* username);

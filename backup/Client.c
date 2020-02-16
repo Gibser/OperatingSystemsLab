@@ -22,6 +22,7 @@ struct config{
 };
 void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
+//void game(int server_sd);
 void homeClient();//aveva server_sd
 char loginCred();//aveva server_sd
 void regCred();//aveva server_sd
@@ -33,6 +34,18 @@ int combineStr(char *creds,char *username, char *password);
 void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
     exit(0);
+    /*if(userStatus==0){
+        write(server_sd,"~USREXIT",8);
+        exit(0);
+    }
+    else if(userStatus==1){
+        write(server_sd,&(int){-1},sizeof(int));
+        exit(0);
+    }
+    else if(userStatus==2){
+        write(server_sd,&(int){-1},sizeof(int));
+        exit(0);
+    }*/
 }
 
 void game(int server_sd){
@@ -114,7 +127,35 @@ void chooseServer(struct sockaddr_in *serverConfig){
     scanf("%u",&port);
     serverConfig->sin_port=htons(port);
 }
+/*
 
+
+void game(int server_sd){
+    char buffer[5000];
+    int n,num_ready,i,nread;
+    receiveMessage(server_sd); 
+    memset(buffer,'\0',sizeof(buffer));
+    while(1){
+        printf("Scegli:\n");
+        scanf("%s",buffer);
+        if(strlen(buffer)>0){
+            n=strlen(buffer);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,buffer,strlen(buffer));//Then I send data
+            if(isExit(buffer)){
+                close(server_sd);
+                printf("Disconnesso.\n");
+                break;
+            }
+            memset(buffer,'\0',sizeof(buffer));//Clear buffer
+            system("clear");//Clear shell for a better readability
+            receiveMessage(server_sd);
+  
+        }
+        memset(buffer,'\0',sizeof(buffer));
+    }
+}
+*/
 int checkLoginStatus(char *msg){
     if(strcmp(msg,"~OKLOGIN")==0){
         printf("Login effettuato!\n");
@@ -267,6 +308,7 @@ void homeClient(){
     char log = '0';
     while(log != '1'){
         userStatus=0;
+        //printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
         write(STDOUT_FILENO,home,sizeof(home));
         scanf("%s", scelta);
         if(strlen(scelta)==1){
