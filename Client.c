@@ -53,7 +53,7 @@ void game(int server_sd){
 
     while(1){
         printf("Comando: ");
-        scanf("%c", &msg);
+        scanf(" %c", &msg);
         write(server_sd, &msg, 1);
     }
 }

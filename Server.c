@@ -24,7 +24,9 @@ pthread_mutex_t login;
 // Game Function
 void game(int clientsd){
     char msg[30];
+    
     while(1){
+        memset(msg,'\0',sizeof(msg));
         if(read(clientsd,msg,sizeof(msg))>0){
             printf("%s\n", msg);
         }
@@ -86,7 +88,7 @@ int main()
 
     //set timeout for socket input/output
     struct timeval timeout;      
-    timeout.tv_sec = 60;
+    timeout.tv_sec = 180;
     timeout.tv_usec = 0;
 
     if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
