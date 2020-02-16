@@ -153,6 +153,7 @@ void logUser(char* username, int clientsd, pthread_mutex_t login){
 	strcat(file_string, sd);
 	//sezione critica: scrittura logged_users
 	pthread_mutex_lock(&login);
+	printf("Scrivo utente...\n");
 	write(fd, file_string, strlen(file_string));
 	write(fd, "\n", 1);
 	pthread_mutex_unlock(&login);
