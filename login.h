@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
+#define MAX_USERS 2
+
 
 int tmpCommand(char* cmd);
 void extractUsername(char *buffer,char* username);
