@@ -78,17 +78,15 @@ void createMap(){
   wareHouses=rand()%4+1; 
   printf("Number of Warehouses: %d\n",wareHouses);
   printf("Choosing number of obstacles...\n");
-  while(obstacles<0||(obstacles>=rows&&obstacles>=cols)){
-    obstacles=rand()%16+5; //Almeno ostacoli fino a un massimo di 16 (righe e colonne permettendo) 
-    //Si deve evitare la possibilità che un utente spawni in un punto chiuso, laddove esista
-  }
-  printf("Number of obstacles: %d\n",obstacles);
+  obstacles = (rand()%12)+5;
+  printf("Number of Obstacles: %d\n", obstacles);
   printf("Choosing number of items...\n");
   n_items=rand()%5+8; //Da 8 a 12 items sparsi nella mappa
   printf("Number of items: %d\n",n_items);
   printf("Generating map...\n");
   i=0;
   while(i<wareHouses){
+    printf("rows: %d cols: %d\n", rows, cols);
     r=rand()%rows;
     c=rand()%cols;
     if(map[r][c].isWareHouse==0){
@@ -96,6 +94,7 @@ void createMap(){
       i++;
     }
   }
+  printf("warehouses done\n");
   i=0;
   while(i<obstacles){
     r=rand()%rows;
@@ -105,6 +104,7 @@ void createMap(){
       i++;
     }
   }
+  printf("obstacles done\n");
   i=0;
   while(i<n_items){
     r=rand()%rows;
@@ -116,6 +116,8 @@ void createMap(){
     }
 
   }
+  printf("items done\n");
+
 
 }
 
