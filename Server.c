@@ -59,6 +59,7 @@ void *mapGenerator(void* args){
 void game(int clientsd){
     char msg[16];
     spawnPlayer(clientsd);
+    printf("Fine Spawn\n");
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
