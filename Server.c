@@ -245,6 +245,7 @@ int isCellNotSolid(struct cell a){
 int isCellGood(struct cell a,int index1,int index2){
   int exp;
   if(isCellFree(a)){
+    printf("La cella risulta libera, controlliamo intorno...\n");
     exp=isLeftFree(index1,index2)+isRightFree(index1,index2)+isUpFree(index1,index2)+isDownFree(index1,index2);
     if(exp>0)//Se almeno una cella è libera attorno al giocatore okay
       return 1;
@@ -258,6 +259,7 @@ void spawnPlayer(int clientsd){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   c=getLetter(clientsd);
+  printf("Lettera assegnata: %c\n",c);
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
