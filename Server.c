@@ -355,9 +355,10 @@ void initializeMatrix(){
 } 
 
 void movement(struct player *info_player, int add_x, int add_y){
-  
+      printf("x: %d y: %d\n", info_player->x, info_player->y);
       if(isCellFree(map[(info_player->x)+add_x][info_player->y+add_y])){
         changeCoordinates(info_player, add_x, add_y);
+        printf("x: %d y: %d\n", info_player->x, info_player->y);
       }
       
       else if(map[(info_player->x)+add_x][info_player->y+add_y].isWareHouse){
@@ -371,6 +372,7 @@ void movement(struct player *info_player, int add_x, int add_y){
           info_player->hasItem=1;
           changeCoordinates(info_player, add_x, add_y);
           map[info_player->x][info_player->y].object=' ';
+          printf("x: %d y: %d\n", info_player->x, info_player->y);
         }
       }
     
