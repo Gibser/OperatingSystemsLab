@@ -14,7 +14,6 @@
 #define MAX 1000 
 extern int errno;
 int userStatus=0; //0 Menu 1 login 2 sign up
-int server_sd;
 struct config{
     unsigned int port;
     char ip[28];
@@ -22,23 +21,60 @@ struct config{
 };
 void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
-void homeClient();//aveva server_sd
-char loginCred();//aveva server_sd
-void regCred();//aveva server_sd
+void homeClient(int server_sd);//aveva server_sd
+char loginCred(int server_sd);//aveva server_sd
+void regCred(int server_sd);//aveva server_sd
 void printGuide();
 void printInfo();
 int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
+void printRow(char *buff);
+void printMap(int server_sd);
 
 void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
     exit(0);
 }
 
+
+void printRow(char *buff){
+    printf("| ");
+    for(int i = 0; i < strlen(buff); i++){
+        printf("%c ", buff[i]);
+    }
+    printf("|");
+    printf("\n");
+}
+
+void printMap(int server_sd){
+    char row[16];
+    int rows;
+    int cols;
+    read(server_sd, &rows, sizeof(int));
+    read(server_sd, &cols, sizeof(int));
+    printf("  ");
+    for(int i = 0; i < cols; i++)
+        printf("_ ");
+
+    for(int i = 0; i < rows; i++){
+        read(server_sd, row, cols);
+        printRow(row);
+    }
+
+    printf("  ");
+    for(int i = 0; i < cols; i++)
+        printf("─ ");
+
+    printf("\n");
+}
+
 void game(int server_sd){
     char msg;
-
+    char row[16];
+    int rows;
+    int cols;
     while(1){
+        printMap(server_sd);
         printf("Comando: ");
         scanf(" %c", &msg);
         write(server_sd, &msg, 1);
@@ -68,7 +104,6 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            server_sd=sockfd;
             homeClient();
         }
 } 
@@ -146,7 +181,7 @@ int combineStr(char *creds,char *username,char *password){
 }
 
 //Gestione del login nel client
-char loginCred(){
+char loginCred(int server_sd){
     char username[100];
     char password[100];
     char creds[200];
@@ -190,7 +225,7 @@ char loginCred(){
 }
 
 //Gestione della registrazione nel client
-void regCred(){
+void regCred(int server_sd){
     char username[100];
     char password[100];
     char creds[200];
@@ -264,7 +299,7 @@ void printInfo(){
     }
 }
 
-void homeClient(){
+void homeClient(int server_sd){
     char scelta[30];
     char home[]="\n----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n(5)Esci\n\nScelta:";
     char log = '0';

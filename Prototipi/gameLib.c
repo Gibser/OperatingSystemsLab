@@ -105,6 +105,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     if(map[r][c].isWareHouse==0){
       map[r][c].isWareHouse=1;
       i++;
+      map[r][c].object = 'ħ';
     }
   }
   printf("warehouses done\n");
@@ -115,6 +116,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0){
       map[r][c].isObstacle=1;
       i++;
+      map[r][c].object = 'x';
     }
   }
   printf("obstacles done\n");
@@ -131,7 +133,13 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   }
   printf("items done\n");
 
-
+  int j;
+  for(i = 0; i < rows; i++){
+    for(j = 0; j < cols; j++){
+      if(map[i][j].isWareHouse == 0 && map[i][j].isObstacle == 0 && map[i][j].object == '0')
+        map[i][j].object = ' ';
+    }
+  }
 }
 
 /*

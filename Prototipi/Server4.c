@@ -28,7 +28,8 @@ int isRightFree(int index1,int index2);
 int isUpFree(int index1,int index2);
 int isDownFree(int index1,int index2);
 char getLetter(int clientsd);
-
+void matrixToString(char *msg, int clientsd);
+char parsePlayer(int playerSD);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -52,10 +53,11 @@ void *mapGenerator(void* args){
 
 // Game Function
 void game(int clientsd){
-    char msg[30];
+    char msg[16];
     spawnPlayer(clientsd);
     while(1){
         memset(msg,'\0',sizeof(msg));
+        matrixToString(msg, clientsd);
         if(read(clientsd,msg,sizeof(msg))>0){
             printf("%s\n", msg);
         }
@@ -262,10 +264,37 @@ void spawnPlayer(int clientsd){
   map[index1][index2].playerSD=clientsd;
 }
 
-int min(int rows,int cols){
-  if(rows<=cols)
-    return rows;
-  else
-    return cols;
-  
+
+char parsePlayer(int playerSD){
+  for(int i = 0; i < MAX_USERS; i++){
+    if(mapPlayers[i] == playerSD)
+      return ((char)i+65);
+  }
+}
+
+void matrixToMessage(char *msg, int clientsd){
+  int i = 0;
+  int j = 0;
+
+  write(clientsd, &rows, sizeof(int));
+  write(clientsd, &cols, sizeof(int));
+  while(i < rows){
+    while(j < cols){
+      if(map[i][j].playerSD >=0){
+        msg[j] = parsePlayer(map[i][j].playerSD);
+      }
+      else
+        msg[j] = map[i][j].object;
+      
+      j++;
+    }
+    msg[j] = '\0';
+    
+    write(clientsd, msg, cols);
+
+    j = 0;
+    i++;
+  }
+
+
 }
