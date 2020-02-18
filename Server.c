@@ -79,7 +79,7 @@ void *clientThread(void *sockfd)
     int log = 0;
     log = loginMain(clientsd, signup_mutex, login);
     if(log == 1){
-        printf("Gestisco il client...\n")
+        printf("Gestisco il client...\n");
         game(clientsd);
     }
 	close(clientsd);
