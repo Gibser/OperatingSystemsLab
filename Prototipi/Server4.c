@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include "login3.h"
+#include "gameLib.h"
 #define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
@@ -24,11 +25,25 @@ pthread_mutex_t login;
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
 
+struct mapObjects info_map;    //info numero oggetti sulla mappa
+struct cell **map;
+int rows, cols;
+char items[3][10]={"sword","gold","food"};
+int mapPlayers[MAX_USERS]={0};
+
+
+void *mapGenerator(void* args){
+    rows = randNumb();
+    cols = randNumb();
+    initializeMatrix(rows, cols, map);
+    createMap(&info_map, rows, cols, map);
+    pthread_exit(NULL);
+}
 
 // Game Function
 void game(int clientsd){
     char msg[30];
-    
+    spawnPlayer(map, mapPlayers, rows, cols);
     while(1){
         memset(msg,'\0',sizeof(msg));
         if(read(clientsd,msg,sizeof(msg))>0){
@@ -63,10 +78,11 @@ int main()
     int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
     void *result;
-    pthread_t tid;
+    pthread_t tid,gameThread;
     /*pthread_t gameThread;
     pthread_t playerThreads[MAX_THREADS];*/
 
+    
 
     if (pthread_mutex_init(&signup_mutex, NULL) != 0)
     {
@@ -133,6 +149,7 @@ int main()
     len = sizeof(cli); 
 
     /*METTERE QUI THREAD DEL GIOCO PRINCIPALEPUNZ*/ 
+    pthread_create(&gameThread, NULL, mapGenerator, NULL);
 
     while(1){
         // Accept the data packet from client and verification 

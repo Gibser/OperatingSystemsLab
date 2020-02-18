@@ -11,9 +11,16 @@ struct cell{
   int playerSD; //Socket descriptor
   int isWareHouse;
   int isObstacle;
-  char object[10];
+  char object;
   
 };
+struct mapObjects{
+    int n_obstacles;
+    int n_items;
+    int n_warehouses;
+};
+
+/*
 void initializeMatrix();
 void createMap();
 void printMatrix();
@@ -25,12 +32,13 @@ int isRightFree(int index1,int index2);
 int isUpFree(int index1,int index2);
 int isDownFree(int index1,int index2);
 char getLetter();
+*/
 
 time_t t;
 
 char items[3][10]={"sword","gold","food"};
-int mapPlayers[MAX_USERS]={0};
-int rows,cols;
+/*int mapPlayers[MAX_USERS]={0};
+int rows,cols;*/
 
 struct cell **map;
 
@@ -53,7 +61,7 @@ int main(){
    return 0;
 }
 
-void initializeMatrix(){
+void initializeMatrix(struct cell **map,int rows,int cols){
   int i=0,j=0;
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
   for(i=0;i<rows;i++){
@@ -64,12 +72,66 @@ void initializeMatrix(){
       map[i][j].isObstacle=0;
       map[i][j].isWareHouse=0;
       map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
-      memset(map[i][j].object,'\0',sizeof(map[i][j].object));
+      map[i][j].object='0';
     }
   } 
 
 }
 
+
+void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
+  int wareHouses, obstacles=-1, n_items;
+  int i;
+  int r,c,index;
+  char items[3]={'$','@','ł'};
+  printf("Choosing number of warehouses...\n");
+  info->n_warehouses=rand()%4+1; 
+  printf("Number of Warehouses: %d\n",info->n_warehouses);
+  printf("Choosing number of obstacles...\n");
+  info->n_obstacles= (rand()%min(rows,cols))+5;
+  printf("Number of Obstacles: %d\n", info->n_obstacles);
+  printf("Choosing number of items...\n");
+  info->n_items=rand()%5+8; //Da 8 a 12 items sparsi nella mappa
+  printf("Number of items: %d\n",info->n_items);
+  printf("Generating map...\n");
+  i=0;
+  while(i<info->n_warehouses){
+    printf("rows: %d cols: %d\n", rows, cols);
+    r=rand()%rows;
+    c=rand()%cols;
+    if(map[r][c].isWareHouse==0){
+      map[r][c].isWareHouse=1;
+      i++;
+    }
+  }
+  printf("warehouses done\n");
+  i=0;
+  while(i<info->n_obstacles){
+    r=rand()%rows;
+    c=rand()%cols;
+    if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0){
+      map[r][c].isObstacle=1;
+      i++;
+    }
+  }
+  printf("obstacles done\n");
+  i=0;
+  while(i<info->n_items){
+    r=rand()%rows;
+    c=rand()%cols;
+    index=rand()%3;
+    if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0&&map[r][c].object=='0'){
+      map[r][c].object=items[index];
+      i++;
+    }
+
+  }
+  printf("items done\n");
+
+
+}
+
+/*
 void createMap(){
   int wareHouses, obstacles=-1, n_items;
   int i;
@@ -120,6 +182,7 @@ void createMap(){
 
 
 }
+*/
 
 void printMatrix(){
   int i,j;
@@ -161,7 +224,9 @@ void printMatrix(){
   }
   printf("\n");
 }
-char getLetter(){
+
+
+char getLetter(int* mapPlayers){
   int i;
   char c;
   for(i=0;i<MAX_USERS;i++){
@@ -173,6 +238,8 @@ char getLetter(){
   }
   return c;
 }
+
+
 int isLeftFree(int index1,int index2){
   if(index2-1>=0){
     return isCellFree(map[index1][index2-1]);
@@ -215,7 +282,7 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(){
+void spawnPlayer(struct cell **map, int *mapPlayers, int rows, int cols){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   c=getLetter();
@@ -229,3 +296,10 @@ void spawnPlayer(){
   //map[index1][index2].playerSD=SOCKETDESCRIPTOR
 }
 
+int min(int rows,int cols){
+  if(rows<=cols)
+    return rows;
+  else
+    return cols;
+  
+}

@@ -2,6 +2,8 @@
     "files.associations": {
         "pthread.h": "c",
         "socket.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "inet.h": "c",
+        "login3.h": "c"
     }
 }
