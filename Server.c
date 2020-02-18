@@ -287,6 +287,7 @@ void matrixToString(char *msg, int clientsd){
   write(clientsd, &rows, sizeof(int));
   write(clientsd, &cols, sizeof(int));
   while(i < rows){
+    memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
         msg[j] = parsePlayer(map[i][j].playerSD);
@@ -297,7 +298,7 @@ void matrixToString(char *msg, int clientsd){
       j++;
     }
     msg[j] = '\0';
-    
+    printf("Riga inviata al Client: %s",msg);
     write(clientsd, msg, cols);
 
     j = 0;
