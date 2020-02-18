@@ -321,6 +321,7 @@ void matrixToString(char *msg, int clientsd){
     memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
+        printf("%c\n", parsePlayer(map[i][j].playerSD));
         msg[j] = parsePlayer(map[i][j].playerSD);
       }
       else
