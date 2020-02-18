@@ -75,6 +75,7 @@ void game(int server_sd){
     int rows;
     int cols;
     while(1){
+        system("clear");
         printMap(server_sd);
         printf("Comando: ");
         scanf(" %c", &msg);

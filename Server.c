@@ -58,7 +58,7 @@ void *mapGenerator(void* args){
     int i=0,j=0;
     rows = randNumb();
     cols = randNumb();
-    for(i=0;i<MAX_USERS;i++)
+    for(i=0;i<MAX_USERS;i++) //MAPPLAYERS INITIALIZATION
       mapPlayers[i]=-1;
     printf("%d %d\n", rows, cols);
     initializeMatrix();
@@ -225,9 +225,9 @@ void setLetter(int clientsd){
   int i;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==-1){
-      pthread_mutex_lock(&editMapPlayers);
+      pthread_mutex_lock(&editMapPlayers); //cappadavide  //NUOVO MUTEX
       mapPlayers[i]=clientsd;
-      pthread_mutex_unlock(&editMapPlayers);
+      pthread_mutex_unlock(&editMapPlayers);//cappadavide
       break;
     }
   }
@@ -309,7 +309,7 @@ void spawnPlayer(int clientsd,struct player *info_player){
   info_player->x=index1;
   info_player->y=index2;
   info_player->hasItem=0;
-  info_player->itemsDelivered=0;
+  info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
   pthread_mutex_lock(&editMatrix); //cappadavide
   map[index1][index2].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);//cappadavide
