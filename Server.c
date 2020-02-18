@@ -259,13 +259,14 @@ void spawnPlayer(int clientsd){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   c=getLetter(clientsd);
-  printf("Lettera assegnata: %c\n",c);
+  printf("Lettera assegnata: %c\n",c); //funziona
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
     if(isCellGood(map[index1][index2],index1,index2)){
       break;
     }
+    printf("Test non superato\n");
   }
   map[index1][index2].playerSD=clientsd;
 }
