@@ -51,13 +51,13 @@ int main(){
    
    
    srand((unsigned) time(&t));
-   rows=rand()%9+8;  //da 0 a 8 -> da 8 a 16
+   /*rows=rand()%9+8;  //da 0 a 8 -> da 8 a 16
    cols=rand()%9+8; 
    printf("rows %d cols %d\n",rows,cols);
    initializeMatrix(rows,cols);
-   createMap(rows,cols);
+   createMap(rows,cols);*/
    printf("Map created.\n");
-   printMatrix(rows,cols);
+   //printMatrix(rows,cols);
    return 0;
 }
 
@@ -265,7 +265,7 @@ int isDownFree(int index1,int index2){
   return 0;
 }
 int isCellFree(struct cell a){
-  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&strlen(a.object)==0)
+  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
     return 1;
   return 0;
 }
@@ -282,10 +282,10 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(struct cell **map, int *mapPlayers, int rows, int cols){
+void spawnPlayer(struct cell **map, int *mapPlayers, int rows, int cols, int clientsd){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
-  c=getLetter();
+  c=getLetter(mapPlayers);
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
@@ -293,7 +293,7 @@ void spawnPlayer(struct cell **map, int *mapPlayers, int rows, int cols){
       break;
     }
   }
-  //map[index1][index2].playerSD=SOCKETDESCRIPTOR
+  map[index1][index2].playerSD=clientsd;
 }
 
 int min(int rows,int cols){
