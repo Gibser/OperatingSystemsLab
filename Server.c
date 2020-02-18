@@ -232,6 +232,7 @@ int isDownFree(int index1,int index2){
   return 0;
 }
 int isCellFree(struct cell a){
+  printf("Ostacolo: %d  Magazzino: %d  Giocatore: %d Oggetto: %c\n",a.isObstacle,a.isWareHouse,a.playerSD,a.object);
   if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
     return 1;
   return 0;
@@ -266,7 +267,8 @@ void spawnPlayer(int clientsd){
     if(isCellGood(map[index1][index2],index1,index2)){
       break;
     }
-    printf("Test non superato\n");
+    //printf("Test non superato\n"); Mi ritorna sempre test non superato
+    sleep(1);
   }
   map[index1][index2].playerSD=clientsd;
 }
