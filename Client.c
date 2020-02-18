@@ -104,7 +104,7 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            homeClient();
+            homeClient(sockfd);
         }
 } 
 
