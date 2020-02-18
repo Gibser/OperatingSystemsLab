@@ -78,6 +78,9 @@ void initializeMatrix(struct cell **map,int rows,int cols){
 
 }
 
+int randNumb(){
+  return rand()%9+8; 
+}
 
 void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   int wareHouses, obstacles=-1, n_items;

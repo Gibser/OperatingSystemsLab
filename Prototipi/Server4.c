@@ -19,17 +19,26 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 
+void spawnPlayer(int clientsd);
+int isCellGood(struct cell a,int index1,int index2);
+int isCellFree(struct cell a);
+int isLeftFree(int index1,int index2);
+int isRightFree(int index1,int index2);
+int isUpFree(int index1,int index2);
+int isDownFree(int index1,int index2);
+char getLetter(int clientsd);
+
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
+
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
 
 struct mapObjects info_map;    //info numero oggetti sulla mappa
 struct cell **map;
 int rows, cols;
-char items[3][10]={"sword","gold","food"};
-int mapPlayers[MAX_USERS]={0};
+int mapPlayers[MAX_USERS]={-1};
 
 
 void *mapGenerator(void* args){
@@ -43,7 +52,7 @@ void *mapGenerator(void* args){
 // Game Function
 void game(int clientsd){
     char msg[30];
-    spawnPlayer(map, mapPlayers, rows, cols);
+    spawnPlayer(clientsd);
     while(1){
         memset(msg,'\0',sizeof(msg));
         if(read(clientsd,msg,sizeof(msg))>0){
@@ -176,3 +185,81 @@ int main()
 /*int isAvailable(int slot){
     return slot==0;
 }*/
+
+char getLetter(int clientsd){
+  int i;
+  char c;
+  for(i=0;i<MAX_USERS;i++){
+    if(mapPlayers[i]==-1){
+      mapPlayers[i]=clientsd;
+      c=(char)(i+65);
+      break;
+    }
+  }
+  return c;
+}
+
+
+int isLeftFree(int index1,int index2){
+  if(index2-1>=0){
+    return isCellFree(map[index1][index2-1]);
+  }
+  return 0;
+}
+int isRightFree(int index1,int index2){
+  if(index2+1<=cols-1){
+    return isCellFree(map[index1][index2-1]);
+  }
+  return 0;
+}
+int isUpFree(int index1,int index2){
+  if(index1-1>=0){
+    return isCellFree(map[index1-1][index2]);
+  }
+  return 0;
+}
+int isDownFree(int index1,int index2){
+  if(index1+1<=rows-1){
+    return isCellFree(map[index1+1][index2]);
+  }
+  return 0;
+}
+int isCellFree(struct cell a){
+  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
+    return 1;
+  return 0;
+}
+
+int isCellGood(struct cell a,int index1,int index2){
+  int exp;
+  if(isCellFree(a)){
+    exp=isLeftFree(index1,index2)+isRightFree(index1,index2)+isUpFree(index1,index2)+isDownFree(index1,index2);
+    if(exp>0)//Se almeno una cella è libera attorno al giocatore okay
+      return 1;
+    return 0;
+  }
+}
+
+
+
+void spawnPlayer(int clientsd){
+  char c;
+  int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
+  c=getLetter(clientsd);
+  while(1){
+    index1=rand()%rows;
+    index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
+    if(isCellGood(map[index1][index2],index1,index2)){
+      break;
+    }
+  }
+  map[index1][index2].playerSD=clientsd;
+}
+
+int min(int rows,int cols){
+  if(rows<=cols)
+    return rows;
+  else
+    return cols;
+  
+}
