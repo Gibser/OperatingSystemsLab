@@ -233,7 +233,7 @@ int isDownFree(int index1,int index2){
 }
 int isCellFree(struct cell a){
   //printf("Ostacolo: %d  Magazzino: %d  Giocatore: %d Oggetto: %c\n",a.isObstacle,a.isWareHouse,a.playerSD,a.object);
-  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
+  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object==' ')
     return 1;
   return 0;
 }
