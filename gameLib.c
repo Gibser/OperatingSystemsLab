@@ -85,13 +85,13 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   }
   printf("items done\n");
 
-  int j;
+  /*int j;   BLOCCO NON NECESSARIO
   for(i = 0; i < rows; i++){
     for(j = 0; j < cols; j++){
       if(map[i][j].isWareHouse == 0 && map[i][j].isObstacle == 0 && map[i][j].object == '0')
         map[i][j].object = ' ';
     }
-  }
+  }*/
 }
 
 

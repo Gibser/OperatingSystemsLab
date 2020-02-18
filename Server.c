@@ -232,7 +232,7 @@ int isDownFree(int index1,int index2){
   return 0;
 }
 int isCellFree(struct cell a){
-  printf("Ostacolo: %d  Magazzino: %d  Giocatore: %d Oggetto: %c\n",a.isObstacle,a.isWareHouse,a.playerSD,a.object);
+  //printf("Ostacolo: %d  Magazzino: %d  Giocatore: %d Oggetto: %c\n",a.isObstacle,a.isWareHouse,a.playerSD,a.object);
   if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
     return 1;
   return 0;
@@ -265,10 +265,9 @@ void spawnPlayer(int clientsd){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
     if(isCellGood(map[index1][index2],index1,index2)){
+      printf("Trovata cella per lo spawn del giocatore!\n");
       break;
     }
-    //printf("Test non superato\n"); Mi ritorna sempre test non superato
-    sleep(1);
   }
   map[index1][index2].playerSD=clientsd;
 }
@@ -320,7 +319,7 @@ void initializeMatrix(){
       map[i][j].isObstacle=0;
       map[i][j].isWareHouse=0;
       map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
-      map[i][j].object='0';
+      map[i][j].object=' '; //prima era 0
     }
   }
 } 
