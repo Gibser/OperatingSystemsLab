@@ -368,7 +368,7 @@ void movement(struct player *info_player, int add_x, int add_y){
           info_player->hasItem=0;
         }
       }
-      else if(map[(info_player->x)+add_x][info_player->y+add_y].object!=' '){
+      else if(map[(info_player->x)+add_x][info_player->y+add_y].object!=' ' && map[(info_player->x)+add_x][info_player->y+add_y].isObstacle == 0){
         if(info_player->hasItem==0){
           info_player->hasItem=1;
           changeCoordinates(info_player, add_x, add_y);
