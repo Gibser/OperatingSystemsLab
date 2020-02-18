@@ -18,8 +18,11 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 
+
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
+//int threadStatus[MAX_THREADS]={0};
+//int isAvailable(int slot);
 
 
 // Game Function
@@ -61,6 +64,9 @@ int main()
     struct sockaddr_in servaddr, cli; 
     void *result;
     pthread_t tid;
+    /*pthread_t gameThread;
+    pthread_t playerThreads[MAX_THREADS];*/
+
 
     if (pthread_mutex_init(&signup_mutex, NULL) != 0)
     {
@@ -137,6 +143,11 @@ int main()
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
+            /*i=0;
+            while(!isAvailable(threadStatus[i])){
+                i++;
+            }
+            pthread_create(&playerThreads[i], NULL, clientThread, (void *) thread_sd);*/
         }
             
         
@@ -144,3 +155,7 @@ int main()
     }
     close(sockfd); 
 } 
+
+/*int isAvailable(int slot){
+    return slot==0;
+}*/
