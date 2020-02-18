@@ -19,7 +19,7 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 
-void spawnPlayer(int clientsd,struct player info_player);
+void spawnPlayer(int clientsd,struct player *info_player);
 int isCellGood(struct cell a,int index1,int index2);
 int isCellFree(struct cell a);
 int isCellNotSolid(struct cell a);
@@ -69,8 +69,9 @@ void game(int clientsd){
     char msg[16];
     char command;
     struct player infoplayer;
-    spawnPlayer(clientsd,infoplayer);
+    spawnPlayer(clientsd, &infoplayer);
     printf("Fine Spawn\n");
+    printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
@@ -284,7 +285,7 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(int clientsd,struct player info_player){
+void spawnPlayer(int clientsd,struct player *info_player){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   c=setLetter(clientsd);
@@ -295,10 +296,10 @@ void spawnPlayer(int clientsd,struct player info_player){
       break;
     }
   }
-  info_player.x=index1;
-  info_player.y=index2;
-  info_player.hasItem=0;
-  info_player.itemsDelivered=0;
+  info_player->x=index1;
+  info_player->y=index2;
+  info_player->hasItem=0;
+  info_player->itemsDelivered=0;
   map[index1][index2].playerSD=clientsd;
 }
 
