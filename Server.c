@@ -51,13 +51,15 @@ pthread_mutex_t editMapPlayers;
 struct mapObjects info_map;    //info numero oggetti sulla mappa
 struct cell **map;
 int rows, cols;
-int mapPlayers[MAX_USERS]={-1};
+int mapPlayers[MAX_USERS];
 
 
 void *mapGenerator(void* args){
     int i=0,j=0;
     rows = randNumb();
     cols = randNumb();
+    for(i=0;i<MAX_USERS;i++)
+      mapPlayers[i]=-1;
     printf("%d %d\n", rows, cols);
     initializeMatrix();
     printMatrix(rows, cols, map);
@@ -73,8 +75,8 @@ void game(int clientsd){
     spawnPlayer(clientsd, &infoplayer);
     printf("Fine Spawn\n");
     printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
-    for(int i=0;i<MAX_USERS;i++)
-      printf("mp %d\n",mapPlayers[i]);
+    /*for(int i=0;i<MAX_USERS;i++)
+      printf("mp %d",mapPlayers[i]);*/
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
@@ -115,7 +117,8 @@ int main()
     /*pthread_t gameThread;
     pthread_t playerThreads[MAX_THREADS];*/
     srand(time(NULL));
-
+    /*for(i=0;i<MAX_USERS;i++)
+      printf("mp %d",mapPlayers[i]);*/
     if (pthread_mutex_init(&signup_mutex, NULL) != 0)
     {
         printf("\n mutex init failed\n");
