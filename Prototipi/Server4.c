@@ -22,6 +22,7 @@
 void spawnPlayer(int clientsd);
 int isCellGood(struct cell a,int index1,int index2);
 int isCellFree(struct cell a);
+int isCellNotSolid(struct cell a);
 int isLeftFree(int index1,int index2);
 int isRightFree(int index1,int index2);
 int isUpFree(int index1,int index2);
@@ -202,30 +203,35 @@ char getLetter(int clientsd){
 
 int isLeftFree(int index1,int index2){
   if(index2-1>=0){
-    return isCellFree(map[index1][index2-1]);
+    return isCellNotSolid(map[index1][index2-1]);
   }
   return 0;
 }
 int isRightFree(int index1,int index2){
   if(index2+1<=cols-1){
-    return isCellFree(map[index1][index2-1]);
+    return isCellNotSolid(map[index1][index2-1]);
   }
   return 0;
 }
 int isUpFree(int index1,int index2){
   if(index1-1>=0){
-    return isCellFree(map[index1-1][index2]);
+    return isCellNotSolid(map[index1-1][index2]);
   }
   return 0;
 }
 int isDownFree(int index1,int index2){
   if(index1+1<=rows-1){
-    return isCellFree(map[index1+1][index2]);
+    return isCellNotSolid(map[index1+1][index2]);
   }
   return 0;
 }
 int isCellFree(struct cell a){
   if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1&&a.object=='0')
+    return 1;
+  return 0;
+}
+int isCellNotSolid(struct cell a){
+  if(a.isObstacle==0&&a.isWareHouse==0&&a.playerSD==-1)
     return 1;
   return 0;
 }
