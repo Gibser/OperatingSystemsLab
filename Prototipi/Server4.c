@@ -12,10 +12,11 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include "login.h"
+#include "login3.h"
 #define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
+#define MAX_THREADS 8
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
