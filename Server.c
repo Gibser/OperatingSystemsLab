@@ -43,6 +43,7 @@ void movement(struct player *info_player, int add_x, int add_y);
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
 pthread_mutex_t editMatrix;
+pthread_mutex_t editMapPlayers;
 
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
@@ -72,6 +73,8 @@ void game(int clientsd){
     spawnPlayer(clientsd, &infoplayer);
     printf("Fine Spawn\n");
     printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
+    for(int i=0;i<MAX_USERS;i++)
+      printf("mp %d\n",mapPlayers[i]);
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
@@ -124,6 +127,11 @@ int main()
         return 1;
     }
      if (pthread_mutex_init(&editMatrix, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&editMapPlayers, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
@@ -212,10 +220,11 @@ int main()
 
 void setLetter(int clientsd){
   int i;
-  char c;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==-1){
+      pthread_mutex_lock(&editMapPlayers);
       mapPlayers[i]=clientsd;
+      pthread_mutex_unlock(&editMapPlayers);
       break;
     }
   }
@@ -321,7 +330,7 @@ void matrixToString(char *msg, int clientsd){
     memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
-        printf("%c\n", parsePlayer(map[i][j].playerSD));
+        printf("parsing %c\n", parsePlayer(map[i][j].playerSD));
         msg[j] = parsePlayer(map[i][j].playerSD);
       }
       else
