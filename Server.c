@@ -27,7 +27,7 @@ int isLeftFree(int index1,int index2);
 int isRightFree(int index1,int index2);
 int isUpFree(int index1,int index2);
 int isDownFree(int index1,int index2);
-char setLetter(int clientsd);
+void setLetter(int clientsd);
 char getLetter(int clientsd);
 void matrixToString(char *msg, int clientsd);
 char parsePlayer(int playerSD);
@@ -210,17 +210,15 @@ int main()
     return slot==0;
 }*/
 
-char setLetter(int clientsd){
+void setLetter(int clientsd){
   int i;
   char c;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==-1){
       mapPlayers[i]=clientsd;
-      c=(char)(i+65);
       break;
     }
   }
-  return c;
 }
 
 char getLetter(int clientsd){
@@ -288,7 +286,7 @@ int isCellGood(struct cell a,int index1,int index2){
 void spawnPlayer(int clientsd,struct player *info_player){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
-  c=setLetter(clientsd);
+  setLetter(clientsd);
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
@@ -300,7 +298,9 @@ void spawnPlayer(int clientsd,struct player *info_player){
   info_player->y=index2;
   info_player->hasItem=0;
   info_player->itemsDelivered=0;
+  pthread_mutex_lock(&editMatrix); //cappadavide
   map[index1][index2].playerSD=clientsd;
+  pthread_mutex_unlock(&editMatrix);//cappadavide
 }
 
 
