@@ -18,6 +18,12 @@ struct mapObjects{
     int n_warehouses;
 };
 
+struct player{
+  int x;
+  int y;
+  int hasItem;
+  int itemsDelivered;
+};
 
 int randNumb();
 //void initializeMatrix(struct cell **map,int rows,int cols);

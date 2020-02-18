@@ -52,7 +52,7 @@ void printMap(int server_sd){
     int cols;
     read(server_sd, &rows, sizeof(int));
     read(server_sd, &cols, sizeof(int));
-    printf("Righe: %d Colonne: %d\n",rows,cols);
+    //printf("Righe: %d Colonne: %d\n",rows,cols);
     printf("  ");
     for(int i = 0; i < cols; i++)
         printf("_ ");

@@ -19,7 +19,7 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 
-void spawnPlayer(int clientsd);
+void spawnPlayer(int clientsd,struct player info_player);
 int isCellGood(struct cell a,int index1,int index2);
 int isCellFree(struct cell a);
 int isCellNotSolid(struct cell a);
@@ -27,13 +27,20 @@ int isLeftFree(int index1,int index2);
 int isRightFree(int index1,int index2);
 int isUpFree(int index1,int index2);
 int isDownFree(int index1,int index2);
+char setLetter(int clientsd);
 char getLetter(int clientsd);
 void matrixToString(char *msg, int clientsd);
 char parsePlayer(int playerSD);
 void initializeMatrix();
+void checkMovement(char msg,struct player *info_player);
+void goUp(struct player *info_player);
+void goLeft(struct player *info_player);
+void goRight(struct player *info_player);
+void goDown(struct player *info_player);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
+pthread_mutex_t editMatrix;
 
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
@@ -58,13 +65,14 @@ void *mapGenerator(void* args){
 // Game Function
 void game(int clientsd){
     char msg[16];
-    spawnPlayer(clientsd);
+    struct player infoplayer;
+    spawnPlayer(clientsd,infoplayer);
     printf("Fine Spawn\n");
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
         if(read(clientsd,msg,sizeof(msg))>0){
-            printf("%s\n", msg);
+            checkMovement(msg);
         }
         else{
             logout(clientsd);
@@ -107,6 +115,11 @@ int main()
         return 1;
     }
     if (pthread_mutex_init(&login, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+     if (pthread_mutex_init(&editMatrix, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
@@ -193,7 +206,7 @@ int main()
     return slot==0;
 }*/
 
-char getLetter(int clientsd){
+char setLetter(int clientsd){
   int i;
   char c;
   for(i=0;i<MAX_USERS;i++){
@@ -205,6 +218,19 @@ char getLetter(int clientsd){
   }
   return c;
 }
+
+char getLetter(int clientsd){
+  int i;
+  char c;
+  for(i=0;i<MAX_USERS;i++){
+    if(mapPlayers[i]==clientsd){
+      c=(char)(i+65);
+      break;
+    }
+  }
+  return c;
+}
+
 
 
 int isLeftFree(int index1,int index2){
@@ -246,7 +272,6 @@ int isCellNotSolid(struct cell a){
 int isCellGood(struct cell a,int index1,int index2){
   int exp;
   if(isCellFree(a)){
-    printf("La cella risulta libera, controlliamo intorno...\n");
     exp=isLeftFree(index1,index2)+isRightFree(index1,index2)+isUpFree(index1,index2)+isDownFree(index1,index2);
     if(exp>0)//Se almeno una cella è libera attorno al giocatore okay
       return 1;
@@ -256,19 +281,21 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(int clientsd){
+void spawnPlayer(int clientsd,struct player info_player){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
-  c=getLetter(clientsd);
-  printf("Lettera assegnata: %c\n",c); //funziona
+  c=setLetter(clientsd);
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
     if(isCellGood(map[index1][index2],index1,index2)){
-      printf("Trovata cella per lo spawn del giocatore!\n");
       break;
     }
   }
+  info_player.x=index1;
+  info_player.y=index2;
+  info_player.hasItem=0;
+  info_player.itemsDelivered=0;
   map[index1][index2].playerSD=clientsd;
 }
 
@@ -298,7 +325,7 @@ void matrixToString(char *msg, int clientsd){
       j++;
     }
     msg[j] = '\0';
-    printf("Riga inviata al Client: %s\n",msg);
+    //printf("Riga inviata al Client: %s\n",msg);
     write(clientsd, msg, cols);
 
     j = 0;
@@ -311,7 +338,6 @@ void matrixToString(char *msg, int clientsd){
 void initializeMatrix(){
   int i=0,j=0;
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
-  printf("Allocato\n");
   for(i=0;i<rows;i++){
     map[i]=(struct cell*)malloc(cols*sizeof(struct cell));
   }
@@ -324,3 +350,61 @@ void initializeMatrix(){
     }
   }
 } 
+
+
+void checkMovement(char msg,struct player *info_player){
+  int clientsd=map[info_player->x][info_player->y].playerSD;
+  if(msg=='w'||msg=='W'){
+    if(info_player->x+1<rows){
+      if(isCellFree(map[(info_player->x)+1][info_player->y])){
+        goUp(info_player);
+      }
+      
+      else if(map[(info_player->x)+1][info_player->y].isWareHouse){
+        if(info_player->hasItem){
+          info_player->itemsDelivered+=1;
+          info_player->hasItem=0;
+        }
+      }
+      else if(map[(info_player->x)+1][info_player->y].object!=' '){
+        if(info_player->hasItem==0){
+          info_player->hasItem=1;
+          goUp(info_player);
+          map[info_player->x][info_player->y].object=' ';
+        }
+      }
+    }
+  }
+  else if(msg=='a'||msg=='A'){
+
+  }
+  else if(msg=='s'||msg=='S'){
+    
+  }
+  else if(msg=='d'||msg=='D'){
+    
+  }
+
+}
+
+void goUp(struct player *info_player){
+  int clientsd;
+  getLetter(map[info_player->x][info_player->y].playerSD);
+  pthread_mutex_lock(&editMatrix);
+  clientsd=map[info_player->x][info_player->y].playerSD;
+  map[info_player->x][info_player->y].playerSD=-1;
+  map[info_player->x+1][info_player->y].playerSD=clientsd;
+  pthread_mutex_unlock(&editMatrix);
+  info_player->x+=1;
+}
+
+void goLeft(struct player *info_player){
+  int clientsd;
+  getLetter(map[info_player->x][info_player->y-1].playerSD);
+  pthread_mutex_lock(&editMatrix);
+  clientsd=map[info_player->x][info_player->y].playerSD;
+  map[info_player->x][info_player->y].playerSD=-1;
+  map[info_player->x+1][info_player->y].playerSD=clientsd;
+  pthread_mutex_unlock(&editMatrix);
+  info_player->x+=1;
+}
