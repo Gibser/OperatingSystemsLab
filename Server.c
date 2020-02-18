@@ -298,7 +298,7 @@ void matrixToString(char *msg, int clientsd){
       j++;
     }
     msg[j] = '\0';
-    printf("Riga inviata al Client: %s",msg);
+    printf("Riga inviata al Client: %s\n",msg);
     write(clientsd, msg, cols);
 
     j = 0;
