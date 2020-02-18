@@ -77,7 +77,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     r=rand()%rows;
     c=rand()%cols;
     index=rand()%3;
-    if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0&&map[r][c].object=='0'){
+    if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0&&map[r][c].object==' '){
       map[r][c].object=items[index];
       i++;
     }
