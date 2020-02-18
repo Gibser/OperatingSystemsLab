@@ -30,6 +30,7 @@ int isDownFree(int index1,int index2);
 char getLetter(int clientsd);
 void matrixToString(char *msg, int clientsd);
 char parsePlayer(int playerSD);
+void initializeMatrix();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -44,11 +45,12 @@ int mapPlayers[MAX_USERS]={-1};
 
 
 void *mapGenerator(void* args){
-    //rows = randNumb();
-    //cols = randNumb();
-    //printf("%d %d\n", rows, cols);
-    //initializeMatrix(map, rows, cols);
-    //printMatrix(rows, cols, map);
+    int i=0,j=0;
+    rows = randNumb();
+    cols = randNumb();
+    printf("%d %d\n", rows, cols);
+    initializeMatrix();
+    printMatrix(rows, cols, map);
     createMap(&info_map, rows, cols, map);
     pthread_exit(NULL);
 }
@@ -96,9 +98,6 @@ int main()
     /*pthread_t gameThread;
     pthread_t playerThreads[MAX_THREADS];*/
     srand(time(NULL));
-    rows = randNumb();
-    cols = randNumb();
-    initializeMatrix(map, rows, cols);
 
     if (pthread_mutex_init(&signup_mutex, NULL) != 0)
     {
@@ -166,7 +165,6 @@ int main()
 
     /*METTERE QUI THREAD DEL GIOCO PRINCIPALEPUNZ*/ 
     pthread_create(&gameThread, NULL, mapGenerator, NULL);
-
     while(1){
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
@@ -302,3 +300,20 @@ void matrixToString(char *msg, int clientsd){
 
 
 }
+
+void initializeMatrix(){
+  int i=0,j=0;
+  map=(struct cell**)malloc(rows * sizeof(struct cell *));
+  printf("Allocato\n");
+  for(i=0;i<rows;i++){
+    map[i]=(struct cell*)malloc(cols*sizeof(struct cell));
+  }
+  for(i=0;i<rows;i++){
+    for(j=0;j<cols;j++){
+      map[i][j].isObstacle=0;
+      map[i][j].isWareHouse=0;
+      map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
+      map[i][j].object='0';
+    }
+  }
+} 
