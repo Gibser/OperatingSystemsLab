@@ -52,7 +52,9 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     printf("rows: %d cols: %d\n", rows, cols);
     r=rand()%rows;
     c=rand()%cols;
+    printf("%d %d\n", r, c);
     if(map[r][c].isWareHouse==0){
+      printf("Si\n");
       map[r][c].isWareHouse=1;
       i++;
       map[r][c].object = 'w';
@@ -93,7 +95,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
 }
 
 
-/*void printMatrix(){
+/*void printMatrix(int rows, int cols, struct cell **map){
   int i,j;
   printf("  ");
   for(i=0;i<cols;i++){
@@ -132,8 +134,18 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     printf("─ ");
   }
   printf("\n");
-}*/
+}
+*/
 
+void printMatrix(int rows, int cols, struct cell **map){
+  int i, j;
+  for(i = 0; i < rows; i++){
+    for(j = 0; j < cols; j++){
+      printf("%c ", map[i][j].object);
+    }
+    printf("\n");
+  }
+}
 
 int min(int rows,int cols){
   if(rows<=cols)

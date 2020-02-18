@@ -1,5 +1,5 @@
 /*Prova Server*/
-
+#include <time.h>
 #include <stdio.h> 
 #include <netdb.h> 
 #include <netinet/in.h> 
@@ -46,7 +46,9 @@ int mapPlayers[MAX_USERS]={-1};
 void *mapGenerator(void* args){
     rows = randNumb();
     cols = randNumb();
+    printf("%d %d\n", rows, cols);
     initializeMatrix(map, rows, cols);
+    //printMatrix(rows, cols, map);
     createMap(&info_map, rows, cols, map);
     pthread_exit(NULL);
 }
@@ -93,7 +95,7 @@ int main()
     pthread_t tid,gameThread;
     /*pthread_t gameThread;
     pthread_t playerThreads[MAX_THREADS];*/
-
+    srand(time(NULL));
     
 
     if (pthread_mutex_init(&signup_mutex, NULL) != 0)
