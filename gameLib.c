@@ -14,6 +14,7 @@
 void initializeMatrix(struct cell **map,int rows,int cols){
   int i=0,j=0;
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
+  printf("Allocato\n");
   for(i=0;i<rows;i++){
     map[i]=(struct cell*)malloc(cols*sizeof(struct cell));
   }
@@ -25,11 +26,11 @@ void initializeMatrix(struct cell **map,int rows,int cols){
       map[i][j].object='0';
     }
   } 
-
+printf("Funzione terminata\n");
 }
 
 int randNumb(){
-  return rand()%9+8; 
+  return (rand()%9+8); 
 }
 
 void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
