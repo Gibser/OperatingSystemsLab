@@ -10,29 +10,81 @@
 #include <pthread.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #define MAX 1000 
 extern int errno;
-
-
+int userStatus=0; //0 Menu 1 login 2 sign up
 struct config{
     unsigned int port;
     char ip[28];
     char hostname[100];
 };
-
+void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
-void game(int server_sd);
-void receiveMessage(int server_sd);
-int isExit(char buffer[]);
-void homeClient(int server_sd);
-char loginCred(int server_sd);
-void regCred(int server_sd);
+void homeClient(int server_sd);//aveva server_sd
+char loginCred(int server_sd);//aveva server_sd
+void regCred(int server_sd);//aveva server_sd
 void printGuide();
-void printInfo(){};
+void printInfo();
+int checkLoginStatus(char *msg);
+int combineStr(char *creds,char *username, char *password);
+void printRow(char *buff);
+void printMap(int server_sd);
+
+void clientAbort(int signalvalue){
+    printf("\nRitorna presto!\n");
+    exit(0);
+}
+
+
+void printRow(char *buff){
+    printf("| ");
+    for(int i = 0; i < strlen(buff); i++){
+        printf("%c ", buff[i]);
+    }
+    printf("|");
+    printf("\n");
+}
+
+void printMap(int server_sd){
+    char row[16];
+    int rows;
+    int cols;
+    read(server_sd, &rows, sizeof(int));
+    read(server_sd, &cols, sizeof(int));
+    printf("  ");
+    for(int i = 0; i < cols; i++)
+        printf("_ ");
+
+    for(int i = 0; i < rows; i++){
+        read(server_sd, row, cols);
+        printRow(row);
+    }
+
+    printf("  ");
+    for(int i = 0; i < cols; i++)
+        printf("─ ");
+
+    printf("\n");
+}
+
+void game(int server_sd){
+    char msg;
+    char row[16];
+    int rows;
+    int cols;
+    while(1){
+        printMap(server_sd);
+        printf("Comando: ");
+        scanf(" %c", &msg);
+        write(server_sd, &msg, 1);
+    }
+}
+
 
 int main() 
 { 
-
+    signal(SIGINT,clientAbort);
     int sockfd, connfd; 
     pthread_t tid;
     struct sockaddr_in serverConfig;
@@ -52,7 +104,7 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            homeClient(sockfd);
+            homeClient();
         }
 } 
 
@@ -98,50 +150,34 @@ void chooseServer(struct sockaddr_in *serverConfig){
     serverConfig->sin_port=htons(port);
 }
 
-void receiveMessage(int server_sd){
-    int i=0,nread,nbytes;
-    char buffer[5000];
-    read(server_sd,&nbytes,sizeof(int));//Read how many bytes server is going to send me
-    while(i<nbytes){//Ready to read message and write on STDOUT
-        nread=read(server_sd,buffer,100);//reading small chunks of bytes to avoid lost data 
-        i+=nread;
-        write(STDOUT_FILENO,buffer,nread);
+int checkLoginStatus(char *msg){
+    if(strcmp(msg,"~OKLOGIN")==0){
+        printf("Login effettuato!\n");
+        return 1;
     }
-}
-
-int isExit(char buffer[]){
-    if(strlen(buffer)==4){
-        if(memcmp(buffer,"exit",4)==0)
-            return 1;
+    else if(strcmp(msg,"~USRNOTEXISTS")==0){
+        printf("L'utente non esiste\n");
+    }
+    else if(strcmp(msg, "~USRLOGGED") == 0){
+                printf("L'utente è già loggato\n");
+    }
+    else if(strcmp(msg,"~NOVALIDPW")==0){
+        printf("La password inserita non è corretta\n");
+    }
+    else if(strcmp(msg,"~SERVERISFULL")==0){
+        printf("Il server è pieno\n");
+    }
+    else{
+        printf("Qualcosa è andato storto\n");
     }
     return 0;
 }
 
-
-void game(int server_sd){
-    char buffer[5000];
-    int n,num_ready,i,nread;
-    receiveMessage(server_sd); 
-    memset(buffer,'\0',sizeof(buffer));
-    while(1){
-        printf("Scegli:\n");
-        scanf("%s",buffer);
-        if(strlen(buffer)>0){
-            n=strlen(buffer);
-            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
-            write(server_sd,buffer,strlen(buffer));//Then I send data
-            if(isExit(buffer)){
-                close(server_sd);
-                printf("Disconnesso.\n");
-                break;
-            }
-            memset(buffer,'\0',sizeof(buffer));//Clear buffer
-            system("clear");//Clear shell for a better readability
-            receiveMessage(server_sd);
-  
-        }
-        memset(buffer,'\0',sizeof(buffer));
-    }
+int combineStr(char *creds,char *username,char *password){
+    strcpy(creds,username);
+    strcat(creds,"\n");
+    strcat(creds,password);
+    return strlen(creds);
 }
 
 //Gestione del login nel client
@@ -151,6 +187,7 @@ char loginCred(int server_sd){
     char creds[200];
     char msg[20];
     int n;
+    userStatus=1;
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -158,39 +195,32 @@ char loginCred(int server_sd){
     getchar(); //scarico il buffer
     scanf("%[^\n]", username); 
     if(strstr(username," ")==NULL){ //Check if username contains space character
-        printf("Per favore inserire password ");
+        printf("Per favore inserire password: ");
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
-            strcpy(creds,username);
-            strcat(creds,"\n");
-            strcat(creds,password);
-            write(server_sd,creds,strlen(creds));
-            read(server_sd,msg,sizeof(msg));
-            printf("blabla\n");
-            if(strcmp(msg,"~OKLOGIN")==0){
-                printf("Login effettuato!\n");
-            }
-            else if(strcmp(msg,"~USRNOTEXISTS")==0){
-                printf("L'utente non esiste\n");
-            }
-            else if(strcmp(msg, "~USRLOGGED") == 0){
-                printf("L'utente è già loggato\n");
-            }
-            else if(strcmp(msg,"~NOVALIDPW")==0){
-                printf("La password inserita non è corretta\n");
-            }
-            else{
-                printf("Qualcosa è andato storto\n");
-            }
+            n=combineStr(creds,username,password);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,creds,strlen(creds));//Then I send data
+            read(server_sd,msg,sizeof(msg));//Receive msg about login status
+            if(checkLoginStatus(msg))
+                return '1';
+            else
+                return '0';
+            
         }
         else{
             printf("La password non può contenere spazi.\n");
+            n=-1;//Notifies server that an error occurred
+            write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
+        n=-1;//Notifies server that an error occurred
+        write(server_sd,&n,sizeof(int));
     }
+    return '0';
     
 }
 
@@ -200,7 +230,8 @@ void regCred(int server_sd){
     char password[100];
     char creds[200];
     char msg[20];
-    int n;                
+    int n;
+    userStatus=2;                
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -212,11 +243,9 @@ void regCred(int server_sd){
         getchar(); //scarico il buffer
         scanf("%[^\n]", password);
         if(strstr(password," ")==NULL){
-            strcpy(creds,username);
-            strcat(creds,"\n");
-            strcat(creds,password);
-            printf("%s",creds);
-            write(server_sd,creds,strlen(creds));
+            n=combineStr(creds,username,password);
+            write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
+            write(server_sd,creds,strlen(creds));//Then I send data
             read(server_sd,msg,sizeof(msg));
             if(strcmp(msg,"~SIGNUPOK")==0){
                 printf("Registrazione effettuata con successo!\n");
@@ -227,56 +256,87 @@ void regCred(int server_sd){
         }
         else{
             printf("La password non può contenere spazi.\n");
+            n=-1;//Notifies server that an error occurred
+            write(server_sd,&n,sizeof(int));
         }
     }
     else{
         printf("Il nome utente non può contenere spazi.\n");
+        n=-1;//Notifies server that an error occurred
+        write(server_sd,&n,sizeof(int));
     }
 }
 
 void printGuide(){
-    char buffer[1024];
+    char buffer[10];
+    int nread;
     int fd=open("GameGuide.txt",O_RDONLY);
     if(fd<0){
         perror("Qualcosa è andato storto");
     }
     else{
-        while(read(fd, buffer, 1024)){
-            write(STDOUT_FILENO, buffer, 1024);
-            memset(buffer, '\0', sizeof(buffer));
-        }   
+        system("clear");
+        while((nread=read(fd,buffer,5))>0){
+            write(STDOUT_FILENO,buffer,nread);
+        }
         close(fd);
     }
-    printf("\n\n");
+}
+
+void printInfo(){
+    char buffer[10];
+    int nread;
+    int fd=open("GameInfo.txt",O_RDONLY);
+    if(fd<0){
+        perror("Qualcosa è andato storto");
+    }
+    else{
+        system("clear");
+        while((nread=read(fd,buffer,3))>0){
+            write(STDOUT_FILENO,buffer,nread);
+        }
+        close(fd);
+    }
 }
 
 void homeClient(int server_sd){
-    char scelta;
+    char scelta[30];
+    char home[]="\n----PROGETTO LSO-GIOCO----\nBenvenuto,cosa vuoi fare?\n(1)Login\n(2)Registrati\n(3)Aiuto\n(4)Informazioni sul gioco\n(5)Esci\n\nScelta:";
     char log = '0';
     while(log != '1'){
-        printf("Benvenuto!\n\n1 - Login\n2 - Registrazione\n3 - Guida\n4 - Informazioni\n5 - Esci\n\nScelta: ");
-        scanf(" %c", &scelta);
-        if(scelta != '1' && scelta != '2' && scelta != '3' && scelta != '4' && scelta != '5')
-            printf("Scelta non valida.\n\n");
-        switch(scelta){
-            case '1':
-                log = loginCred(server_sd);
-                break;
-            case '2':
-                regCred(server_sd);
-                break;
-            case '3':
-                printGuide(); // si deve fare
-                break;
-            case '4':
-                printInfo();
-                break;
-            case '5':
-                printf("Uscita...\n");
-                return;
+        userStatus=0;
+        write(STDOUT_FILENO,home,sizeof(home));
+        scanf("%s", scelta);
+        if(strlen(scelta)==1){
+            switch(scelta[0]){
+                case '1':
+                    log=loginCred(server_sd);
+                    break;
+                case '2':
+                    regCred(server_sd);
+                    break;
+                case '3':
+                    printGuide();
+                    break;
+                case '4':
+                    printInfo();
+                    break;
+                case '5':
+                    printf("Uscita...\n");
+                    write(server_sd,"~USREXIT",8);
+                    exit(0);
+                    break;
+                default:
+                    printf("Scelta non valida, riprovare.\n");
+                    break;
+                
+            }            
         }
+        else{
+            printf("Scelta non valida, riprovare.\n");
+        }
+    
         
     }
-
-    printf("Gioco...\n");
+        game(server_sd);
 }
