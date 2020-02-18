@@ -37,6 +37,8 @@ void goUp(struct player *info_player);
 void goLeft(struct player *info_player);
 void goRight(struct player *info_player);
 void goDown(struct player *info_player);
+void changeCoordinates(struct player *info_player, int add_x, int add_y);
+void movement(struct player *info_player, int add_x, int add_y);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -65,14 +67,15 @@ void *mapGenerator(void* args){
 // Game Function
 void game(int clientsd){
     char msg[16];
+    char command;
     struct player infoplayer;
     spawnPlayer(clientsd,infoplayer);
     printf("Fine Spawn\n");
     while(1){
         memset(msg,'\0',sizeof(msg));
         matrixToString(msg, clientsd);
-        if(read(clientsd,msg,sizeof(msg))>0){
-            checkMovement(msg);
+        if(read(clientsd, &command, sizeof(command))>0){
+            checkMovement(command, &infoplayer);
         }
         else{
             logout(clientsd);
@@ -351,45 +354,65 @@ void initializeMatrix(){
   }
 } 
 
-
-void checkMovement(char msg,struct player *info_player){
-  int clientsd=map[info_player->x][info_player->y].playerSD;
-  if(msg=='w'||msg=='W'){
-    if(info_player->x+1<rows){
-      if(isCellFree(map[(info_player->x)+1][info_player->y])){
-        goUp(info_player);
+void movement(struct player *info_player, int add_x, int add_y){
+  
+      if(isCellFree(map[(info_player->x)+add_x][info_player->y+add_y])){
+        changeCoordinates(info_player, add_x, add_y);
       }
       
-      else if(map[(info_player->x)+1][info_player->y].isWareHouse){
+      else if(map[(info_player->x)+add_x][info_player->y+add_y].isWareHouse){
         if(info_player->hasItem){
           info_player->itemsDelivered+=1;
           info_player->hasItem=0;
         }
       }
-      else if(map[(info_player->x)+1][info_player->y].object!=' '){
+      else if(map[(info_player->x)+add_x][info_player->y+add_y].object!=' '){
         if(info_player->hasItem==0){
           info_player->hasItem=1;
-          goUp(info_player);
+          changeCoordinates(info_player, add_x, add_y);
           map[info_player->x][info_player->y].object=' ';
         }
       }
+    
+}
+
+
+void checkMovement(char msg, struct player *info_player){
+  int clientsd=map[info_player->x][info_player->y].playerSD;
+  if(msg=='w'||msg=='W'){
+    if(info_player->x-1>=0){
+      movement(info_player, -1, 0);
     }
   }
   else if(msg=='a'||msg=='A'){
-
+    if(info_player->y-1 >= 0){
+      movement(info_player, 0, -1);
+    }
   }
   else if(msg=='s'||msg=='S'){
-    
+    if(info_player->x+1 < rows)
+      movement(info_player, 1, 0);
   }
   else if(msg=='d'||msg=='D'){
-    
+    if(info_player->y+1 < cols)
+      movement(info_player, 0, 1);
   }
 
 }
 
+void changeCoordinates(struct player *info_player, int add_x, int add_y){
+  int clientsd;
+  pthread_mutex_lock(&editMatrix);
+  clientsd=map[info_player->x][info_player->y].playerSD;
+  map[info_player->x][info_player->y].playerSD=-1;
+  map[info_player->x+add_x][info_player->y+add_y].playerSD=clientsd;
+  pthread_mutex_unlock(&editMatrix);
+  info_player->x+=add_x;
+  info_player->y+=add_y;
+}
+
 void goUp(struct player *info_player){
   int clientsd;
-  getLetter(map[info_player->x][info_player->y].playerSD);
   pthread_mutex_lock(&editMatrix);
   clientsd=map[info_player->x][info_player->y].playerSD;
   map[info_player->x][info_player->y].playerSD=-1;
@@ -404,7 +427,7 @@ void goLeft(struct player *info_player){
   pthread_mutex_lock(&editMatrix);
   clientsd=map[info_player->x][info_player->y].playerSD;
   map[info_player->x][info_player->y].playerSD=-1;
-  map[info_player->x+1][info_player->y].playerSD=clientsd;
+  map[info_player->x][info_player->y-1].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);
-  info_player->x+=1;
+  info_player->y-=1;
 }
