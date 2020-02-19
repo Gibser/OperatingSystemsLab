@@ -427,7 +427,7 @@ void checkMovement(char msg, struct player *info_player){
       }
     }
   }
-  else if(msg=='d'||msg=='D'){
+  else if(msg=='e'||msg=='E'){
     if(info_player->hasItem && isWarehouseHere(info_player)){
       printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
       info_player->hasItem=0;
