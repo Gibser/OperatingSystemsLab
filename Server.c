@@ -29,7 +29,7 @@ int isUpFree(int index1,int index2);
 int isDownFree(int index1,int index2);
 void setLetter(int clientsd);
 char getLetter(int clientsd);
-void matrixToString(char *msg, int clientsd);
+void matrixToString(char *msg, int clientsd,int *obstacles);
 char parsePlayer(int playerSD);
 void initializeMatrix();
 void checkMovement(char msg,struct player *info_player);
@@ -75,14 +75,13 @@ void game(int clientsd){
     char msg[16];
     char command;
     struct player infoplayer;
+    infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
     spawnPlayer(clientsd, &infoplayer);
     printf("Fine Spawn\n");
     printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
-    /*for(int i=0;i<MAX_USERS;i++)
-      printf("mp %d",mapPlayers[i]);*/
     while(1){
         memset(msg,'\0',sizeof(msg));
-        matrixToString(msg, clientsd);
+        matrixToString(msg, clientsd,infoplayer.obstacles);
         if(read(clientsd, &command, sizeof(command))>0){
             checkMovement(command, &infoplayer);
         }
@@ -326,10 +325,10 @@ char parsePlayer(int playerSD){
   }
 }
 
-void matrixToString(char *msg, int clientsd){
+void matrixToString(char *msg, int clientsd,int *obstacles){
   int i = 0;
   int j = 0;
-
+  struct obstacles *a;
   write(clientsd, &rows, sizeof(int));
   write(clientsd, &cols, sizeof(int));
   while(i < rows){
@@ -339,8 +338,17 @@ void matrixToString(char *msg, int clientsd){
         printf("parsing %c\n", parsePlayer(map[i][j].playerSD));
         msg[j] = parsePlayer(map[i][j].playerSD);
       }
+      else if(map[i][j].isObstacle){
+        a=(struct obstacles *)map[i][j].pointer;
+        if(obstacles[a->id]==1){
+          msg[j]='x';
+        }
+        else
+          msg[j]=' ';
+      }
+        
       else
-        msg[j] = map[i][j].object;
+          msg[j] = map[i][j].object;
       
       j++;
     }
@@ -373,6 +381,8 @@ void initializeMatrix(){
 } 
 
 void movement(struct player *info_player, int add_x, int add_y){
+      int id;
+      struct obstacles *a;
       printf("x: %d y: %d\n", info_player->x, info_player->y);
       if(isCellNotSolid(map[(info_player->x)+add_x][info_player->y+add_y])){
         changeCoordinates(info_player, add_x, add_y);
@@ -384,6 +394,11 @@ void movement(struct player *info_player, int add_x, int add_y){
           info_player->itemsDelivered+=1;
           info_player->hasItem=0;
         }
+      }
+      else if(map[(info_player->x)+add_x][info_player->y+add_y].isObstacle){
+        a=(struct obstacles*)map[(info_player->x)+add_x][info_player->y+add_y].pointer;
+        id=a->id;
+        info_player->obstacles[id]=1; 
       }
       /*else if(map[(info_player->x)+add_x][info_player->y+add_y].object!=' ' && map[(info_player->x)+add_x][info_player->y+add_y].isObstacle == 0){
           changeCoordinates(info_player, add_x, add_y);

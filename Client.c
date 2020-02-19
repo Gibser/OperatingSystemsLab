@@ -59,6 +59,7 @@ void printMap(int server_sd){
     printf("\n");
     for(int i = 0; i < rows; i++){
         read(server_sd, row, cols);
+        row[cols]='\0';
         printRow(row);
     }
 

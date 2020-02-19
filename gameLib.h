@@ -20,6 +20,10 @@ struct warehouse{
   int id;
 };
 
+struct obstacles{
+  int id;
+};
+
 struct mapObjects{
     int n_obstacles;
     int n_items;
@@ -32,7 +36,9 @@ struct player{
   int hasItem;
   int itemsDelivered;
   struct items *pack;
+  int *obstacles;
 };
+
 
 int randNumb();
 //void initializeMatrix(struct cell **map,int rows,int cols);

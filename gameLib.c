@@ -37,9 +37,10 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   //int wareHouses, obstacles=-1, n_items;
   int i;
   int r,c,index;
-  int id=1;
+  int idWarehouse=1,idObstacle=0;
   struct warehouse * magazzino;
   struct items *oggetto;
+  struct obstacles *ostacolo;
   char items[3]={'$','@','s'};
   printf("Choosing number of warehouses...\n");
   info->n_warehouses=rand()%4+1; 
@@ -62,7 +63,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       map[r][c].isWareHouse=1;
       i++;
       map[r][c].object = 'w';
-      magazzino->id=id++;
+      magazzino->id=idWarehouse++;
       map[r][c].pointer=(void *)magazzino;
     }
   }
@@ -72,10 +73,12 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
     r=rand()%rows;
     c=rand()%cols;
     if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0){
+      ostacolo=(struct obstacles *)malloc(sizeof(struct obstacles));
       map[r][c].isObstacle=1;
       i++;
       map[r][c].object = 'x';
-      
+      ostacolo->id=idObstacle++;
+      map[r][c].pointer=(void *)ostacolo;
     }
   }
   printf("obstacles done\n");
@@ -83,13 +86,13 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   while(i<info->n_items){
     r=rand()%rows;
     c=rand()%cols;
-    id=rand()%info->n_warehouses+1;
+    idWarehouse=rand()%info->n_warehouses+1;
     index=rand()%3;
     if(map[r][c].isWareHouse==0&&map[r][c].isObstacle==0&&map[r][c].object==' '){
       oggetto=(struct items *)malloc(sizeof(struct items));
       map[r][c].object=items[index];
       i++;
-      oggetto->warehouse=id;
+      oggetto->warehouse=idWarehouse;
       map[r][c].pointer=(void *)oggetto;
     }
 
