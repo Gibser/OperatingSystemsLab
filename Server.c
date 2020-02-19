@@ -356,6 +356,7 @@ void spawnPlayer(int clientsd,struct player *info_player){
   info_player->y=index2;
   info_player->hasItem=0;
   info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
+  info_player->pack=NULL;
   pthread_mutex_lock(&editMatrix); //cappadavide
   map[index1][index2].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);//cappadavide
@@ -573,7 +574,7 @@ int isWarehouseHere(struct player *a){
 
 int checkWarehouse(struct player *a, int add_x,int add_y){
   struct warehouse *b;
-  if(noBoundaryCheck(a,add_x,add_y)){
+  if(noBoundaryCheck(a,add_x,add_y) && a->pack!=NULL){
     if(map[a->x+add_x][a->y+add_y].isWareHouse==1){
       b=(struct warehouse*)map[a->x+add_x][a->y+add_y].pointer;
       printf("Trovato deposito con id %d\n",b->id);
