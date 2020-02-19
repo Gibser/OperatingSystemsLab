@@ -103,14 +103,16 @@ void game(int clientsd){
       printf("Giocatore %c\n", parsePlayer(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
+      matrixToString(msg, clientsd,infoplayer.obstacles);
+      write(clientsd,&(int){0},sizeof(int));//cappadavide
       while(1){
           printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
           if(getLetter(clientsd) == '0') break;
           memset(msg,'\0',sizeof(msg));
-          matrixToString(msg, clientsd,infoplayer.obstacles);
           if(read(clientsd, &command, sizeof(command))>0){
             if(getLetter(clientsd) == '0') break;
+              matrixToString(msg, clientsd,infoplayer.obstacles);
               checkCommand(command, &infoplayer);
           }
           else{
@@ -397,7 +399,7 @@ void matrixToString(char *msg, int clientsd,int *obstacles){
     j = 0;
     i++;
   }
-  write(clientsd,&(int){0},sizeof(int));//cappadavide
+
 
 
 }
