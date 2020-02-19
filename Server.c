@@ -43,6 +43,7 @@ void movement(struct player *info_player, int add_x, int add_y);
 int isWarehouseHere(struct player *a);
 int checkWarehouse(struct player *info_player, int add_x, int add_y);
 int noBoundaryCheck(struct player *a,int add_x,int add_y);
+void sendMessage(int clientsd, char *msg);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
