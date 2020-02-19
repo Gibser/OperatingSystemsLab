@@ -513,6 +513,7 @@ void checkMovement(char msg, struct player *info_player){
   if(msg=='w'||msg=='W'){
     if(info_player->x-1>=0){
       movement(info_player, -1, 0);
+      
     }
   }
   else if(msg=='a'||msg=='A'){
@@ -528,11 +529,12 @@ void checkMovement(char msg, struct player *info_player){
     if(info_player->y+1 < cols)
       movement(info_player, 0, 1);
   }
-  else{
+  /*else{
     n = 0;
     write(clientsd, &n, sizeof(int));
   }
-  
+  */
+  write(clientsd,&(int){0},sizeof(int));
   
 
 }
