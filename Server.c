@@ -493,7 +493,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
       info_player->pack=NULL;
       strcpy(info,"Oggetto consegnato.");
     }
-    else if(!info_player->hasItem && isWarehouseHere(info_player))
+    else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.");
     else if(info_player->hasItem && !isWarehouseHere(info_player))
         strcpy(info,"Non ci sono magazzini nelle vicinanze.");
