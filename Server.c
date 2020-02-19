@@ -93,8 +93,8 @@ void game(int clientsd){
     char info[200]="";
     char command;
     struct player infoplayer;
-    int firstTime=1;
-    while(1){
+    int isLogged=1;
+    while(isLogged){
       if(!gameStarted){
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
@@ -120,6 +120,7 @@ void game(int clientsd){
           }
           else{
               logout(clientsd);
+              isLogged=0;
               break;
           }
       }
