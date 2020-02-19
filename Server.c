@@ -92,6 +92,7 @@ void game(int clientsd){
     char msg[16];
     char command;
     struct player infoplayer;
+    int firstTime=1;
     while(1){
       if(!gameStarted){
         pthread_mutex_lock(&editMatrix);
@@ -103,16 +104,19 @@ void game(int clientsd){
       printf("Giocatore %c\n", parsePlayer(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
-      matrixToString(msg, clientsd,infoplayer.obstacles);
-      write(clientsd,&(int){0},sizeof(int));//cappadavide
+      firstTime=1;
       while(1){
+          matrixToString(msg, clientsd,infoplayer.obstacles);
+          if(firstTime){
+            write(clientsd,&(int){0},sizeof(int));
+            firstTime=0;
+          }
           printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
           if(getLetter(clientsd) == '0') break;
           memset(msg,'\0',sizeof(msg));
           if(read(clientsd, &command, sizeof(command))>0){
             if(getLetter(clientsd) == '0') break;
-              matrixToString(msg, clientsd,infoplayer.obstacles);
               checkCommand(command, &infoplayer);
           }
           else{

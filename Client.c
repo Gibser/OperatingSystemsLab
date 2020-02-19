@@ -95,8 +95,8 @@ void game(int server_sd){
         system("clear");
         printMap(server_sd);
         printf("Comando: ");
-        scanf(" %s",buffer);
-        msg = firstChar(buffer);
+        scanf(" %c",&msg);
+        //msg = firstChar(buffer);
         write(server_sd, &msg, 1);
     }
 }
