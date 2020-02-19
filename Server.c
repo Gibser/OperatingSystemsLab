@@ -394,10 +394,10 @@ void matrixToString(char *msg, int clientsd,int *obstacles){
     msg[j] = '\0';
     //printf("Riga inviata al Client: %s\n",msg);
     write(clientsd, msg, cols);
-
     j = 0;
     i++;
   }
+  write(clientsd,&(int){0},sizeof(int));//cappadavide
 
 
 }
