@@ -39,6 +39,9 @@ void goRight(struct player *info_player);
 void goDown(struct player *info_player);
 void changeCoordinates(struct player *info_player, int add_x, int add_y);
 void movement(struct player *info_player, int add_x, int add_y);
+int isWarehouseHere(struct player *a);
+int checkWarehouse(struct player *info_player, int add_x, int add_y);
+int noBoundaryCheck(struct player *a,int add_x,int add_y);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -414,6 +417,24 @@ void checkMovement(char msg, struct player *info_player){
     if(info_player->y+1 < cols)
       movement(info_player, 0, 1);
   }
+  else if(msg=='p'||msg=='P'){
+    if(!info_player->hasItem){
+      if(map[info_player->x][info_player->y].pointer!=NULL){
+        info_player->pack=(struct items*)map[info_player->x][info_player->y].pointer;
+        map[info_player->x][info_player->y].object=' ';
+        map[info_player->x][info_player->y].pointer=NULL;
+        info_player->hasItem=1;
+      }
+    }
+  }
+  else if(msg=='d'||msg=='D'){
+    if(info_player->hasItem && isWarehouseHere(info_player)){
+      printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
+      info_player->hasItem=0;
+      info_player->itemsDelivered++;
+      info_player->pack=NULL;
+    }
+  }
 
 }
 
@@ -447,4 +468,30 @@ void goLeft(struct player *info_player){
   map[info_player->x][info_player->y-1].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);
   info_player->y-=1;
+}
+
+int isWarehouseHere(struct player *a){
+  int exp;
+  exp=checkWarehouse(a,-1,0)+checkWarehouse(a,1,0)+checkWarehouse(a,0,-1)+checkWarehouse(a,0,1);
+  return exp>0;
+}
+
+int checkWarehouse(struct player *a, int add_x,int add_y){
+  struct warehouse *b;
+  if(noBoundaryCheck(a,add_x,add_y)){
+    if(map[a->x+add_x][a->y+add_y].isWareHouse==1){
+      b=(struct warehouse*)map[a->x+add_x][a->y+add_y].pointer;
+      printf("Trovato deposito con id %d\n",b->id);
+      return a->pack->warehouse==b->id;
+    }
+  }
+  return 0;
+}
+
+int noBoundaryCheck(struct player *a,int add_x,int add_y){
+  int r=a->x+add_x;
+  int c=a->y+add_y;
+  if(r>=0 && r<rows && c>=0 && c<cols)
+    return 1;
+  return 0;
 }

@@ -31,7 +31,7 @@ struct player{
   int y;
   int hasItem;
   int itemsDelivered;
-  struct item *pack;
+  struct items *pack;
 };
 
 int randNumb();
