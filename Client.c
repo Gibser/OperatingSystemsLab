@@ -73,6 +73,7 @@ void printMap(int server_sd){
 
     //info
     read(server_sd, &n_bytes, sizeof(int));
+    printf("Messaggio informativo di lunghezza %d\n",n_bytes);
     if(n_bytes > 0){
         read(server_sd, buffer, n_bytes);
         buffer[n_bytes] = '\0';
