@@ -33,6 +33,7 @@ void matrixToString(char *msg, int clientsd,int *obstacles);
 char parsePlayer(int playerSD);
 void initializeMatrix();
 void checkMovement(char msg,struct player *info_player);
+void checkCommand(char msg, struct player *info_player);
 void goUp(struct player *info_player);
 void goLeft(struct player *info_player);
 void goRight(struct player *info_player);
@@ -58,7 +59,7 @@ struct cell **map;
 int rows, cols;
 int mapPlayers[MAX_USERS];
 int gameStarted = 0;
-int time = 0;
+int gameTime = 0;
 
 void *mapGenerator(void* args){
     int i=0,j=0;
@@ -77,9 +78,9 @@ void *mapGenerator(void* args){
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
-      while(time++ < 120)
+      while(gameTime++ < 120)
         sleep(1);
-      time = 0;
+      gameTime = 0;
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
       
@@ -460,7 +461,7 @@ void checkCommand(char msg, struct player *info_player){
   char buff[200];
   int n;
   if(msg == 't' || msg == 'T'){
-    itoa(time, buff, 10);
+    sprintf(buff, "%d", gameTime);
     n = strlen(buff);
     write(clientsd, &n, sizeof(int));
     write(clientsd, buff, n);
