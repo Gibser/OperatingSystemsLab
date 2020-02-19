@@ -9,7 +9,15 @@ struct cell{
   int isWareHouse;
   int isObstacle;
   char object;
+  void* pointer;
   
+};
+struct items{
+  int warehouse;
+};
+
+struct warehouse{
+  int id;
 };
 
 struct mapObjects{
@@ -23,6 +31,7 @@ struct player{
   int y;
   int hasItem;
   int itemsDelivered;
+  struct item *pack;
 };
 
 int randNumb();

@@ -364,6 +364,7 @@ void initializeMatrix(){
       map[i][j].isWareHouse=0;
       map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
       map[i][j].object=' '; //prima era 0
+      map[i][j].pointer=NULL;
     }
   }
 } 
@@ -383,10 +384,10 @@ void movement(struct player *info_player, int add_x, int add_y){
       }
       else if(map[(info_player->x)+add_x][info_player->y+add_y].object!=' ' && map[(info_player->x)+add_x][info_player->y+add_y].isObstacle == 0){
         if(info_player->hasItem==0){
-          info_player->hasItem=1;
+          //info_player->hasItem=1;
           changeCoordinates(info_player, add_x, add_y);
-          map[info_player->x][info_player->y].object=' ';
-          printf("x: %d y: %d\n", info_player->x, info_player->y);
+          //map[info_player->x][info_player->y].object=' ';
+          //printf("x: %d y: %d\n", info_player->x, info_player->y);
         }
       }
     
