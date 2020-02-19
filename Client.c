@@ -50,6 +50,8 @@ void printMap(int server_sd){
     char row[16];
     int rows;
     int cols;
+    int n_bytes;
+    char buffer[200];
     read(server_sd, &rows, sizeof(int));
     read(server_sd, &cols, sizeof(int));
     //printf("Righe: %d Colonne: %d\n",rows,cols);
@@ -67,11 +69,24 @@ void printMap(int server_sd){
     for(int i = 0; i < cols; i++)
         printf("─ ");
 
-    printf("\n");
+    printf("\n\n");
+
+    //info
+    read(server_sd, &n_bytes, sizeof(int));
+    if(n_bytes > 0){
+        read(server_sd, buffer, n_bytes);
+        buffer[n_bytes] = '\0';
+        write(STDOUT_FILENO, buffer, n_bytes);
+    }
+}
+
+char firstChar(char *buffer){
+    return buffer[0];
 }
 
 void game(int server_sd){
     char msg;
+    char buffer[200];
     char row[16];
     int rows;
     int cols;
@@ -79,7 +94,8 @@ void game(int server_sd){
         system("clear");
         printMap(server_sd);
         printf("Comando: ");
-        scanf(" %c", &msg);
+        scanf("%s", buffer);
+        msg = firstChar(buffer);
         write(server_sd, &msg, 1);
     }
 }

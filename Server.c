@@ -58,12 +58,13 @@ struct cell **map;
 int rows, cols;
 int mapPlayers[MAX_USERS];
 int gameStarted = 0;
+int time = 0;
 
 void *mapGenerator(void* args){
     int i=0,j=0;
     while(1){
       gameStarted = 0;
-      pthread_mutex_lock(&mapGen);
+      pthread_mutex_lock(&editMatrix);
   
       rows = randNumb();
       cols = randNumb();
@@ -71,12 +72,14 @@ void *mapGenerator(void* args){
         mapPlayers[i]=-1;
       printf("%d %d\n", rows, cols);
       initializeMatrix();
-      printMatrix(rows, cols, map);
+      //printMatrix(rows, cols, map);
       createMap(&info_map, rows, cols, map);
-      gameStarted = 1;
       pthread_cond_broadcast(&mapGen_cond_var);
-      pthread_mutex_unlock(&mapGen);
-      sleep(5);
+      pthread_mutex_unlock(&editMatrix);
+      gameStarted = 1;
+      while(time++ < 120)
+        sleep(1);
+      time = 0;
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
       
@@ -89,19 +92,25 @@ void game(int clientsd){
     char command;
     struct player infoplayer;
     while(1){
-      pthread_mutex_lock(&mapGen);
-      pthread_cond_wait(&mapGen_cond_var, &mapGen);
-      pthread_mutex_unlock(&mapGen);
+      if(!gameStarted){
+        pthread_mutex_lock(&editMatrix);
+        pthread_cond_wait(&mapGen_cond_var, &editMatrix);
+        pthread_mutex_unlock(&editMatrix);
+      }
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
       spawnPlayer(clientsd, &infoplayer);
+      printf("Giocatore %c\n", parsePlayer(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
-          if(!gameStarted) break;
+          printf("Valore gameStarted: %d\n", gameStarted);
+          //if(!gameStarted) break;
+          if(getLetter(clientsd) == '0') break;
           memset(msg,'\0',sizeof(msg));
           matrixToString(msg, clientsd,infoplayer.obstacles);
           if(read(clientsd, &command, sizeof(command))>0){
-              checkMovement(command, &infoplayer);
+            if(getLetter(clientsd) == '0') break;
+              checkCommand(command, &infoplayer);
           }
           else{
               logout(clientsd);
@@ -266,7 +275,7 @@ void setLetter(int clientsd){
 
 char getLetter(int clientsd){
   int i;
-  char c;
+  char c = '0';
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==clientsd){
       c=(char)(i+65);
@@ -435,9 +444,69 @@ void movement(struct player *info_player, int add_x, int add_y){
     
 }
 
+void sendMessage(int clientsd, char *msg){
+  char buff[200];
+  int n;
+  strcpy(buff, msg);
+  n = strlen(buff);
+  write(clientsd, &n, sizeof(int));
+  write(clientsd, buff, n);
+}
+
+
+
+void checkCommand(char msg, struct player *info_player){
+  int clientsd=map[info_player->x][info_player->y].playerSD;
+  char buff[200];
+  int n;
+  if(msg == 't' || msg == 'T'){
+    itoa(time, buff, 10);
+    n = strlen(buff);
+    write(clientsd, &n, sizeof(int));
+    write(clientsd, buff, n);
+  }
+  else if(msg=='p'||msg=='P'){
+    if(!info_player->hasItem){
+      if(map[info_player->x][info_player->y].pointer!=NULL){
+        info_player->pack=(struct items*)map[info_player->x][info_player->y].pointer;
+        map[info_player->x][info_player->y].object=' ';
+        map[info_player->x][info_player->y].pointer=NULL;
+        info_player->hasItem=1;
+        sendMessage(clientsd, "Oggetto raccolto.");
+      }
+    }
+    else
+    {
+      sendMessage(clientsd, "Inventario pieno.");
+    }
+    
+  }
+  else if(msg=='e'||msg=='E'){
+    if(info_player->hasItem && isWarehouseHere(info_player)){
+      //printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
+      info_player->hasItem=0;
+      info_player->itemsDelivered++;
+      info_player->pack=NULL;
+      sendMessage(clientsd, "Oggetto consegnato.");
+    }
+    else if(!info_player->hasItem && isWarehouseHere(info_player))
+        sendMessage(clientsd, "Non hai oggetti nell'inventario.");
+    else if(info_player->hasItem && !isWarehouseHere(info_player))
+        sendMessage(clientsd, "Non ci sono magazzini nelle vicinanze.");
+    else
+        sendMessage(clientsd, "Per depositare un oggetto hai bisogno di un oggetto e di un magazzino nelle vicinanze!");
+    
+  }
+  else
+    checkMovement(msg, info_player);
+
+}
+
+
 
 void checkMovement(char msg, struct player *info_player){
   int clientsd=map[info_player->x][info_player->y].playerSD;
+  int n;
   if(msg=='w'||msg=='W'){
     if(info_player->x-1>=0){
       movement(info_player, -1, 0);
@@ -456,24 +525,12 @@ void checkMovement(char msg, struct player *info_player){
     if(info_player->y+1 < cols)
       movement(info_player, 0, 1);
   }
-  else if(msg=='p'||msg=='P'){
-    if(!info_player->hasItem){
-      if(map[info_player->x][info_player->y].pointer!=NULL){
-        info_player->pack=(struct items*)map[info_player->x][info_player->y].pointer;
-        map[info_player->x][info_player->y].object=' ';
-        map[info_player->x][info_player->y].pointer=NULL;
-        info_player->hasItem=1;
-      }
-    }
+  else{
+    n = 0;
+    write(clientsd, &n, sizeof(int));
   }
-  else if(msg=='e'||msg=='E'){
-    if(info_player->hasItem && isWarehouseHere(info_player)){
-      printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
-      info_player->hasItem=0;
-      info_player->itemsDelivered++;
-      info_player->pack=NULL;
-    }
-  }
+  
+  
 
 }
 
