@@ -47,6 +47,8 @@ pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
 pthread_mutex_t editMatrix;
 pthread_mutex_t editMapPlayers;
+pthread_mutex_t mapGen;
+pthread_cond_t mapGen_cond_var;
 
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
@@ -55,19 +57,30 @@ struct mapObjects info_map;    //info numero oggetti sulla mappa
 struct cell **map;
 int rows, cols;
 int mapPlayers[MAX_USERS];
-
+int gameStarted = 0;
 
 void *mapGenerator(void* args){
     int i=0,j=0;
-    rows = randNumb();
-    cols = randNumb();
-    for(i=0;i<MAX_USERS;i++) //MAPPLAYERS INITIALIZATION
-      mapPlayers[i]=-1;
-    printf("%d %d\n", rows, cols);
-    initializeMatrix();
-    printMatrix(rows, cols, map);
-    createMap(&info_map, rows, cols, map);
-    pthread_exit(NULL);
+    while(1){
+      gameStarted = 0;
+      pthread_mutex_lock(&mapGen);
+  
+      rows = randNumb();
+      cols = randNumb();
+      for(i=0;i<MAX_USERS;i++) //MAPPLAYERS INITIALIZATION
+        mapPlayers[i]=-1;
+      printf("%d %d\n", rows, cols);
+      initializeMatrix();
+      printMatrix(rows, cols, map);
+      createMap(&info_map, rows, cols, map);
+      gameStarted = 1;
+      pthread_cond_broadcast(&mapGen_cond_var);
+      pthread_mutex_unlock(&mapGen);
+      sleep(5);
+      printf("Fine sleep, genero mappa...\n");
+      //pthread_exit(NULL);
+      
+    }
 }
 
 // Game Function
@@ -75,20 +88,26 @@ void game(int clientsd){
     char msg[16];
     char command;
     struct player infoplayer;
-    infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
-    spawnPlayer(clientsd, &infoplayer);
-    printf("Fine Spawn\n");
-    printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
     while(1){
-        memset(msg,'\0',sizeof(msg));
-        matrixToString(msg, clientsd,infoplayer.obstacles);
-        if(read(clientsd, &command, sizeof(command))>0){
-            checkMovement(command, &infoplayer);
-        }
-        else{
-            logout(clientsd);
-            break;
-        }
+      pthread_mutex_lock(&mapGen);
+      pthread_cond_wait(&mapGen_cond_var, &mapGen);
+      pthread_mutex_unlock(&mapGen);
+      infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
+      spawnPlayer(clientsd, &infoplayer);
+      printf("Fine Spawn\n");
+      printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
+      while(1){
+          if(!gameStarted) break;
+          memset(msg,'\0',sizeof(msg));
+          matrixToString(msg, clientsd,infoplayer.obstacles);
+          if(read(clientsd, &command, sizeof(command))>0){
+              checkMovement(command, &infoplayer);
+          }
+          else{
+              logout(clientsd);
+              break;
+          }
+      }
     }
 }
 
@@ -137,6 +156,16 @@ int main()
         return 1;
     }
     if (pthread_mutex_init(&editMapPlayers, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&mapGen, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
