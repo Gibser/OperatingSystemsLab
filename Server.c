@@ -121,6 +121,7 @@ void game(int clientsd){
           else{
               logout(clientsd);
               isLogged=0;
+              logoutMP(clientsd);
               break;
           }
       }
@@ -290,6 +291,17 @@ char getLetter(int clientsd){
     }
   }
   return c;
+}
+
+void logoutMP(int clientsd){
+  int i;
+  for(i=0;i<MAX_USERS;i++){
+    if(mapPlayers[i]==clientsd){
+      pthread_mutex_lock(&editMapPlayers); //cappadavide 
+      mapPlayers[i]=-1;
+      pthread_mutex_unlock(&editMapPlayers);//cappadavide
+    }
+  }
 }
 
 
