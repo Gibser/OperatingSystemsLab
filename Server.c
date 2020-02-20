@@ -71,7 +71,7 @@ int gameStarted = 0;
 int gameTime = 0;
 int MAX_ITEMS;
 int maxItemReached=0;
-char scoreboardString[200];
+char scoreboardString[200]="";
 struct player *nullStruct;
 
 void *mapGenerator(void* args){
@@ -111,7 +111,7 @@ void game(int clientsd){
     int isLogged=1;
     while(isLogged){
       if(!gameStarted){
-        //stampa classifica
+        sendMessage(clientsd,scoreboardString);
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
         pthread_mutex_unlock(&editMatrix);
@@ -654,6 +654,7 @@ void createScoreboard(){
   char num[10];
   int fd;
   int n;
+  memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
   quicksort(scoreboard, 0, MAX_USERS-1);
   while(i < MAX_USERS){
     if(scoreboard[i]->clientsd >= 0){

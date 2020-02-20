@@ -30,6 +30,7 @@ int checkLoginStatus(char *msg);
 int combineStr(char *creds,char *username, char *password);
 void printRow(char *buff);
 void printMap(int server_sd);
+void receiveMessage(int server_sd);
 
 void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
@@ -46,12 +47,23 @@ void printRow(char *buff){
     printf("\n");
 }
 
+void receiveMessage(int server_sd){
+    char buffer[200];
+    int n_bytes;
+    read(server_sd, &n_bytes, sizeof(int));
+    printf("Messaggio di lunghezza %d\n",n_bytes);
+    if(n_bytes > 0){
+        read(server_sd, buffer, n_bytes);
+        buffer[n_bytes] = '\0';
+        write(STDOUT_FILENO, buffer, n_bytes);
+    }
+
+}
+
 void printMap(int server_sd){
     char row[16];
     int rows;
     int cols;
-    int n_bytes;
-    char buffer[200];
     read(server_sd, &rows, sizeof(int));
     read(server_sd, &cols, sizeof(int));
     //printf("Righe: %d Colonne: %d\n",rows,cols);
@@ -70,15 +82,8 @@ void printMap(int server_sd){
         printf("─ ");
 
     printf("\n\n");
-
-    //info
-    read(server_sd, &n_bytes, sizeof(int));
-    printf("Messaggio informativo di lunghezza %d\n",n_bytes);
-    if(n_bytes > 0){
-        read(server_sd, buffer, n_bytes);
-        buffer[n_bytes] = '\0';
-        write(STDOUT_FILENO, buffer, n_bytes);
-    }
+    //info (VEDI RECEIVEMESSAGE)
+    
 }
 
 char firstChar(char *buffer){
@@ -93,7 +98,9 @@ void game(int server_sd){
     int cols;
     while(1){
         system("clear");
+        receiveMessage(server_sd);//Scoreboard
         printMap(server_sd);
+        receiveMessage(server_sd);//Info
         printf("Comando: ");
         scanf(" %c",&msg);
         //msg = firstChar(buffer);
