@@ -48,6 +48,7 @@ void gameLogout(int clientsd);
 void logoutStructs(int clientsd);
 void setScorePlayer(struct player *info_player);
 void createScoreboard();
+void initNullStruct();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -71,6 +72,7 @@ int gameTime = 0;
 int MAX_ITEMS;
 int maxItemReached=0;
 char scoreboardString[200];
+struct player *nullStruct;
 
 void *mapGenerator(void* args){
     int i=0,j=0;
@@ -86,6 +88,7 @@ void *mapGenerator(void* args){
       MAX_ITEMS=info_map.n_items/2;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
+      sleep(10);
       gameStarted = 1;
       while(gameTime++ < 120){
         if(maxItemReached==1)
@@ -108,6 +111,7 @@ void game(int clientsd){
     int isLogged=1;
     while(isLogged){
       if(!gameStarted){
+        //stampa classifica
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
         pthread_mutex_unlock(&editMatrix);
@@ -136,6 +140,7 @@ void game(int clientsd){
               break;
           }
       }
+      
     }
 }
 
@@ -203,6 +208,8 @@ int main()
         printf("\n mutex init failed\n");
         return 1;
     }
+
+    initNullStruct();
     // socket create and verification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
@@ -317,8 +324,8 @@ void logoutStructs(int clientsd){
       mapPlayers[i]=-1;
       //pthread_mutex_unlock(&editMapPlayers);//cappadavide
     }
-    if(map[scoreboard[i]->x][scoreboard[i]->y].playerSD==clientsd){
-      scoreboard[i]=NULL;
+    if(scoreboard[i]->clientsd == clientsd){
+      scoreboard[i]=nullStruct;
     }
   }
 }
@@ -390,6 +397,7 @@ void spawnPlayer(int clientsd,struct player *info_player){
   info_player->hasItem=0;
   info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
   info_player->pack=NULL;
+  info_player->clientsd = clientsd;
   pthread_mutex_lock(&editMatrix); //cappadavide
   map[index1][index2].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);//cappadavide
@@ -451,7 +459,7 @@ void initGame(){
   int i=0,j=0;
   for(i=0;i<MAX_USERS;i++){ 
         mapPlayers[i]=-1;
-        scoreboard[i]=NULL;
+        scoreboard[i]=nullStruct;
   }
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
   for(i=0;i<rows;i++){
@@ -640,5 +648,78 @@ void gameLogout(int clientsd){
 }
 
 void createScoreboard(){
-  
+  int i = 0;
+  char buff[50];
+  char cmd[200] = "cat logged_users | sed -n 's/\\(.*\\) ";
+  char num[10];
+  int fd;
+  int n;
+  quicksort(scoreboard, 0, MAX_USERS-1);
+  while(i < MAX_USERS){
+    if(scoreboard[i]->clientsd >= 0){
+      sprintf(num, "%d", scoreboard[i]->clientsd);
+      strcat(cmd, num);
+      strcat(cmd, "$/\\1/p' > tmp");
+      fd = tmpCommand(cmd);
+      n = read(fd, buff, 50);
+      buff[n] = '\0';
+      strcat(scoreboardString, buff);
+      strcat(scoreboardString, " ");
+      sprintf(num, "%d", scoreboard[i]->itemsDelivered);
+      strcat(scoreboardString, num);
+      strcat(scoreboardString, "\n");
+    }
+    i++;
+  }
+}
+
+void copyStruct(struct player *a, struct player *temp){
+  temp->x = a->x;
+  temp->y = a->y;
+  temp->hasItem = a->hasItem;
+  temp->itemsDelivered = a->itemsDelivered;
+  temp->pack = a->pack;
+  temp->obstacles = a->obstacles;
+  temp->clientsd = a->clientsd;
+}
+
+
+void swapStruct(struct player *a, struct player *b){
+  struct player *temp = (struct player *)malloc(sizeof(struct player));
+  copyStruct(a, temp);
+  copyStruct(b, a);
+  copyStruct(temp, b);
+  free(temp);
+}
+
+void quicksort(struct player* a[MAX_USERS], int first, int last){
+   int i, j, pivot, temp;
+/*pivot -- inizialmente il pivot è il first elemento
+first e last sono le due variabili che servono per scorrere l'array
+*/
+   if(first<last){
+      pivot=first;
+      i=first;
+      j=last;     
+      
+      while(i<j){
+         while(a[i]->itemsDelivered <= a[pivot]->itemsDelivered && i < last)
+            i++;
+         while(a[j]->itemsDelivered > a[pivot]->itemsDelivered)
+            j--;
+         if(i<j){   
+            swapStruct(a[i], a[j]);
+         }
+      }
+
+      swapStruct(a[pivot], a[j]);
+      quicksort(a, first, j-1);
+      quicksort(a, j+1, last);
+   }
+}
+
+void initNullStruct(){
+  nullStruct = (struct player *)malloc(sizeof(struct player));
+  nullStruct->clientsd = -1;
+  nullStruct->itemsDelivered = 0;
 }

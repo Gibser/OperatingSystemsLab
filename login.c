@@ -191,6 +191,7 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		strcat(cmd, username);
 		strcat(cmd, " \\(.*\\)/\\1/p') > tmp");
 		
+		//pthread_mutex_lock(&login);
 		int fd = tmpCommand(cmd);
 		char passwd[100];
 
@@ -198,7 +199,9 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 
 		close(fd);
 		system("rm tmp");
-		printf("\n%s %s\n", password, passwd);
+		//pthread_mutex_unlock(&login);
+
+		//printf("\n%s %s\n", password, passwd);
 		if(strcmp(password, passwd) == 0){
 			write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 			printf("Login effettuato con successo.\n");
