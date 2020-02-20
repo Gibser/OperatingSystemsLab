@@ -551,7 +551,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
         info_player->hasItem=1;
         strcpy(info,"Oggetto raccolto.");
         strcat(info,"Consegna al magazzino ");
-        strcat(info,&(char){(info_player->pack->warehouse)+'0'});
+        strcat(info,&(char){(info_player->pack->warehouse)+'0'});//DA MIGLIORARE
       }
     }
     else
