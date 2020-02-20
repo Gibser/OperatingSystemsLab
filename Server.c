@@ -671,6 +671,7 @@ void createScoreboard(){
       fd = tmpCommand(cmd);
       n = read(fd, buff, 50);
       buff[n] = '\0';
+      printf("%s ciao",buff);
       strcat(scoreboardString, buff);
       strcat(scoreboardString, " ");
       sprintf(num, "%d", scoreboard[i]->itemsDelivered);
