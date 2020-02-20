@@ -66,22 +66,24 @@ void printMap(int server_sd){
     int cols;
     read(server_sd, &rows, sizeof(int));
     read(server_sd, &cols, sizeof(int));
-    //printf("Righe: %d Colonne: %d\n",rows,cols);
-    printf("  ");
-    for(int i = 0; i < cols; i++)
-        printf("_ ");
-    printf("\n");
-    for(int i = 0; i < rows; i++){
-        read(server_sd, row, cols);
-        row[cols]='\0';
-        printRow(row);
+    if(rows>0&&cols>0){
+        //printf("Righe: %d Colonne: %d\n",rows,cols);
+        printf("  ");
+        for(int i = 0; i < cols; i++)
+            printf("_ ");
+        printf("\n");
+        for(int i = 0; i < rows; i++){
+            read(server_sd, row, cols);
+            row[cols]='\0';
+            printRow(row);
+        }
+
+        printf("  ");
+        for(int i = 0; i < cols; i++)
+            printf("─ ");
+
+        printf("\n\n");
     }
-
-    printf("  ");
-    for(int i = 0; i < cols; i++)
-        printf("─ ");
-
-    printf("\n\n");
     //info (VEDI RECEIVEMESSAGE)
     
 }

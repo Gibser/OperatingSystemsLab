@@ -144,6 +144,7 @@ void game(int clientsd){
         write(clientsd,&(int){0},sizeof(int));
         write(clientsd,&(int){0},sizeof(int));
         sendMessage(clientsd,scoreboardString);
+        read(clientsd,&command,1);
       }
       
     }
