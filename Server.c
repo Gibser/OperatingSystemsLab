@@ -44,6 +44,7 @@ int isWarehouseHere(struct player *a);
 int checkWarehouse(struct player *info_player, int add_x, int add_y);
 int noBoundaryCheck(struct player *a,int add_x,int add_y);
 void sendMessage(int clientsd, char *msg);
+void gameLogout(int clientsd);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -119,9 +120,8 @@ void game(int clientsd){
               checkCommand(command, &infoplayer,info);
           }
           else{
-              logout(clientsd);
+              gameLogout(clientsd);
               isLogged=0;
-              logoutMP(clientsd);
               break;
           }
       }
@@ -603,4 +603,9 @@ int noBoundaryCheck(struct player *a,int add_x,int add_y){
   if(r>=0 && r<rows && c>=0 && c<cols)
     return 1;
   return 0;
+}
+
+void gameLogout(int clientsd){
+  logout(clientsd);
+  logoutMP(clientsd);
 }
