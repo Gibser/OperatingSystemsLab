@@ -676,7 +676,9 @@ void createScoreboard(){
       sprintf(num, "%d", scoreboard[i]->itemsDelivered);
       strcat(scoreboardString, num);
       strcat(scoreboardString, "\n");
+      printf("Operazione su %d %s\n",scoreboard[i]->clientsd,scoreboardString);
     }
+
     i++;
   }
 }
