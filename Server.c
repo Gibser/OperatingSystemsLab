@@ -91,7 +91,7 @@ void *mapGenerator(void* args){
       pthread_mutex_unlock(&editMatrix);
       sleep(10);
       gameStarted = 1;
-      while(gameTime++ < 120){
+      while(gameTime++ < 20){
         if(maxItemReached==1)
           break;
         sleep(1);
