@@ -49,6 +49,7 @@ void logoutStructs(int clientsd);
 void setScorePlayer(struct player *info_player);
 void createScoreboard();
 void initNullStruct();
+void quicksort(struct player* a[MAX_USERS], int first, int last);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
