@@ -34,10 +34,6 @@ char parsePlayer(int playerSD);
 void initGame();
 void checkMovement(char msg,struct player *info_player,char *info);
 void checkCommand(char msg, struct player *info_player,char *info);
-void goUp(struct player *info_player);
-void goLeft(struct player *info_player);
-void goRight(struct player *info_player);
-void goDown(struct player *info_player);
 void changeCoordinates(struct player *info_player, int add_x, int add_y);
 void movement(struct player *info_player, int add_x, int add_y);
 int isWarehouseHere(struct player *a);
@@ -621,26 +617,6 @@ void changeCoordinates(struct player *info_player, int add_x, int add_y){
   info_player->y+=add_y;
 }
 
-void goUp(struct player *info_player){
-  int clientsd;
-  pthread_mutex_lock(&editMatrix);
-  clientsd=map[info_player->x][info_player->y].playerSD;
-  map[info_player->x][info_player->y].playerSD=-1;
-  map[info_player->x+1][info_player->y].playerSD=clientsd;
-  pthread_mutex_unlock(&editMatrix);
-  info_player->x+=1;
-}
-
-void goLeft(struct player *info_player){
-  int clientsd;
-  getLetter(map[info_player->x][info_player->y-1].playerSD);
-  pthread_mutex_lock(&editMatrix);
-  clientsd=map[info_player->x][info_player->y].playerSD;
-  map[info_player->x][info_player->y].playerSD=-1;
-  map[info_player->x][info_player->y-1].playerSD=clientsd;
-  pthread_mutex_unlock(&editMatrix);
-  info_player->y-=1;
-}
 
 int isWarehouseHere(struct player *a){
   int exp;

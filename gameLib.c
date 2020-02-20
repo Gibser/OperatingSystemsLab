@@ -62,7 +62,8 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       magazzino=(struct warehouse *)malloc(sizeof(struct warehouse));
       map[r][c].isWareHouse=1;
       i++;
-      map[r][c].object = 'w';
+      //map[r][c].object = 'w';
+      map[r][c].object=idWarehouse;//cappadavide
       magazzino->id=idWarehouse++;
       map[r][c].pointer=(void *)magazzino;
     }
