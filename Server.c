@@ -89,7 +89,6 @@ void *mapGenerator(void* args){
       MAX_ITEMS=info_map.n_items/2;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
-      sleep(10);
       gameStarted = 1;
       while(gameTime++ < 20){
         if(maxItemReached==1)
