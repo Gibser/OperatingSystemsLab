@@ -111,8 +111,8 @@ void game(int clientsd){
     struct player infoplayer;
     int isLogged=1;
     while(isLogged){
+      sendMessage(clientsd,scoreboardString);
       if(!gameStarted){
-        sendMessage(clientsd,scoreboardString);
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
         pthread_mutex_unlock(&editMatrix);
