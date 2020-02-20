@@ -670,8 +670,7 @@ void createScoreboard(){
       strcat(cmd, "$/\\1/p' > tmp");
       fd = tmpCommand(cmd);
       n = read(fd, buff, 50);
-      buff[n] = '\0';
-      printf("%s ciao",buff);
+      buff[n-1] = '\0';
       strcat(scoreboardString, buff);
       strcat(scoreboardString, " ");
       sprintf(num, "%d", scoreboard[i]->itemsDelivered);
