@@ -63,8 +63,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       map[r][c].isWareHouse=1;
       i++;
       //map[r][c].object = 'w';
-      map[r][c].object=(char)idWarehouse;//cappadavide
-      printf("EH %c",map[r][c].object);
+      map[r][c].object=idWarehouse+'0';//cappadavide
       magazzino->id=idWarehouse++;
       map[r][c].pointer=(void *)magazzino;
     }
