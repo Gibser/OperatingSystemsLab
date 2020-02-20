@@ -141,6 +141,7 @@ void game(int clientsd){
           }
       }
       if(isLogged){
+        printf("classifica \n%s\n",scoreboardString);
         write(clientsd,&(int){0},sizeof(int));
         write(clientsd,&(int){0},sizeof(int));
         sendMessage(clientsd,scoreboardString);
