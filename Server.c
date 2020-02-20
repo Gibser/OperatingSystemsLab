@@ -507,12 +507,12 @@ void movement(struct player *info_player, int add_x, int add_y){
         printf("x: %d y: %d\n", info_player->x, info_player->y);
       }
       
-      else if(map[(info_player->x)+add_x][info_player->y+add_y].isWareHouse){
+      /*else if(map[(info_player->x)+add_x][info_player->y+add_y].isWareHouse){
         if(info_player->hasItem){
           info_player->itemsDelivered+=1;
           info_player->hasItem=0;
         }
-      }
+      }CAPPADAVIDE*/
       else if(map[(info_player->x)+add_x][info_player->y+add_y].isObstacle){
         a=(struct obstacles*)map[(info_player->x)+add_x][info_player->y+add_y].pointer;
         id=a->id;
@@ -551,7 +551,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
         info_player->hasItem=1;
         strcpy(info,"Oggetto raccolto.");
         strcat(info,"Consegna al magazzino ");
-        strcat(info,&(char){info_player->pack->warehouse+'0'});
+        strcat(info,&(char){(info_player->pack->warehouse)+'0'});
       }
     }
     else
