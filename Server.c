@@ -31,7 +31,7 @@ void setLetter(int clientsd);
 char getLetter(int clientsd);
 void matrixToString(char *msg, int clientsd,int *obstacles);
 char parsePlayer(int playerSD);
-void initializeMatrix();
+void initGame();
 void checkMovement(char msg,struct player *info_player,char *info);
 void checkCommand(char msg, struct player *info_player,char *info);
 void goUp(struct player *info_player);
@@ -45,13 +45,18 @@ int checkWarehouse(struct player *info_player, int add_x, int add_y);
 int noBoundaryCheck(struct player *a,int add_x,int add_y);
 void sendMessage(int clientsd, char *msg);
 void gameLogout(int clientsd);
+void logoutStructs(int clientsd);
+void setScorePlayer(struct player *info_player);
+void createScoreboard();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
 pthread_mutex_t editMatrix;
 pthread_mutex_t editMapPlayers;
 pthread_mutex_t mapGen;
+pthread_mutex_t notifyMaxItems;
 pthread_cond_t mapGen_cond_var;
+
 
 //int threadStatus[MAX_THREADS]={0};
 //int isAvailable(int slot);
@@ -60,28 +65,34 @@ struct mapObjects info_map;    //info numero oggetti sulla mappa
 struct cell **map;
 int rows, cols;
 int mapPlayers[MAX_USERS];
+struct player* scoreboard[MAX_USERS];
 int gameStarted = 0;
 int gameTime = 0;
+int MAX_ITEMS;
+int maxItemReached=0;
+char scoreboardString[200];
 
 void *mapGenerator(void* args){
     int i=0,j=0;
     while(1){
       gameStarted = 0;
       pthread_mutex_lock(&editMatrix);
-  
       rows = randNumb();
       cols = randNumb();
-      for(i=0;i<MAX_USERS;i++) //MAPPLAYERS INITIALIZATION
-        mapPlayers[i]=-1;
       printf("%d %d\n", rows, cols);
-      initializeMatrix();
+      initGame();
       //printMatrix(rows, cols, map);
       createMap(&info_map, rows, cols, map);
+      MAX_ITEMS=info_map.n_items/2;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
-      while(gameTime++ < 120)
+      while(gameTime++ < 120){
+        if(maxItemReached==1)
+          break;
         sleep(1);
+      }
+      createScoreboard();
       gameTime = 0;
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
@@ -178,6 +189,11 @@ int main()
         return 1;
     }
     if (pthread_mutex_init(&mapGen, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&notifyMaxItems, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
@@ -293,13 +309,16 @@ char getLetter(int clientsd){
   return c;
 }
 
-void logoutMP(int clientsd){
+void logoutStructs(int clientsd){
   int i;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==clientsd){
-      pthread_mutex_lock(&editMapPlayers); //cappadavide 
+      //pthread_mutex_lock(&editMapPlayers); //cappadavide 
       mapPlayers[i]=-1;
-      pthread_mutex_unlock(&editMapPlayers);//cappadavide
+      //pthread_mutex_unlock(&editMapPlayers);//cappadavide
+    }
+    if(map[scoreboard[i]->x][scoreboard[i]->y].playerSD==clientsd){
+      scoreboard[i]=NULL;
     }
   }
 }
@@ -358,6 +377,7 @@ void spawnPlayer(int clientsd,struct player *info_player){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   setLetter(clientsd);
+  setScorePlayer(info_player);
   while(1){
     index1=rand()%rows;
     index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
@@ -374,7 +394,12 @@ void spawnPlayer(int clientsd,struct player *info_player){
   map[index1][index2].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);//cappadavide
 }
-
+void setScorePlayer(struct player *info_player){
+  int i=0;
+  while(scoreboard[i]!=NULL)
+    i++;
+  scoreboard[i]=info_player;
+}
 
 char parsePlayer(int playerSD){
   for(int i = 0; i < MAX_USERS; i++){
@@ -422,8 +447,12 @@ void matrixToString(char *info, int clientsd,int *obstacles){
 
 }
 
-void initializeMatrix(){
+void initGame(){
   int i=0,j=0;
+  for(i=0;i<MAX_USERS;i++){ 
+        mapPlayers[i]=-1;
+        scoreboard[i]=NULL;
+  }
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
   for(i=0;i<rows;i++){
     map[i]=(struct cell*)malloc(cols*sizeof(struct cell));
@@ -607,5 +636,9 @@ int noBoundaryCheck(struct player *a,int add_x,int add_y){
 
 void gameLogout(int clientsd){
   logout(clientsd);
-  logoutMP(clientsd);
+  logoutStructs(clientsd);
+}
+
+void createScoreboard(){
+  
 }
