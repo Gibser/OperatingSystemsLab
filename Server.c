@@ -139,12 +139,12 @@ void game(int clientsd){
               break;
           }
       }
-      /*if(isLogged){
+      if(isLogged){
         printf("classifica \n%s\n",scoreboardString);
         write(clientsd,&(int){0},sizeof(int));
         write(clientsd,&(int){0},sizeof(int));
         sendMessage(clientsd,scoreboardString);
-      }*/
+      }
       
     }
 }
