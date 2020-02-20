@@ -670,6 +670,7 @@ void createScoreboard(){
       strcat(cmd, "$/\\1/p' > tmp");
       fd = tmpCommand(cmd);
       n = read(fd, buff, 50);
+      system("rm tmp");
       buff[n-1] = '\0';
       strcat(scoreboardString, buff);
       strcat(scoreboardString, " ");
