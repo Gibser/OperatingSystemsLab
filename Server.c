@@ -53,7 +53,7 @@ void quicksort(struct player* a[MAX_USERS], int first, int last);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
-pthread_mutex_t editMatrix;
+pthread_mutex_t editMatrix; 
 pthread_mutex_t editMapPlayers;
 pthread_mutex_t mapGen;
 pthread_mutex_t notifyMaxItems;
@@ -75,6 +75,7 @@ int maxItemReached=0;
 char scoreboardString[200]="";
 struct player *nullStruct;
 
+
 void *mapGenerator(void* args){
     int i=0,j=0;
     while(1){
@@ -84,13 +85,20 @@ void *mapGenerator(void* args){
       cols = randNumb();
       printf("%d %d\n", rows, cols);
       initGame();
+      printf("\n\nClassifica live\n");
+      for(i= 0; i < MAX_USERS; i++){
+        if(scoreboard[i]->clientsd >= 0)
+          printf("Giocatore: %d\n", scoreboard[i]->clientsd);
+      }
+      printf("Valore clientsd nullStruct: %d\n", nullStruct->clientsd);
+      printf("\n\n");
       //printMatrix(rows, cols, map);
       createMap(&info_map, rows, cols, map);
       MAX_ITEMS=info_map.n_items/2;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
-      while(gameTime++ < 20){
+      while(gameTime++ < 60){
         if(maxItemReached==1)
           break;
         sleep(1);
@@ -116,7 +124,11 @@ void game(int clientsd){
         pthread_mutex_unlock(&editMatrix);
       }
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
+
+      pthread_mutex_lock(&editMatrix);
       spawnPlayer(clientsd, &infoplayer);
+      pthread_mutex_unlock(&editMatrix);
+
       printf("Giocatore %c\n", parsePlayer(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
@@ -403,17 +415,22 @@ void spawnPlayer(int clientsd,struct player *info_player){
   info_player->hasItem=0;
   info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
   info_player->pack=NULL;
+  printf("clientsd nullStruct prima di dio: %d\n", nullStruct->clientsd);
   info_player->clientsd = clientsd;
-  pthread_mutex_lock(&editMatrix); //cappadavide
+  printf("clientsd nullStruct dopo dio: %d\n", nullStruct->clientsd);
+
   map[index1][index2].playerSD=clientsd;
-  pthread_mutex_unlock(&editMatrix);//cappadavide
+
 }
 
 void setScorePlayer(struct player *info_player){
   int i=0;
-  while(scoreboard[i]!=nullStruct)
+  while(scoreboard[i]!=nullStruct){
     i++;
+  }
   scoreboard[i]=info_player;
+  printf("Nuovo valore giocatore: %p\n", scoreboard[i]);
+
 }
 
 char parsePlayer(int playerSD){
@@ -464,9 +481,11 @@ void matrixToString(char *info, int clientsd,int *obstacles){
 
 void initGame(){
   int i=0,j=0;
+  initNullStruct();
   for(i=0;i<MAX_USERS;i++){ 
         mapPlayers[i]=-1;
         scoreboard[i]=nullStruct;
+        printf("Init: %d\n", scoreboard[i]->clientsd);
   }
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
   for(i=0;i<rows;i++){
@@ -657,7 +676,7 @@ void gameLogout(int clientsd){
 void createScoreboard(){
   int i = 0;
   char buff[50];
-  char cmd[200] = "cat logged_users | sed -n 's/\\(.*\\) ";
+  char cmd[200] = ""; 
   char num[10];
   int fd;
   int n;
@@ -666,11 +685,19 @@ void createScoreboard(){
   while(i < MAX_USERS){
     if(scoreboard[i]->clientsd >= 0){
       sprintf(num, "%d", scoreboard[i]->clientsd);
+      strcpy(cmd, "echo $(cat logged_users | sed -n 's/\\(.*\\) ");
       strcat(cmd, num);
-      strcat(cmd, "$/\\1/p' > tmp");
-      fd = tmpCommand(cmd);
+      strcat(cmd, "$/\\1/p') > tmp2");
+      printf("Comando: %s\n", cmd);
+
+      if((fd = open("./tmp2", O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
+        perror("Errore creazione file tmp2");
+        exit(1);
+      }
+
+      system(cmd);
       n = read(fd, buff, 50);
-      system("rm tmp");
+      system("rm tmp2");
       buff[n-1] = '\0';
       strcat(scoreboardString, buff);
       strcat(scoreboardString, " ");
