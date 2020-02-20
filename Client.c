@@ -98,7 +98,7 @@ void game(int server_sd){
     int cols;
     while(1){
         system("clear");
-        receiveMessage(server_sd);//Scoreboard
+        //receiveMessage(server_sd);//Scoreboard
         printMap(server_sd);
         receiveMessage(server_sd);//Info
         printf("Comando: ");
