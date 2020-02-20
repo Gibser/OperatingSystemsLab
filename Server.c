@@ -408,9 +408,10 @@ void spawnPlayer(int clientsd,struct player *info_player){
   map[index1][index2].playerSD=clientsd;
   pthread_mutex_unlock(&editMatrix);//cappadavide
 }
+
 void setScorePlayer(struct player *info_player){
   int i=0;
-  while(scoreboard[i]!=NULL)
+  while(scoreboard[i]!=nullStruct)
     i++;
   scoreboard[i]=info_player;
 }
