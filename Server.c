@@ -84,7 +84,7 @@ void initNullStruct();
 void quicksort(struct player* a[MAX_USERS], int first, int last);
 void writeLog(char *msg,int flag);
 int mutexInitialization();
-void getUTCString(char *str);
+char * getUTCString();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -115,9 +115,16 @@ struct player *nullStruct;
 
 void *mapGenerator(void* args){
     int i=0,j=0;
+    char *timeString;
+    char msg[100];
     while(1){
+      memset(msg,'\0',sizeof(msg));
+      *timeString=getUTCString();
+      sprintf(msg,"[%s]Starting new game session...\n",timeString);
+      writeLog(msg,1);
       gameStarted = 0;
       pthread_mutex_lock(&editMatrix);
+      
       rows = randNumb();
       cols = randNumb();
       printf("%d %d\n", rows, cols);
@@ -141,6 +148,8 @@ void *mapGenerator(void* args){
         sleep(1);
       }
       createScoreboard();
+      //memset(msg,'\0',sizeof(msg));
+      //SCRIVERE NEL LOG CHI HA VINTO DOVREMMO ESTRARRE USERNAME
       gameTime = 60; //Era 0
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
@@ -221,17 +230,16 @@ int main()
     void *result;
     pthread_t tid,gameThread;
     char msg[200];
-    char timeString[30];
-    //getUTCString(timeString);
-    time_t connTime;
+    char *timeString;
+    timeString=getUTCString(timeString);
+    /*time_t connTime;
     struct tm *infoTime;
     time(&connTime);
     infoTime=gmtime(&connTime);
-    strftime(timeString,sizeof(timeString),"%c",infoTime);
+    strftime(timeString,sizeof(timeString),"%c",infoTime);*/
     sprintf(msg,"[%s]Turning on the server...\n",timeString);
     writeLog(msg,0);
     memset(msg,'\0',sizeof(msg));
-    memset(timeString,'\0',sizeof(timeString));
     srand(time(NULL));
     if(mutexInitialization()){
       strcpy(msg,"\t-Mutex initialization FAILED\n");
@@ -303,7 +311,7 @@ int main()
         exit(0); 
     } 
     else
-        printf("Server listening..\n"); 
+    printf("Server listening..\n"); 
     strcpy(msg,"\t-Server Listening...\n");
     writeLog(msg,0); 
     memset(msg,'\0',sizeof(msg));
@@ -846,10 +854,14 @@ void writeLog(char *msg,int flag){
   }
 }
 
-void getUTCString(char *str){
-  time_t connTime;
+char * getUTCString(){
+  static char str[30];
+  time_t connTime=time(NULL);
   struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
   time(&connTime);
   infoTime=gmtime(&connTime);
   strftime(str,sizeof(str),"%c",infoTime);
+  return str;
+
 }
