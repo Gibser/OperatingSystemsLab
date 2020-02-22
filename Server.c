@@ -519,7 +519,7 @@ void movement(struct player *info_player, int add_x, int add_y){
 }
 
 void sendMessage(int clientsd, char *msg){
-  char buff[200];
+  char buff[250];
   int n;
   strcpy(buff, msg);
   n = strlen(buff);
