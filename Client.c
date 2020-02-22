@@ -48,7 +48,7 @@ void printRow(char *buff){
 }
 
 void receiveMessage(int server_sd){
-    char buffer[200];
+    char buffer[250];
     int n_bytes;
     read(server_sd, &n_bytes, sizeof(int));
     printf("Messaggio di lunghezza %d\n",n_bytes);
