@@ -82,7 +82,7 @@ void createScoreboard();
 void initNullStruct();
 /*quicksort algorithm to sort a game session's scoreboard*/
 void quicksort(struct player* a[MAX_USERS], int first, int last);
-int mutexInitializion();
+int mutexInitialization();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -217,7 +217,7 @@ int main()
     void *result;
     pthread_t tid,gameThread;
     srand(time(NULL));
-    if(mutexInitializion())
+    if(mutexInitialization())
       return 1;
     initNullStruct();
     // socket create and verification 
