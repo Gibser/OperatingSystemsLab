@@ -68,7 +68,7 @@ int gameStarted = 0;
 int gameTime = 60; //era zero
 int MAX_ITEMS;
 int maxItemReached=0;
-char scoreboardString[200]="";
+char scoreboardString[500]="";
 struct player *nullStruct;
 
 
@@ -564,14 +564,14 @@ void checkCommand(char msg, struct player *info_player,char *info){
       info_player->hasItem=0;
       info_player->itemsDelivered++;
       info_player->pack=NULL;
-      strcpy(info,"Oggetto consegnato.");
+      strcpy(info,"Oggetto consegnato.\n");
     }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
-        strcpy(info,"Non hai oggetti nell'inventario.");
+        strcpy(info,"Non hai oggetti nell'inventario.\n");
     else if(info_player->hasItem && !isWarehouseHere(info_player))
-        strcpy(info,"Non ci sono magazzini nelle vicinanze.");
+        strcpy(info,"Non ci sono magazzini nelle vicinanze.\n");
     else
-        strcpy(info,"Per depositare un oggetto hai bisogno di un oggetto e di un magazzino nelle vicinanze!");
+        strcpy(info,"Per depositare un oggetto hai bisogno di un oggetto e di un magazzino nelle vicinanze!\n");
     
   }
   else if(msg=='i'||msg=='I'){
@@ -668,6 +668,7 @@ void createScoreboard(){
   int fd;
   int n;
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
+  strcpy(scoreboardString,"---PARTITA FINITA---\nClassifica avventurieri:\n");
   quicksort(scoreboard, 0, MAX_USERS-1);
   while(i < MAX_USERS){
     if(scoreboard[i]->clientsd >= 0){
