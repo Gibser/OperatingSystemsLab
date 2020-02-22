@@ -82,8 +82,9 @@ void createScoreboard();
 void initNullStruct();
 /*quicksort algorithm to sort a game session's scoreboard*/
 void quicksort(struct player* a[MAX_USERS], int first, int last);
-void writeLog(char *msg);
+void writeLog(char *msg,int flag);
 int mutexInitialization();
+void getUTCString(char *str);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -219,21 +220,34 @@ int main()
     struct sockaddr_in servaddr, cli; 
     void *result;
     pthread_t tid,gameThread;
-    time_t connTime;
-    struct tm *infoTime;
     char msg[200];
     char timeString[30];
+    getUTCString(timeString);
+    sprintf(msg,"[%s]Turning on the server...\n",timeString);
+    writeLog(msg,0);
+    memset(msg,'\0',sizeof(msg));
+    memset(timeString,'\0',sizeof(timeString));
     srand(time(NULL));
-    if(mutexInitialization())
+    if(mutexInitialization()){
+      strcpy(msg,"\t-Mutex initialization FAILED\n");
+      writeLog(msg,0);
       return 1;
+    }
+    strcpy(msg,"\t-Mutex initialized");
+    writeLog(msg,0);
     initNullStruct();
     // socket create and verification 
+    memset(msg,'\0',sizeof(msg));
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
         printf("socket creation failed...\n"); 
+        strcpy(msg,"\t-Socket creation FAILED\n");
+        writeLog(msg,0);
         exit(0); 
-    } 
-    else
+    }
+    strcpy(msg,"\t-Socket successfully created\n");
+    writeLog(msg,0);
+    memset(msg,'\0',sizeof(msg));
     printf("Socket successfully created..\n"); 
     int reuse = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
@@ -267,18 +281,27 @@ int main()
     // Binding newly created socket to given IP and verification 
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
         printf("socket bind failed...\n"); 
+        strcpy(msg,"\t-Socket bind FAILED\n");
+        writeLog(msg,0);
         exit(0); 
-    } 
-    else
-        printf("Socket successfully binded..\n"); 
+    }
+    strcpy(msg,"\t-Socket successfully binded\n");
+    writeLog(msg,0); 
+    memset(msg,'\0',sizeof(msg));
+    printf("Socket successfully binded..\n"); 
   
     // Now server is ready to listen and verification 
     if ((listen(sockfd, 10)) != 0) { 
         printf("Listen failed...\n"); 
+        strcpy(msg,"\t-Socket listen FAILED\n");
+        writeLog(msg,0); 
         exit(0); 
     } 
     else
         printf("Server listening..\n"); 
+    strcpy(msg,"\t-Server Listening...n");
+    writeLog(msg,0); 
+    memset(msg,'\0',sizeof(msg));
     len = sizeof(cli); 
 
     /*METTERE QUI THREAD DEL GIOCO PRINCIPALEPUNZ*/ 
@@ -292,11 +315,10 @@ int main()
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
-            time(&connTime);
-            infoTime=gmtime(&connTime);
-            strftime(timeString,sizeof(timeString),"%c",infoTime);
-            sprintf(msg,"[%s] New connection from %s\n",timeString,inet_ntoa(cli.sin_addr));
-            writeLog(msg);
+            /////////
+            sprintf(msg,"\t[%s] New connection from %s\n",timeString,inet_ntoa(cli.sin_addr));
+            writeLog(msg,1);
+            ////////
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
         }
@@ -795,15 +817,35 @@ void initNullStruct(){
   nullStruct->itemsDelivered = 0;
 }
 
-void writeLog(char *msg){
+void writeLog(char *msg,int flag){
   int fd;
-  pthread_mutex_lock(&gameLog);
-  fd=open("./gameLog",O_RDWR | O_APPEND|O_CREAT, 0666);
-  if(fd<0){
-    perror("Errore creazione file gameLog");
-		exit(1); //da gestire meglio
+  if(flag){
+    pthread_mutex_lock(&gameLog);
+    fd=open("./gameLog",O_RDWR | O_APPEND|O_CREAT, 0666);
+    if(fd<0){
+      perror("Errore creazione file gameLog");
+      exit(1); //da gestire meglio
+    }
+    write(fd,msg,strlen(msg));
+    close(fd);
+    pthread_mutex_unlock(&gameLog);
   }
-  write(fd,msg,strlen(msg));
-  close(fd);
-  pthread_mutex_unlock(&gameLog);
+  else{
+    fd=open("./gameLog",O_RDWR | O_APPEND|O_CREAT, 0666);
+    if(fd<0){
+      perror("Errore creazione file gameLog");
+      exit(1); //da gestire meglio
+    }
+    write(fd,msg,strlen(msg));
+    close(fd);
+  }
+}
+
+void getUTCString(char *str){
+  time_t connTime;
+  struct tm *infoTime;
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+
 }
