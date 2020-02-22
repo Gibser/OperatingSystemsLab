@@ -295,8 +295,7 @@ int main()
             time(&connTime);
             infoTime=gmtime(&connTime);
             strftime(timeString,sizeof(timeString),"%c",infoTime);
-            sprintf(msg,"[%s] New connection from %s",timeString,inet_ntoa(cli.sin_addr));
-            printf("Messaggio\n%s",msg);
+            sprintf(msg,"[%s] New connection from %s\n",timeString,inet_ntoa(cli.sin_addr));
             writeLog(msg);
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
@@ -804,7 +803,7 @@ void writeLog(char *msg){
     perror("Errore creazione file gameLog");
 		exit(1); //da gestire meglio
   }
-  write(fd,msg,sizeof(msg));
+  write(fd,msg,strlen(msg));
   close(fd);
   pthread_mutex_unlock(&gameLog);
 }
