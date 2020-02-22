@@ -130,8 +130,9 @@ void game(int server_sd){
         printMap(server_sd);
         receiveMessage(server_sd);//Info
         printf("Comando: ");
-        scanf(" %c",&msg);
-        //msg = firstChar(buffer);
+        //scanf(" %c",&msg);
+        fgets(buffer, sizeof(buffer), stdin);
+        msg = firstChar(buffer);
         write(server_sd, &msg, 1);
     }
 }
