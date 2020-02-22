@@ -12,6 +12,25 @@
 #include <fcntl.h>
 #include <signal.h>
 #define MAX 1000 
+
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_WHITE   "\x1b[37m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define BLK "\e[0;30m"
+#define RED "\e[0;31m"
+#define GRN "\e[0;32m"
+#define YEL "\e[0;33m"
+#define BLU "\e[0;34m"
+#define MAG "\e[0;35m"
+#define CYN "\e[0;36m"
+#define WHT "\e[0;37m"
+#define RST "\e[0m"
+
 extern int errno;
 int userStatus=0; //0 Menu 1 login 2 sign up
 struct config{
@@ -39,11 +58,16 @@ void clientAbort(int signalvalue){
 
 
 void printRow(char *buff){
-    printf("| ");
+    //printf("| ");
+    printf(RED"|"RST" ");
     for(int i = 0; i < strlen(buff); i++){
-        printf("%c ", buff[i]);
+        if(buff[i]>='A'&&buff[i]<='H')
+            printf(BLU"%c"RST" ",buff[i]);
+        else
+            printf("%c ", buff[i]);
     }
-    printf("|");
+    //printf("|");
+    printf(RED"|"RST);
     printf("\n");
 }
 
@@ -51,11 +75,12 @@ void receiveMessage(int server_sd){
     char buffer[250];
     int n_bytes;
     read(server_sd, &n_bytes, sizeof(int));
-    printf("Messaggio di lunghezza %d\n",n_bytes);
+    //printf("Messaggio di lunghezza %d\n",n_bytes);
     if(n_bytes > 0){
         read(server_sd, buffer, n_bytes);
         buffer[n_bytes] = '\0';
-        write(STDOUT_FILENO, buffer, n_bytes);
+        //write(STDOUT_FILENO, buffer, n_bytes);
+        printf(GRN"%s"RST,buffer);
     }
 
 }
@@ -70,7 +95,8 @@ void printMap(int server_sd){
         //printf("Righe: %d Colonne: %d\n",rows,cols);
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf("_ ");
+            printf(ANSI_COLOR_RED"_"ANSI_COLOR_RESET" ");
+            //printf("_ ");
         printf("\n");
         for(int i = 0; i < rows; i++){
             read(server_sd, row, cols);
@@ -80,7 +106,8 @@ void printMap(int server_sd){
 
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf("─ ");
+            printf(ANSI_COLOR_RED"─"ANSI_COLOR_RESET" ");
+            //printf("─ ");
 
         printf("\n\n");
     }

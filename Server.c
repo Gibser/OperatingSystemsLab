@@ -82,6 +82,7 @@ void createScoreboard();
 void initNullStruct();
 /*quicksort algorithm to sort a game session's scoreboard*/
 void quicksort(struct player* a[MAX_USERS], int first, int last);
+void writeLog(char *msg);
 int mutexInitialization();
 
 pthread_mutex_t signup_mutex;
@@ -91,6 +92,8 @@ pthread_mutex_t editMapPlayers;
 pthread_mutex_t mapGen;
 pthread_mutex_t notifyMaxItems;
 pthread_cond_t mapGen_cond_var;
+pthread_mutex_t gameLog;
+
 
 
 //int threadStatus[MAX_THREADS]={0};
@@ -216,6 +219,10 @@ int main()
     struct sockaddr_in servaddr, cli; 
     void *result;
     pthread_t tid,gameThread;
+    time_t connTime;
+    struct tm *infoTime;
+    char msg[200];
+    char timeString[30];
     srand(time(NULL));
     if(mutexInitialization())
       return 1;
@@ -280,9 +287,16 @@ int main()
         // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
+            memset(msg,'\0',sizeof(msg));
+            memset(timeString,'\0',sizeof(timeString));
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
+            time(&connTime);
+            infoTime=gmtime(&connTime);
+            strftime(timeString,sizeof(timeString),"%c",infoTime);
+            sprintf(msg,"[%s] New connection from %s",timeString,inet_ntoa(cli.sin_addr));
+            writeLog(msg);
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
         }
@@ -779,4 +793,17 @@ void initNullStruct(){
   nullStruct = (struct player *)malloc(sizeof(struct player));
   nullStruct->clientsd = -1;
   nullStruct->itemsDelivered = 0;
+}
+
+void writeLog(char *msg){
+  int fd;
+  pthread_mutex_lock(&gameLog);
+  fd=open("./gameLog",O_RDWR | O_APPEND|O_CREAT, 0666);
+  if(fd<0){
+    perror("Errore creazione file gameLog");
+		exit(1); //da gestire meglio
+  }
+  write(fd,msg,sizeof(msg));
+  close(fd);
+  pthread_mutex_unlock(&gameLog);
 }
