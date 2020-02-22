@@ -65,7 +65,7 @@ int rows, cols;
 int mapPlayers[MAX_USERS];
 struct player* scoreboard[MAX_USERS];
 int gameStarted = 0;
-int gameTime = 0;
+int gameTime = 60; //era zero
 int MAX_ITEMS;
 int maxItemReached=0;
 char scoreboardString[200]="";
@@ -94,13 +94,13 @@ void *mapGenerator(void* args){
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
-      while(gameTime++ < 60){
+      while(gameTime-- > 0){ //era gameTime++ < 60
         if(maxItemReached==1)
           break;
         sleep(1);
       }
       createScoreboard();
-      gameTime = 0;
+      gameTime = 60; //Era 0
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
       
@@ -109,7 +109,7 @@ void *mapGenerator(void* args){
 
 // Game Function
 void game(int clientsd){
-    char info[200]="";
+    char info[300]="";
     char command;
     struct player infoplayer;
     int isLogged=1;
@@ -546,11 +546,11 @@ void checkCommand(char msg, struct player *info_player,char *info){
         map[info_player->x][info_player->y].pointer=NULL;
         info_player->hasItem=1;
         if(obj=='$')
-          sprintf(info, "Raccolto il seguente oggetto: Oro. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
+          sprintf(info, "Raccolto il seguente oggetto: Oro. Consegnalo al magazzino numero %d\n",info_player->pack->warehouse);
         else if(obj=='@')
-          sprintf(info, "Raccolto il seguente oggetto: Cibo. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
+          sprintf(info, "Raccolto il seguente oggetto: Cibo. Consegnalo al magazzino numero %d\n",info_player->pack->warehouse);
         else
-          sprintf(info, "Raccolto il seguente oggetto: Spada. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
+          sprintf(info, "Raccolto il seguente oggetto: Spada. Consegnalo al magazzino numero %d\n",info_player->pack->warehouse);
       }
     }
     else
@@ -579,8 +579,11 @@ void checkCommand(char msg, struct player *info_player,char *info){
       sprintf(info,"Sei il giocatore %c\nOggetti consegnati:%d\nHai un oggetto da consegnare al magazzino numero %d\n",getLetter(info_player->clientsd),info_player->itemsDelivered,info_player->pack->warehouse);
     }
     else
-      sprintf(info,"Sei il giocatore %c\nOggetti consegnati:%d\nNon hai oggetti da consegnare",getLetter(info_player->clientsd),info_player->itemsDelivered);
+      sprintf(info,"Sei il giocatore %c\nOggetti consegnati:%d\nNon hai oggetti da consegnare\n",getLetter(info_player->clientsd),info_player->itemsDelivered);
     
+  }
+  else if(msg=='h'||msg=='H'){
+    sprintf(info,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n");
   }
   else
     checkMovement(msg, info_player,info);
