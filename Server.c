@@ -296,6 +296,7 @@ int main()
             infoTime=gmtime(&connTime);
             strftime(timeString,sizeof(timeString),"%c",infoTime);
             sprintf(msg,"[%s] New connection from %s",timeString,inet_ntoa(cli.sin_addr));
+            printf("Messaggio\n%s",msg);
             writeLog(msg);
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
