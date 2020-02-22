@@ -233,7 +233,7 @@ int main()
       writeLog(msg,0);
       return 1;
     }
-    strcpy(msg,"\t-Mutex initialized");
+    strcpy(msg,"\t-Mutex initialized\n");
     writeLog(msg,0);
     initNullStruct();
     // socket create and verification 
@@ -299,7 +299,7 @@ int main()
     } 
     else
         printf("Server listening..\n"); 
-    strcpy(msg,"\t-Server Listening...n");
+    strcpy(msg,"\t-Server Listening...\n");
     writeLog(msg,0); 
     memset(msg,'\0',sizeof(msg));
     len = sizeof(cli); 
