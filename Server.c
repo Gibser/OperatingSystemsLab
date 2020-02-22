@@ -227,7 +227,7 @@ int main()
     struct tm *infoTime;
     time(&connTime);
     infoTime=gmtime(&connTime);
-    strftime(str,sizeof(str),"%c",infoTime);
+    strftime(timeString,sizeof(timeString),"%c",infoTime);
     sprintf(msg,"[%s]Turning on the server...\n",timeString);
     writeLog(msg,0);
     memset(msg,'\0',sizeof(msg));
