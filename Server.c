@@ -223,6 +223,7 @@ int main()
     char msg[200];
     char timeString[30];
     getUTCString(timeString);
+    printf("Tempo %s",timeString);
     sprintf(msg,"[%s]Turning on the server...\n",timeString);
     writeLog(msg,0);
     memset(msg,'\0',sizeof(msg));
@@ -847,5 +848,4 @@ void getUTCString(char *str){
   time(&connTime);
   infoTime=gmtime(&connTime);
   strftime(str,sizeof(str),"%c",infoTime);
-
 }
