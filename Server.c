@@ -130,6 +130,7 @@ void game(int clientsd){
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
           matrixToString(info, clientsd,infoplayer.obstacles);
+          memset(info,'\0',sizeof(info));
           /*if(firstTime){
             write(clientsd,&(int){0},sizeof(int));
             firstTime=0;
@@ -506,13 +507,6 @@ void movement(struct player *info_player, int add_x, int add_y){
         changeCoordinates(info_player, add_x, add_y);
         printf("x: %d y: %d\n", info_player->x, info_player->y);
       }
-      
-      /*else if(map[(info_player->x)+add_x][info_player->y+add_y].isWareHouse){
-        if(info_player->hasItem){
-          info_player->itemsDelivered+=1;
-          info_player->hasItem=0;
-        }
-      }CAPPADAVIDE*/
       else if(map[(info_player->x)+add_x][info_player->y+add_y].isObstacle){
         a=(struct obstacles*)map[(info_player->x)+add_x][info_player->y+add_y].pointer;
         id=a->id;
@@ -537,28 +531,32 @@ void sendMessage(int clientsd, char *msg){
 
 
 void checkCommand(char msg, struct player *info_player,char *info){
-  int clientsd=map[info_player->x][info_player->y].playerSD;
+  //int clientsd=map[info_player->x][info_player->y].playerSD;
   int n;
+  char obj;
   if(msg == 't' || msg == 'T'){
-    sprintf(info, "%d", gameTime);
+    sprintf(info, "Tempo rimanente: %d secondi\n", gameTime);
   }
   else if(msg=='p'||msg=='P'){
     if(!info_player->hasItem){
       if(map[info_player->x][info_player->y].pointer!=NULL){
         info_player->pack=(struct items*)map[info_player->x][info_player->y].pointer;
+        obj=map[info_player->x][info_player->y].object;
         map[info_player->x][info_player->y].object=' ';
         map[info_player->x][info_player->y].pointer=NULL;
         info_player->hasItem=1;
-        strcpy(info,"Oggetto raccolto.");
-        strcat(info,"Consegna al magazzino ");
-        strcat(info,&(char){(info_player->pack->warehouse)+'0'});//DA MIGLIORARE
+        if(obj=='$')
+          sprintf(info, "Raccolto il seguente oggetto: Oro. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
+        else if(obj=='@')
+          sprintf(info, "Raccolto il seguente oggetto: Cibo. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
+        else
+          sprintf(info, "Raccolto il seguente oggetto: Spada. Consegnalo al magazzino numero %d",info_player->pack->warehouse);
       }
     }
     else
     {
       strcpy(info,"Inventario pieno.");
     }
-    
   }
   else if(msg=='e'||msg=='E'){
     if(info_player->hasItem && isWarehouseHere(info_player)){
@@ -574,6 +572,14 @@ void checkCommand(char msg, struct player *info_player,char *info){
         strcpy(info,"Non ci sono magazzini nelle vicinanze.");
     else
         strcpy(info,"Per depositare un oggetto hai bisogno di un oggetto e di un magazzino nelle vicinanze!");
+    
+  }
+  else if(msg=='i'||msg=='I'){
+    if(info_player->hasItem){
+      sprintf(info,"Sei il giocatore %c\nOggetti consegnati:%d\nHai un oggetto da consegnare al magazzino numero %d\n",getLetter(info_player->clientsd),info_player->itemsDelivered,info_player->pack->warehouse);
+    }
+    else
+      sprintf(info,"Sei il giocatore %c\nOggetti consegnati:%d\nNon hai oggetti da consegnare",getLetter(info_player->clientsd),info_player->itemsDelivered);
     
   }
   else
