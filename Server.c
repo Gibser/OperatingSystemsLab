@@ -222,8 +222,12 @@ int main()
     pthread_t tid,gameThread;
     char msg[200];
     char timeString[30];
-    getUTCString(timeString);
-    printf("Tempo %s",timeString);
+    //getUTCString(timeString);
+    time_t connTime;
+    struct tm *infoTime;
+    time(&connTime);
+    infoTime=gmtime(&connTime);
+    strftime(str,sizeof(str),"%c",infoTime);
     sprintf(msg,"[%s]Turning on the server...\n",timeString);
     writeLog(msg,0);
     memset(msg,'\0',sizeof(msg));
