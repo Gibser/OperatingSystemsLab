@@ -84,7 +84,6 @@ void printMap(int server_sd){
 
         printf("\n\n");
     }
-    //info (VEDI RECEIVEMESSAGE)
     
 }
 

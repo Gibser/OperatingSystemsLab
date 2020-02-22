@@ -19,33 +19,70 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 
+/**spawnPlayer gets a clientSD and a pointer to a struct player type as parameters.
+ * It spawns a player in a cell (using some criteria) and initializes its associated struct.
+ */
 void spawnPlayer(int clientsd,struct player *info_player);
+/*isCellGood function determines if a cell object is good for a player's spawn*/
 int isCellGood(struct cell a,int index1,int index2);
+/*isCellFree function tells if a cell is free (no warehouses/players/objects/obstacles)*/
 int isCellFree(struct cell a);
+/*isCellNotSolid function tells if a cell is "not Solid", that is, a cell on which a player can move*/
 int isCellNotSolid(struct cell a);
+/**isLeftFree function checks whether the left cell (in relation of current position) is free or not.
+ * It requires a struct cell matrix and current position
+ */
 int isLeftFree(int index1,int index2);
+/**isRightFree function checks whether the right cell (in relation of current position) is free or not.
+ * It requires a struct cell matrix and current position
+ */
 int isRightFree(int index1,int index2);
+/**isUpFree function checks whether the top cell (in relation of current position) is free or not.
+ * It requires a struct cell matrix and current position
+ */
 int isUpFree(int index1,int index2);
+/**isDownFree function checks whether the bottom cell (in relation of current position) is free or not.
+ * It requires a struct cell matrix and current position
+ */
 int isDownFree(int index1,int index2);
+/*setLetter function assigns a letter to a new Player*/
 void setLetter(int clientsd);
+/*getLetter function returns the letter used by a specified player*/
 char getLetter(int clientsd);
+/**matrixToString sends game map to a specific player in order to display it on its Game's Client.
+ * It can append an informative message.
+*/
 void matrixToString(char *msg, int clientsd,int *obstacles);
-char parsePlayer(int playerSD);
+//char parsePlayer(int playerSD);
+/**initGame initializes everything that's necessary to run the game correctly 
+ * (mapPlayers,map,scoreboard).
+ */
 void initGame();
+
 void checkMovement(char msg,struct player *info_player,char *info);
 void checkCommand(char msg, struct player *info_player,char *info);
+/*changeCoordinates modifies game map to update a player's position*/
 void changeCoordinates(struct player *info_player, int add_x, int add_y);
 void movement(struct player *info_player, int add_x, int add_y);
+/*isWarehouseHere tells if there's at least a warehouse around the player*/
 int isWarehouseHere(struct player *a);
+/*checkWarehouse tells whether a warehouse is on a specified cell*/
 int checkWarehouse(struct player *info_player, int add_x, int add_y);
 int noBoundaryCheck(struct player *a,int add_x,int add_y);
+/*sendMessage sends a message to a specified socket. It sends the length of the message it's going to send before sending it*/
 void sendMessage(int clientsd, char *msg);
+/*gameLogout does everything it's necessary when a player leaves game*/
 void gameLogout(int clientsd);
+/*logoutStructs removes every information about a player that left a game session*/
 void logoutStructs(int clientsd);
+/*setScorePlayer inserts a new player into scoreboard*/
 void setScorePlayer(struct player *info_player);
+/*createScoreboard creates a message containing scoreboard when a game session is over*/
 void createScoreboard();
 void initNullStruct();
+/*quicksort algorithm to sort a game session's scoreboard*/
 void quicksort(struct player* a[MAX_USERS], int first, int last);
+int mutexInitializion();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -125,16 +162,12 @@ void game(int clientsd){
       spawnPlayer(clientsd, &infoplayer);
       pthread_mutex_unlock(&editMatrix);
 
-      printf("Giocatore %c\n", parsePlayer(clientsd));
+      printf("Giocatore %c\n", getLetter(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
-          /*if(firstTime){
-            write(clientsd,&(int){0},sizeof(int));
-            firstTime=0;
-          }*/
           printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
           if(getLetter(clientsd) == '0') break;
@@ -183,47 +216,9 @@ int main()
     struct sockaddr_in servaddr, cli; 
     void *result;
     pthread_t tid,gameThread;
-    /*pthread_t gameThread;
-    pthread_t playerThreads[MAX_THREADS];*/
     srand(time(NULL));
-    /*for(i=0;i<MAX_USERS;i++)
-      printf("mp %d",mapPlayers[i]);*/
-    if (pthread_mutex_init(&signup_mutex, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    if (pthread_mutex_init(&login, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-     if (pthread_mutex_init(&editMatrix, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    if (pthread_mutex_init(&editMapPlayers, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    if (pthread_mutex_init(&mapGen, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    if (pthread_mutex_init(&notifyMaxItems, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-
+    if(mutexInitializion())
+      return 1;
     initNullStruct();
     // socket create and verification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
@@ -290,11 +285,6 @@ int main()
             *thread_sd =  connfd;
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
-            /*i=0;
-            while(!isAvailable(threadStatus[i])){
-                i++;
-            }
-            pthread_create(&playerThreads[i], NULL, clientThread, (void *) thread_sd);*/
         }
             
         
@@ -319,7 +309,7 @@ void setLetter(int clientsd){
   }
 }
 
-char getLetter(int clientsd){
+/*char getLetter(int clientsd){
   int i;
   char c = '0';
   for(i=0;i<MAX_USERS;i++){
@@ -329,7 +319,7 @@ char getLetter(int clientsd){
     }
   }
   return c;
-}
+} VECCHIO GETLETTER RIMPIAZZATO DA PARSEPLAYER*/
 
 void logoutStructs(int clientsd){
   int i;
@@ -430,11 +420,13 @@ void setScorePlayer(struct player *info_player){
 
 }
 
-char parsePlayer(int playerSD){
+char getLetter(int playerSD){
+  char c='0';
   for(int i = 0; i < MAX_USERS; i++){
     if(mapPlayers[i] == playerSD)
       return ((char)i+65);
   }
+  return c;
 }
 
 void matrixToString(char *info, int clientsd,int *obstacles){
@@ -448,8 +440,8 @@ void matrixToString(char *info, int clientsd,int *obstacles){
     memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
-        printf("parsing %c\n", parsePlayer(map[i][j].playerSD));
-        msg[j] = parsePlayer(map[i][j].playerSD);
+        printf("parsing %c\n", getLetter(map[i][j].playerSD));
+        msg[j] = getLetter(map[i][j].playerSD);
       }
       else if(map[i][j].isObstacle){
         a=(struct obstacles *)map[i][j].pointer;
@@ -653,6 +645,45 @@ int noBoundaryCheck(struct player *a,int add_x,int add_y){
   if(r>=0 && r<rows && c>=0 && c<cols)
     return 1;
   return 0;
+}
+
+int mutexInitialization(){
+  if (pthread_mutex_init(&signup_mutex, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&login, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+     if (pthread_mutex_init(&editMatrix, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&editMapPlayers, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&mapGen, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_mutex_init(&notifyMaxItems, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    return 0;
 }
 
 void gameLogout(int clientsd){
