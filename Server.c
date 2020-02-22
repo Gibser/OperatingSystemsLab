@@ -109,7 +109,7 @@ void *mapGenerator(void* args){
 
 // Game Function
 void game(int clientsd){
-    char info[250]="";
+    char info[250]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto.\n";
     char command;
     struct player infoplayer;
     int isLogged=1;
