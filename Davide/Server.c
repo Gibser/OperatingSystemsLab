@@ -217,9 +217,12 @@ void *clientThread(void *sockfd)
     int clientsd=*(int*)sockfd;
     int log = 0;
     char username[100];
+    char message[50];
     log = loginMain(clientsd, signup_mutex, login, username);
     if(log == 1){
         printf("Gestisco il client...\n");
+        sprintf(message,"\t-%s has joined the game!",username);
+        writeLog(message,1);
         game(clientsd,username);
     }
 	close(clientsd);
@@ -758,11 +761,10 @@ void createScoreboard(){
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
   strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI\n");
   quicksort(scoreboard, 0, MAX_USERS-1);
-  printf("EHI BELLI STO QUA PUNZ\n");
   while(i>=0){
     memset(buffer,'\0',sizeof(buffer));
     if(scoreboard[i]->clientsd >= 0){
-      sprintf(buffer,"%s\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
+      sprintf(buffer,"%s\t\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
       strcat(scoreboardString,buffer);
     }
     i--;
