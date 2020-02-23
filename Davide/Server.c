@@ -90,6 +90,7 @@ void writeLog_ItemDelivered(struct player *info);
 void writeLog_NewConnection(char *ip);
 void writeLog_GameOver(struct player *winner);
 void writeLog_JoinGame(char *user);
+void writeLog_QuitGame(char *user);
 
 
 pthread_mutex_t signup_mutex;
@@ -203,6 +204,7 @@ void game(int clientsd,char *username){
           else{
               gameLogout(clientsd);
               isLogged=0;
+              writeLog_QuitGame(username);
               break;
           }
       }
@@ -910,6 +912,19 @@ void writeLog_JoinGame(char *user){
   infoTime=gmtime(&connTime);
   strftime(str,sizeof(str),"%c",infoTime);
   sprintf(msg,"\t-[%s] %s has joined the game!\n",str,user);
+  writeLog(msg,1);
+}
+
+void writeLog_QuitGame(char *user){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  sprintf(msg,"\t-[%s] %s has left the game.\n",str,user);
   writeLog(msg,1);
 }
 
