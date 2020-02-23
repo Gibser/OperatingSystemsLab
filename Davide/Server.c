@@ -583,6 +583,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
   //int clientsd=map[info_player->x][info_player->y].playerSD;
   int n;
   char obj;
+  char log[100];
   if(msg == 't' || msg == 'T'){
     sprintf(info, "Tempo rimanente: %d secondi\n", gameTime);
   }
@@ -612,8 +613,10 @@ void checkCommand(char msg, struct player *info_player,char *info){
       //printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
       info_player->hasItem=0;
       info_player->itemsDelivered++;
+      sprintf(log,"\t-%s delivered an item to warehouse n.%d\n",info_player->username,info_player->pack->warehouse);
       info_player->pack=NULL;
       strcpy(info,"Oggetto consegnato.\n");
+      writeLog(log,1);
     }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.\n");
