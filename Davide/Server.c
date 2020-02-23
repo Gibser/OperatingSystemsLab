@@ -221,7 +221,7 @@ void *clientThread(void *sockfd)
     log = loginMain(clientsd, signup_mutex, login, username);
     if(log == 1){
         printf("Gestisco il client...\n");
-        sprintf(message,"\t-%s has joined the game!",username);
+        sprintf(message,"\t-%s has joined the game!\n",username);
         writeLog(message,1);
         game(clientsd,username);
     }
