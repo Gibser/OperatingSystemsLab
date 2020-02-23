@@ -85,6 +85,7 @@ void quicksort(struct player* a[MAX_USERS], int first, int last);
 void writeLog(char *msg,int flag);
 int mutexInitialization();
 char * getUTCString();
+struct player *getWinnerStruct();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -116,6 +117,7 @@ struct player *nullStruct;
 void *mapGenerator(void* args){
     int i=0,j=0;
     char *timeString;
+    struct player *winner;
     char msg[100];
     while(1){
       memset(msg,'\0',sizeof(msg));
@@ -149,7 +151,10 @@ void *mapGenerator(void* args){
       }
       createScoreboard();
       //memset(msg,'\0',sizeof(msg));
-      //SCRIVERE NEL LOG CHI HA VINTO DOVREMMO ESTRARRE USERNAME
+      winner=getWinnerStruct();
+      memset(msg,'\0',sizeof(msg));
+      sprintf(msg,"\t-GAME OVER: Winner is %s with %d items delivered.\n",winner->username,winner->itemsDelivered);
+      writeLog(msg,1);
       gameTime = 60; //Era 0
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
@@ -848,4 +853,15 @@ char * getUTCString(){
   strftime(str,sizeof(str),"%c",infoTime);
   return str;
 
+}
+
+struct player* getWinnerStruct(){
+  int i=MAX_USERS-1;
+  while(i>=0){
+    if(scoreboard[i]->clientsd>=0){
+      return scoreboard[i];
+    }
+    i--;
+  }
+  return NULL;
 }
