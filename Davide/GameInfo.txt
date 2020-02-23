@@ -1,0 +1,4 @@
+Progetto per Laboratorio di Sistemi Operativi 2019/2020
+Studenti:
+Davide Somma N86002618
+Giuseppe Rauso N86002481
