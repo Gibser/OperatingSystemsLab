@@ -31,6 +31,7 @@ struct mapObjects{
 };
 
 struct player{
+  char username[50];
   int x;
   int y;
   int hasItem;

@@ -22,7 +22,7 @@
 /**spawnPlayer gets a clientSD and a pointer to a struct player type as parameters.
  * It spawns a player in a cell (using some criteria) and initializes its associated struct.
  */
-void spawnPlayer(int clientsd,struct player *info_player);
+void spawnPlayer(int clientsd,struct player *info_player,char *username);
 /*isCellGood function determines if a cell object is good for a player's spawn*/
 int isCellGood(struct cell a,int index1,int index2);
 /*isCellFree function tells if a cell is free (no warehouses/players/objects/obstacles)*/
@@ -159,7 +159,7 @@ void *mapGenerator(void* args){
 
 // Game Function
 void game(int clientsd,char *username){
-    printf("Username client %s\n",username);
+    //printf("Username client %s\n",username);
     char info[250]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto.\n";
     char command;
     struct player infoplayer;
@@ -173,7 +173,7 @@ void game(int clientsd,char *username){
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
 
       pthread_mutex_lock(&editMatrix);
-      spawnPlayer(clientsd, &infoplayer);
+      spawnPlayer(clientsd,&infoplayer,username);
       pthread_mutex_unlock(&editMatrix);
 
       printf("Giocatore %c\n", getLetter(clientsd));
@@ -326,12 +326,11 @@ int main()
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
             memset(msg,'\0',sizeof(msg));
-            memset(timeString,'\0',sizeof(timeString));
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
             /////////
-            sprintf(msg,"\t[%s] New connection from %s\n",timeString,inet_ntoa(cli.sin_addr));
+            sprintf(msg,"\t-New connection from %s\n",inet_ntoa(cli.sin_addr));
             writeLog(msg,1);
             ////////
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
@@ -436,7 +435,7 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(int clientsd,struct player *info_player){
+void spawnPlayer(int clientsd,struct player *info_player,char *username){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   setLetter(clientsd);
@@ -448,6 +447,8 @@ void spawnPlayer(int clientsd,struct player *info_player){
       break;
     }
   }
+  strcpy(info_player->username,username);
+  printf("Spawn %s\n",info_player->username);
   info_player->x=index1;
   info_player->y=index2;
   info_player->hasItem=0;
