@@ -748,12 +748,14 @@ void createScoreboard(){
   int n;
   char buffer[50];
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
-  strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI");
+  strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI\n");
   quicksort(scoreboard, 0, MAX_USERS-1);
+  printf("EHI BELLI STO QUA PUNZ\n");
   while(i>=0){
     memset(buffer,'\0',sizeof(buffer));
     if(scoreboard[i]->clientsd >= 0){
-      sprintf("%s\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
+      sprintf(buffer,"%s\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
+      strcat(scoreboardString,buffer);
     }
     i--;
   }
