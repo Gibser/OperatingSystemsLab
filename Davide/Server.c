@@ -89,6 +89,8 @@ struct player *getWinnerStruct();
 void writeLog_ItemDelivered(struct player *info);
 void writeLog_NewConnection(char *ip);
 void writeLog_GameOver(struct player *winner);
+void writeLog_JoinGame(char *user);
+
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -225,8 +227,9 @@ void *clientThread(void *sockfd)
     log = loginMain(clientsd, signup_mutex, login, username);
     if(log == 1){
         printf("Gestisco il client...\n");
-        sprintf(message,"\t-%s has joined the game!\n",username);
-        writeLog(message,1);
+        writeLog_JoinGame(username);
+        /*sprintf(message,"\t-%s has joined the game!\n",username);
+        writeLog(message,1);*/
         game(clientsd,username);
     }
 	close(clientsd);
@@ -863,10 +866,10 @@ void writeLog_GameOver(struct player *winner){
   infoTime=gmtime(&connTime);
   strftime(str,sizeof(str),"%c",infoTime);
   if(winner!=NULL){
-    sprintf(msg,"\t-[%s]GAME OVER: Winner is %s with %d items delivered.\n",str,winner->username,winner->itemsDelivered);
+    sprintf(msg,"\t-[%s] GAME OVER: Winner is %s with %d items delivered.\n",str,winner->username,winner->itemsDelivered);
   }
   else
-    sprintf(msg,"\t-[%s]GAME OVER: No winner.\n",str);
+    sprintf(msg,"\t-[%s] GAME OVER: No winner.\n",str);
   writeLog(msg,1);
 }
 
@@ -893,7 +896,20 @@ void writeLog_NewConnection(char *ip){
   time(&connTime);
   infoTime=gmtime(&connTime);
   strftime(str,sizeof(str),"%c",infoTime);
-  sprintf(msg,"\t-[%s]New connection from %s\n",str,ip);
+  sprintf(msg,"\t-[%s] New connection from %s\n",str,ip);
+  writeLog(msg,1);
+}
+
+void writeLog_JoinGame(char *user){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  sprintf(msg,"\t-[%s] %s has joined the game!\n",str,user);
   writeLog(msg,1);
 }
 
