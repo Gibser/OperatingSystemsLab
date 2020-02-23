@@ -86,6 +86,9 @@ void writeLog(char *msg,int flag);
 int mutexInitialization();
 char * getUTCString();
 struct player *getWinnerStruct();
+void writeLog_ItemDelivered(struct player *info);
+void writeLog_NewConnection(char *ip);
+void writeLog_GameOver(struct player *winner);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -152,9 +155,10 @@ void *mapGenerator(void* args){
       createScoreboard();
       //memset(msg,'\0',sizeof(msg));
       winner=getWinnerStruct();
-      memset(msg,'\0',sizeof(msg));
+      writeLog_GameOver(winner);
+      /*memset(msg,'\0',sizeof(msg));
       sprintf(msg,"\t-GAME OVER: Winner is %s with %d items delivered.\n",winner->username,winner->itemsDelivered);
-      writeLog(msg,1);
+      writeLog(msg,1);*/
       gameTime = 60; //Era 0
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
@@ -314,7 +318,7 @@ int main()
     printf("Socket successfully binded..\n"); 
   
     // Now server is ready to listen and verification 
-    if ((listen(sockfd, 10)) != 0) { 
+    if ((listen(sockfd,128)) != 0) { 
         printf("Listen failed...\n"); 
         strcpy(msg,"\t-Socket listen FAILED\n");
         writeLog(msg,0); 
@@ -338,8 +342,9 @@ int main()
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
             /////////
-            sprintf(msg,"\t-New connection from %s\n",inet_ntoa(cli.sin_addr));
-            writeLog(msg,1);
+            //sprintf(msg,"\t-New connection from %s\n",inet_ntoa(cli.sin_addr));
+            //writeLog(msg,1);
+            writeLog_NewConnection(inet_ntoa(cli.sin_addr));
             ////////
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
@@ -586,7 +591,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
   //int clientsd=map[info_player->x][info_player->y].playerSD;
   int n;
   char obj;
-  char log[100];
+  //char log[100];
   if(msg == 't' || msg == 'T'){
     sprintf(info, "Tempo rimanente: %d secondi\n", gameTime);
   }
@@ -616,10 +621,11 @@ void checkCommand(char msg, struct player *info_player,char *info){
       //printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
       info_player->hasItem=0;
       info_player->itemsDelivered++;
-      sprintf(log,"\t-%s delivered an item to warehouse n.%d\n",info_player->username,info_player->pack->warehouse);
+      writeLog_ItemDelivered(info_player);
+      //sprintf(log,"\t-%s delivered an item to warehouse n.%d\n",info_player->username,info_player->pack->warehouse);
       info_player->pack=NULL;
       strcpy(info,"Oggetto consegnato.\n");
-      writeLog(log,1);
+      //writeLog(log,1);
     }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.\n");
@@ -757,7 +763,7 @@ void gameLogout(int clientsd){
 void createScoreboard(){
   int i = MAX_USERS-1;
   int n;
-  char buffer[50];
+  char buffer[100];
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
   strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI\n");
   quicksort(scoreboard, 0, MAX_USERS-1);
@@ -846,6 +852,49 @@ void writeLog(char *msg,int flag){
     write(fd,msg,strlen(msg));
     close(fd);
   }
+}
+void writeLog_GameOver(struct player *winner){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  if(winner!=NULL){
+    sprintf(msg,"\t-[%s]GAME OVER: Winner is %s with %d items delivered.\n",str,winner->username,winner->itemsDelivered);
+  }
+  else
+    sprintf(msg,"\t-[%s]GAME OVER: No winner.\n",str);
+  writeLog(msg,1);
+}
+
+void writeLog_ItemDelivered(struct player *info){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  sprintf(msg,"\t-[%s] %s delivered an item to warehouse n.%d\n",str,info->username,info->pack->warehouse);
+  writeLog(msg,1);
+}
+
+
+void writeLog_NewConnection(char *ip){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  sprintf(msg,"\t-[%s]New connection from %s\n",str,ip);
+  writeLog(msg,1);
 }
 
 char * getUTCString(){
