@@ -131,7 +131,8 @@ void game(int server_sd){
         receiveMessage(server_sd);//Info
         printf("Comando: ");
         //scanf(" %c",&msg);
-        fgets(buffer, sizeof(buffer), stdin);
+        //fgets(buffer, sizeof(buffer), stdin);  //PEPPE NON ASPETTA INPUTPUNZ
+        scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
     }

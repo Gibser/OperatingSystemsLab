@@ -744,45 +744,23 @@ void gameLogout(int clientsd){
 }
 
 void createScoreboard(){
-  int i = 0;
-  char buff[50];
-  char cmd[200] = ""; 
-  char num[10];
-  int fd;
+  int i = MAX_USERS-1;
   int n;
+  char buffer[50];
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
-  strcpy(scoreboardString,"---PARTITA FINITA---\nClassifica avventurieri:\n");
+  strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI");
   quicksort(scoreboard, 0, MAX_USERS-1);
-  while(i < MAX_USERS){
+  while(i>=0){
+    memset(buffer,'\0',sizeof(buffer));
     if(scoreboard[i]->clientsd >= 0){
-      sprintf(num, "%d", scoreboard[i]->clientsd);
-      strcpy(cmd, "echo $(cat logged_users | sed -n 's/\\(.*\\) ");
-      strcat(cmd, num);
-      strcat(cmd, "$/\\1/p') > tmp2");
-      printf("Comando: %s\n", cmd);
-
-      if((fd = open("./tmp2", O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
-        perror("Errore creazione file tmp2");
-        exit(1);
-      }
-
-      system(cmd);
-      n = read(fd, buff, 50);
-      system("rm tmp2");
-      buff[n-1] = '\0';
-      strcat(scoreboardString, buff);
-      strcat(scoreboardString, " ");
-      sprintf(num, "%d", scoreboard[i]->itemsDelivered);
-      strcat(scoreboardString, num);
-      strcat(scoreboardString, "\n");
-      printf("Operazione su %d %s\n",scoreboard[i]->clientsd,scoreboardString);
+      sprintf("%s\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
     }
-
-    i++;
+    i--;
   }
 }
 
 void copyStruct(struct player *a, struct player *temp){
+  memset(temp->username,'\0',sizeof(temp->username));
   temp->x = a->x;
   temp->y = a->y;
   temp->hasItem = a->hasItem;
@@ -790,6 +768,7 @@ void copyStruct(struct player *a, struct player *temp){
   temp->pack = a->pack;
   temp->obstacles = a->obstacles;
   temp->clientsd = a->clientsd;
+  strcpy(temp->username,a->username);
 }
 
 
