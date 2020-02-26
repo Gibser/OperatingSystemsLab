@@ -176,6 +176,8 @@ void game(int clientsd,char *username){
     char command;
     struct player infoplayer;
     int isLogged=1;
+    char playerLetter;
+
     while(isLogged){
       if(!gameStarted){
         pthread_mutex_lock(&editMatrix);
@@ -187,6 +189,9 @@ void game(int clientsd,char *username){
       pthread_mutex_lock(&editMatrix);
       spawnPlayer(clientsd,&infoplayer,username);
       pthread_mutex_unlock(&editMatrix);
+
+      playerLetter = getLetter(clientsd);
+      write(clientsd, &playerLetter, 1);
 
       printf("Giocatore %c\n", getLetter(clientsd));
       printf("Fine Spawn\n");
@@ -618,7 +623,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
     }
     else
     {
-      strcpy(info,"Inventario pieno.");
+      strcpy(info,"Inventario pieno.\n");
     }
   }
   else if(msg=='e'||msg=='E'){

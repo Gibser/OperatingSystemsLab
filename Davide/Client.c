@@ -38,6 +38,10 @@ struct config{
     char ip[28];
     char hostname[100];
 };
+
+char playerLetter;
+int gameFinished = 0;
+
 void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
 void homeClient(int server_sd);//aveva server_sd
@@ -61,7 +65,9 @@ void printRow(char *buff){
     //printf("| ");
     printf(RED"|"RST" ");
     for(int i = 0; i < strlen(buff); i++){
-        if(buff[i]>='A'&&buff[i]<='H')
+        if(buff[i] == playerLetter)
+            printf(ANSI_COLOR_YELLOW"%c"ANSI_COLOR_RESET" ", buff[i]);
+        else if(buff[i]>='A'&&buff[i]<='H')
             printf(BLU"%c"RST" ",buff[i]);
         else
             printf("%c ", buff[i]);
@@ -93,6 +99,7 @@ void printMap(int server_sd){
     read(server_sd, &cols, sizeof(int));
     if(rows>0&&cols>0){
         //printf("Righe: %d Colonne: %d\n",rows,cols);
+        printf("Lettera giocatore: %c\n\n", playerLetter);
         printf("  ");
         for(int i = 0; i < cols; i++)
             printf(ANSI_COLOR_RED"_"ANSI_COLOR_RESET" ");
@@ -111,11 +118,19 @@ void printMap(int server_sd){
 
         printf("\n\n");
     }
+    else{
+        gameFinished = 1;
+    }
     
 }
 
 char firstChar(char *buffer){
     return buffer[0];
+}
+
+void clearBuffer(){
+    char c;
+    while ((c = getchar()) != '\n' && c != EOF) { };
 }
 
 void game(int server_sd){
@@ -124,6 +139,7 @@ void game(int server_sd){
     char row[16];
     int rows;
     int cols;
+    read(server_sd, &playerLetter, 1);
     while(1){
         system("clear");
         //receiveMessage(server_sd);//Scoreboard
@@ -132,9 +148,17 @@ void game(int server_sd){
         printf("Comando: ");
         //scanf(" %c",&msg);
         //fgets(buffer, sizeof(buffer), stdin);  //PEPPE NON ASPETTA INPUTPUNZ
+        clearBuffer();
         scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
+        if(gameFinished){
+            read(server_sd, &playerLetter, 1);
+            gameFinished = 0;
+        }
+            
+        
+       
     }
 }
 
