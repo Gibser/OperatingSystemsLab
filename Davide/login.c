@@ -139,7 +139,7 @@ void logUser(char* username, int clientsd, pthread_mutex_t login){
 	//converto clientsd in stringa
 	snprintf(sd, 10, "%d", clientsd);
 
-	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0777);
+	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0666);
 	if(fd < 0){
 		perror("Errore apertura file utenti loggati.");
 		exit(1);

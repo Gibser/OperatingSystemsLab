@@ -43,3 +43,12 @@
 	-Socket successfully created
 	-Socket successfully binded
 	-Server Listening...
+[Wed Feb 26 15:00:43 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+	[] New connection from 93.48.253.171
+	[] New connection from 127.0.0.1
+	[] New connection from 127.0.0.1
+	[] New connection from 93.48.253.171

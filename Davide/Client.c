@@ -13,23 +13,15 @@
 #include <signal.h>
 #define MAX 1000 
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-#define ANSI_COLOR_WHITE   "\x1b[37m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-#define BLK "\e[0;30m"
-#define RED "\e[0;31m"
-#define GRN "\e[0;32m"
-#define YEL "\e[0;33m"
-#define BLU "\e[0;34m"
-#define MAG "\e[0;35m"
-#define CYN "\e[0;36m"
-#define WHT "\e[0;37m"
-#define RST "\e[0m"
+#define RED     "\x1b[31m"
+#define GREEN   "\x1b[32m"
+#define YELLOW  "\x1b[33m"
+#define BLUE    "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN    "\x1b[36m"
+#define WHITE   "\x1b[37m"
+#define RST   "\x1b[0m"
+#define BRIGHT_CYAN "\x1b[96m"
 
 extern int errno;
 int userStatus=0; //0 Menu 1 login 2 sign up
@@ -66,9 +58,13 @@ void printRow(char *buff){
     printf(RED"|"RST" ");
     for(int i = 0; i < strlen(buff); i++){
         if(buff[i] == playerLetter)
-            printf(ANSI_COLOR_YELLOW"%c"ANSI_COLOR_RESET" ", buff[i]);
+            printf(YELLOW"%c"RST" ", buff[i]);
+        else if(buff[i] == 'x')
+            printf(GREEN"%c"RST" ", buff[i]);
+        else if(buff[i]>='1'&&buff[i]<='9')
+            printf(BRIGHT_CYAN"%c"RST" ", buff[i]);
         else if(buff[i]>='A'&&buff[i]<='H')
-            printf(BLU"%c"RST" ",buff[i]);
+            printf(BLUE"%c"RST" ",buff[i]);
         else
             printf("%c ", buff[i]);
     }
@@ -86,7 +82,7 @@ void receiveMessage(int server_sd){
         read(server_sd, buffer, n_bytes);
         buffer[n_bytes] = '\0';
         //write(STDOUT_FILENO, buffer, n_bytes);
-        printf(GRN"%s"RST,buffer);
+        printf(GREEN"%s"RST,buffer);
     }
 
 }
@@ -102,7 +98,7 @@ void printMap(int server_sd){
         printf("Lettera giocatore: %c\n\n", playerLetter);
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf(ANSI_COLOR_RED"_"ANSI_COLOR_RESET" ");
+            printf(RED"_"RST" ");
             //printf("_ ");
         printf("\n");
         for(int i = 0; i < rows; i++){
@@ -113,7 +109,7 @@ void printMap(int server_sd){
 
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf(ANSI_COLOR_RED"─"ANSI_COLOR_RESET" ");
+            printf(RED"─"RST" ");
             //printf("─ ");
 
         printf("\n\n");

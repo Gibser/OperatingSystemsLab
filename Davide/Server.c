@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <signal.h>
 #include "login.h"
 #include "gameLib.h"
 #define MAX 1000
@@ -91,7 +92,11 @@ void writeLog_NewConnection(char *ip);
 void writeLog_GameOver(struct player *winner);
 void writeLog_JoinGame(char *user);
 void writeLog_QuitGame(char *user);
+void writeLog_serverAbort();
+
 void initCell(int i, int j);
+void selectionSort(struct player *arr[], int n);
+int partiziona(struct player* a[], int low, int high);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -146,7 +151,7 @@ void *mapGenerator(void* args){
       printf("\n\n");
       //printMatrix(rows, cols, map);
       createMap(&info_map, rows, cols, map);
-      MAX_ITEMS=info_map.n_items/2;
+      MAX_ITEMS = (info_map.n_items / MAX_USERS) + 1;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
@@ -155,10 +160,16 @@ void *mapGenerator(void* args){
           break;
         sleep(1);
       }
+      printf("\nCreo scoreboard...\n");
       createScoreboard();
+      printf("\n\n--------------------------\n\n");
+      printf("\n\nScoreboard creata\n\n");
       //memset(msg,'\0',sizeof(msg));
       winner=getWinnerStruct();
+      printf("\n\nVincitore ottenuto\n\n");
       writeLog_GameOver(winner);
+      printf("\n\nLog aggiornato\n\n");
+      printf("\n\n---------------------------\n\n");
       /*memset(msg,'\0',sizeof(msg));
       sprintf(msg,"\t-GAME OVER: Winner is %s with %d items delivered.\n",winner->username,winner->itemsDelivered);
       writeLog(msg,1);*/
@@ -197,10 +208,10 @@ void game(int clientsd,char *username){
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
-        printf("\n\nValore nullStruct sd: %d\n\n", nullStruct->clientsd);
+        //printf("\n\nValore nullStruct sd: %d\n\n", nullStruct->clientsd);
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
-          printf("Valore gameStarted: %d\n", gameStarted);
+          //printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
           if(getLetter(clientsd) == '0') break;
           if(read(clientsd, &command, sizeof(command))>0){
@@ -220,7 +231,7 @@ void game(int clientsd,char *username){
         write(clientsd,&(int){0},sizeof(int));
         write(clientsd,&(int){0},sizeof(int));
         sendMessage(clientsd,scoreboardString);
-        
+
         if(read(clientsd,&command,1) <= 0){
           initCell(infoplayer.x, infoplayer.y);
           gameLogout(clientsd);
@@ -254,10 +265,19 @@ void *clientThread(void *sockfd)
 }
 
 
+void serverAbort(){
+  printf("\nChiusura server...\n");
+  system("rm logged_users");
+  //system("touch logged_users");
+  writeLog_serverAbort();
+  exit(0);
+}
+
 // Driver function 
 int main() 
-{ 
-   
+{   
+    system("touch logged_users");
+    signal(SIGINT, serverAbort);
     int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
     void *result;
@@ -522,7 +542,7 @@ void matrixToString(char *info, int clientsd,int *obstacles){
     memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
-        printf("parsing %c\n", getLetter(map[i][j].playerSD));
+        //printf("parsing %c\n", getLetter(map[i][j].playerSD));
         msg[j] = getLetter(map[i][j].playerSD);
       }
       else if(map[i][j].isObstacle){
@@ -576,10 +596,10 @@ void initGame(){
 void movement(struct player *info_player, int add_x, int add_y){
       int id;
       struct obstacles *a;
-      printf("x: %d y: %d\n", info_player->x, info_player->y);
+      //printf("x: %d y: %d\n", info_player->x, info_player->y);
       if(isCellNotSolid(map[(info_player->x)+add_x][info_player->y+add_y])){
         changeCoordinates(info_player, add_x, add_y);
-        printf("x: %d y: %d\n", info_player->x, info_player->y);
+        //printf("x: %d y: %d\n", info_player->x, info_player->y);
       }
       else if(map[(info_player->x)+add_x][info_player->y+add_y].isObstacle){
         a=(struct obstacles*)map[(info_player->x)+add_x][info_player->y+add_y].pointer;
@@ -642,6 +662,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
       //sprintf(log,"\t-%s delivered an item to warehouse n.%d\n",info_player->username,info_player->pack->warehouse);
       info_player->pack=NULL;
       strcpy(info,"Oggetto consegnato.\n");
+      
       //writeLog(log,1);
     }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
@@ -778,19 +799,21 @@ void gameLogout(int clientsd){
 }
 
 void createScoreboard(){
-  int i = MAX_USERS-1;
+  int i = 0; //MAX_USERS-1;
   int n;
   char buffer[100];
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
   strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI\n");
   quicksort(scoreboard, 0, MAX_USERS-1);
-  while(i>=0){
+  //selectionSort(scoreboard, MAX_USERS);
+  printf("Sorting done\n");
+  while(i < MAX_USERS){
     memset(buffer,'\0',sizeof(buffer));
     if(scoreboard[i]->clientsd >= 0){
       sprintf(buffer,"%s\t\t\t\t%d\n",scoreboard[i]->username,scoreboard[i]->itemsDelivered);
       strcat(scoreboardString,buffer);
     }
-    i--;
+    i++;
   }
 }
 
@@ -821,30 +844,55 @@ void swapStruct(struct player *a, struct player *b){
   free(temp);
 }
 
-void quicksort(struct player* a[MAX_USERS], int first, int last){
-   int i, j, pivot, temp;
-/*pivot -- inizialmente il pivot è il first elemento
-first e last sono le due variabili che servono per scorrere l'array
-*/
-   if(first<last){
-      pivot=first;
-      i=first;
-      j=last;     
-      
-      while(i<j){
-         while(a[i]->itemsDelivered <= a[pivot]->itemsDelivered && i < last)
-            i++;
-         while(a[j]->itemsDelivered > a[pivot]->itemsDelivered)
-            j--;
-         if(i<j){   
-            swapStructAddr(a[i], a[j]);
-         }
-      }
 
-      swapStructAddr(a[pivot], a[j]);
-      quicksort(a, first, j-1);
-      quicksort(a, j+1, last);
-   }
+void selectionSort(struct player *arr[], int n)  
+{  
+    int i, j, min_idx;  
+  
+    // One by one move boundary of unsorted subarray  
+    for (i = 0; i < n-1; i++)  
+    {  
+        // Find the minimum element in unsorted array  
+        min_idx = i;  
+        for (j = i+1; j < n; j++)  
+        if (arr[j]->itemsDelivered < arr[min_idx]->itemsDelivered)  
+            min_idx = j;  
+  
+        // Swap the found minimum element with the first element  
+        swapStructAddr(arr[min_idx], arr[i]);  
+    }  
+}  
+
+
+int partiziona(struct player* a[], int low, int high){
+  int pivot = a[high]->itemsDelivered;
+  int i = (low - 1);
+  for(int j = low; j <= high- 1; j++){
+    if (a[j]->itemsDelivered < pivot)
+        {
+            i++;    // increment index of smaller element
+            swapStructAddr(a[i], a[j]);
+        }
+    }
+    swapStructAddr(a[i + 1], a[high]);
+    return (i + 1);
+  }
+
+
+
+
+
+void quicksort(struct player* a[MAX_USERS], int low, int high){
+    int pi;
+    if (low < high)
+    {
+        /* pi is partitioning index, arr[pi] is now
+           at right place */
+        pi = partiziona(a, low, high);
+
+        quicksort(a, low, pi - 1);  // Before pi
+        quicksort(a, pi + 1, high); // After pi
+    }
 }
 
 void initNullStruct(){
@@ -892,6 +940,21 @@ void writeLog_GameOver(struct player *winner){
     sprintf(msg,"\t-[%s] GAME OVER: No winner.\n",str);
   writeLog(msg,1);
 }
+
+void writeLog_serverAbort(){
+  char str[30];
+  char msg[200];
+  time_t connTime;
+  struct tm *infoTime;
+  memset(str,'\0',sizeof(str));
+  time(&connTime);
+  infoTime=gmtime(&connTime);
+  strftime(str,sizeof(str),"%c",infoTime);
+  
+  sprintf(msg,"[%s]Server closed.\n",str);
+  writeLog(msg,1);
+}
+
 
 void writeLog_ItemDelivered(struct player *info){
   char str[30];
@@ -959,7 +1022,7 @@ char * getUTCString(){
 }
 
 struct player* getWinnerStruct(){
-  int i=MAX_USERS-1;
+  /*int i=MAX_USERS-1;
   while(i>=0){
     if(scoreboard[i]->clientsd>=0){
       return scoreboard[i];
@@ -967,6 +1030,8 @@ struct player* getWinnerStruct(){
     i--;
   }
   return NULL;
+  */
+ return scoreboard[0];
 }
 
 void initCell(int i, int j){
