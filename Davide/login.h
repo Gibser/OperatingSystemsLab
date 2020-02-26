@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
-#define MAX_USERS 2
+#define MAX_USERS 8
 
 
 int tmpCommand(char* cmd);

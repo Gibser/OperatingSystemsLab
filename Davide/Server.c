@@ -91,7 +91,7 @@ void writeLog_NewConnection(char *ip);
 void writeLog_GameOver(struct player *winner);
 void writeLog_JoinGame(char *user);
 void writeLog_QuitGame(char *user);
-
+void initCell(int i, int j);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -197,6 +197,7 @@ void game(int clientsd,char *username){
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
+        printf("\n\nValore nullStruct sd: %d\n\n", nullStruct->clientsd);
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
           printf("Valore gameStarted: %d\n", gameStarted);
@@ -207,6 +208,7 @@ void game(int clientsd,char *username){
               checkCommand(command, &infoplayer,info);
           }
           else{
+              initCell(infoplayer.x, infoplayer.y);
               gameLogout(clientsd);
               isLogged=0;
               writeLog_QuitGame(username);
@@ -218,7 +220,14 @@ void game(int clientsd,char *username){
         write(clientsd,&(int){0},sizeof(int));
         write(clientsd,&(int){0},sizeof(int));
         sendMessage(clientsd,scoreboardString);
-        read(clientsd,&command,1);
+        
+        if(read(clientsd,&command,1) <= 0){
+          initCell(infoplayer.x, infoplayer.y);
+          gameLogout(clientsd);
+          isLogged=0;
+          writeLog_QuitGame(username);
+        }
+
       }
       
     }
@@ -398,9 +407,7 @@ void logoutStructs(int clientsd){
   int i;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==clientsd){
-      //pthread_mutex_lock(&editMapPlayers); //cappadavide 
       mapPlayers[i]=-1;
-      //pthread_mutex_unlock(&editMapPlayers);//cappadavide
     }
     if(scoreboard[i]->clientsd == clientsd){
       scoreboard[i]=nullStruct;
@@ -799,6 +806,12 @@ void copyStruct(struct player *a, struct player *temp){
   strcpy(temp->username,a->username);
 }
 
+void swapStructAddr(struct player *a, struct player *b){
+  struct player *temp;
+  temp = a;
+  a = b;
+  b = temp;
+}
 
 void swapStruct(struct player *a, struct player *b){
   struct player *temp = (struct player *)malloc(sizeof(struct player));
@@ -824,11 +837,11 @@ first e last sono le due variabili che servono per scorrere l'array
          while(a[j]->itemsDelivered > a[pivot]->itemsDelivered)
             j--;
          if(i<j){   
-            swapStruct(a[i], a[j]);
+            swapStructAddr(a[i], a[j]);
          }
       }
 
-      swapStruct(a[pivot], a[j]);
+      swapStructAddr(a[pivot], a[j]);
       quicksort(a, first, j-1);
       quicksort(a, j+1, last);
    }
@@ -954,4 +967,12 @@ struct player* getWinnerStruct(){
     i--;
   }
   return NULL;
+}
+
+void initCell(int i, int j){
+  map[i][j].isObstacle=0;
+  map[i][j].isWareHouse=0;
+  map[i][j].playerSD=-1; 
+  map[i][j].object=' ';
+  map[i][j].pointer=NULL;
 }
