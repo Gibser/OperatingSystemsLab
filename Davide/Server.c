@@ -582,8 +582,6 @@ void matrixToString(char *info, int clientsd,int *obstacles){
     i++;
   }
   sendMessage(clientsd,info);
-  printf("Fine matrix\n");
-
 
 }
 
