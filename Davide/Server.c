@@ -219,7 +219,8 @@ void game(int clientsd,char *username){
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
-        //printf("\n\nValore nullStruct sd: %d\n\n", nullStruct->clientsd);
+          if(infoplayer.clientsd==-1)
+            break;
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
           //printf("Valore gameStarted: %d\n", gameStarted);
@@ -227,7 +228,7 @@ void game(int clientsd,char *username){
           if(getLetter(clientsd) == '0') break;
           if(read(clientsd, &command, sizeof(command))>0){
             if(getLetter(clientsd) == '0') break;
-              checkCommand(command, &infoplayer,info);
+            checkCommand(command, &infoplayer,info);
           }
           else{
               if(infoplayer.hasItem)
@@ -244,11 +245,12 @@ void game(int clientsd,char *username){
           }
       }
       if(isLogged){
-        printf("classifica \n%s\n",scoreboardString);
-        write(clientsd,&(int){0},sizeof(int));
-        write(clientsd,&(int){0},sizeof(int));
-        sendMessage(clientsd,scoreboardString);
-
+        if(infoplayer.clientsd>=0){
+          printf("classifica \n%s\n",scoreboardString);
+          write(clientsd,&(int){0},sizeof(int));
+          write(clientsd,&(int){0},sizeof(int));
+          sendMessage(clientsd,scoreboardString);
+        }
         if(read(clientsd,&command,1) <= 0){
           if(infoplayer.hasItem)
             dropItem(&infoplayer);
@@ -716,6 +718,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
       write(info_player->clientsd, &(int){0}, sizeof(int));
       sendMessage(info_player->clientsd,info);
       close(info_player->clientsd);
+      info_player->clientsd=-1;
   }
   else
     checkMovement(msg, info_player,info);
