@@ -247,7 +247,8 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 		extractUsername(buffer,username);
 		extractPassword(buffer,password);
 		if(!usernameCheck(username)){
-			write(clientsd, "~USREXISTS", 10); //Username già esistente
+			//write(clientsd, "~USREXISTS", 10); //Username già esistente
+			sendSignal(clientsd, "~USREXISTS");
 			return 0;
 		}
 		int fd;
@@ -265,7 +266,8 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 			exit(1);
 		}
 		pthread_mutex_unlock(&lock);
-		write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
+		//write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
+		sendSignal(clientsd, "~SIGNUPOK");
 		return 1;
 	}
 	else{
