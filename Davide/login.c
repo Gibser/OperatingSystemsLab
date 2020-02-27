@@ -8,6 +8,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
 #include "login.h"
 
 
@@ -59,7 +60,6 @@ void logout(int clientsd){
 
 int tmpCommand(char* cmd, char* fileName){
 	int fd;
-	strcat("./", fileName);
 	if((fd = open(fileName, O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
 		perror("Errore creazione file tmp");
 		exit(1);
@@ -102,8 +102,8 @@ void extractPassword(char *buffer, char *password){
 
 int usernameCheck(char* username){	
 	pthread_t currentTid = pthread_self();
-	char stringTid[20];
-	char removeString[50];
+	char stringTid[100];
+	char removeString[150];
 	//conto il numero di utenti con il nome inserito
 	char cmd[100] = "echo $(cat users | grep -c \"";
 	strcat(cmd, username);
