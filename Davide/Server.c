@@ -691,13 +691,6 @@ void checkCommand(char msg, struct player *info_player,char *info){
       }
       //writeLog(log,1);
     }
-    else if(msg=='q'||msg=='Q'){
-      strcpy(info,"Sei uscito dal gioco.\n");
-      write(info_player->clientsd, &(int){0}, sizeof(int));
-      write(info_player->clientsd, &(int){0}, sizeof(int));
-      sendMessage(info_player->clientsd,info);
-      close(info_player->clientsd);
-    }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.\n");
     else if(info_player->hasItem && !isWarehouseHere(info_player))
@@ -716,6 +709,13 @@ void checkCommand(char msg, struct player *info_player,char *info){
   }
   else if(msg=='h'||msg=='H'){
     snprintf(info,238,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n");
+  }
+  else if(msg=='q'||msg=='Q'){
+      strcpy(info,"Sei uscito dal gioco.\n");
+      write(info_player->clientsd, &(int){0}, sizeof(int));
+      write(info_player->clientsd, &(int){0}, sizeof(int));
+      sendMessage(info_player->clientsd,info);
+      close(info_player->clientsd);
   }
   else
     checkMovement(msg, info_player,info);
@@ -1067,7 +1067,7 @@ char * getUTCString(){
 
 }
 void dropItem(struct player *info){
-  if(map[info->x][info->y].object!=' ')
+  if(map[info->x][info->y].object==' ')
     dropInPosition(info,0,0);
   else if(isLeftFree(info->x,info->y))
     dropInPosition(info,0,-1);
