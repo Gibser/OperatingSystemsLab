@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "signal.h": "c",
+        "login.h": "c",
+        "gamelib.h": "c"
+    }
+}

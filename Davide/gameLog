@@ -1859,3 +1859,159 @@
 	-[Thu Feb 27 14:51:17 2020] GAME OVER: Winner is  with 0 items delivered.
 [Thu Feb 27 14:51:17 2020]Starting new game session...
 [Thu Feb 27 15:02:34 2020]Server closed.
+[Thu Feb 27 17:21:18 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:21:18 2020]Starting new game session...
+	-[Thu Feb 27 17:21:22 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 17:21:24 2020] pinco has joined the game!
+	-[Thu Feb 27 17:21:41 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:21:43 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:22:16 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:22:24 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:22:24 2020] GAME OVER: Winner is pinco with 0 items delivered.
+[Thu Feb 27 17:22:24 2020]Starting new game session...
+	-[Thu Feb 27 17:22:28 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:22:39 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:22:49 2020] New connection from 127.0.0.1
+[Thu Feb 27 17:22:51 2020]Server closed.
+[Thu Feb 27 17:23:04 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:23:04 2020]Starting new game session...
+	-[Thu Feb 27 17:23:10 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:23:14 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:23:16 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 17:23:18 2020] pinco has joined the game!
+	-[Thu Feb 27 17:23:36 2020] pinco has left the game.
+	-[Thu Feb 27 17:24:03 2020] giuseppe has left the game.
+[Thu Feb 27 17:24:10 2020]Server closed.
+[Thu Feb 27 17:25:59 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:25:59 2020]Starting new game session...
+	-[Thu Feb 27 17:26:07 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:26:08 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 17:26:10 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:26:10 2020] pinco has joined the game!
+	-[Thu Feb 27 17:26:16 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:26:32 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:26:34 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:26:48 2020] pinco has left the game.
+	-[Thu Feb 27 17:26:56 2020] giuseppe delivered an item to warehouse n.1
+	-[Thu Feb 27 17:27:01 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 17:27:04 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:27:04 2020] pinco has joined the game!
+	-[Thu Feb 27 17:27:10 2020] GAME OVER: Winner is pinco with 0 items delivered.
+[Thu Feb 27 17:27:10 2020]Starting new game session...
+	-[Thu Feb 27 17:27:13 2020] pinco has left the game.
+	-[Thu Feb 27 17:27:14 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:27:16 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:27:31 2020] giuseppe has left the game.
+[Thu Feb 27 17:27:47 2020]Server closed.
+[Thu Feb 27 17:46:40 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:46:40 2020]Starting new game session...
+	-[Thu Feb 27 17:46:49 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:46:55 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:46:58 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:47:11 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:47:15 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:47:16 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:47:56 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 17:47:56 2020]Starting new game session...
+[Thu Feb 27 17:48:00 2020]Server closed.
+[Thu Feb 27 17:49:59 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:49:59 2020]Starting new game session...
+	-[Thu Feb 27 17:50:36 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:50:38 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:50:40 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:50:47 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:50:50 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:50:52 2020] giuseppe has left the game.
+[Thu Feb 27 17:50:59 2020]Server closed.
+[Thu Feb 27 17:53:32 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:53:32 2020]Starting new game session...
+	-[Thu Feb 27 17:53:58 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:54:01 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:54:03 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:54:13 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:54:15 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:54:20 2020] giuseppe has left the game.
+[Thu Feb 27 17:54:47 2020]Server closed.
+[Thu Feb 27 17:54:53 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:54:53 2020]Starting new game session...
+	-[Thu Feb 27 17:54:57 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:55:00 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:55:06 2020] giuseppe has left the game.
+	-[Thu Feb 27 17:56:00 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 17:56:00 2020]Starting new game session...
+[Thu Feb 27 17:59:38 2020]Server closed.
+[Thu Feb 27 17:59:41 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 17:59:41 2020]Starting new game session...
+	-[Thu Feb 27 17:59:46 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 17:59:53 2020] giuseppe has joined the game!
+	-[Thu Feb 27 17:59:59 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:00:32 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:00:38 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:00:41 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:00:53 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:00:53 2020]Starting new game session...
+	-[Thu Feb 27 18:02:03 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:02:06 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:02:08 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:03:06 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:03:06 2020]Starting new game session...
+	-[Thu Feb 27 18:05:41 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:05:43 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:05:44 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:06:25 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:06:28 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:06:33 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:06:43 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:06:43 2020]Starting new game session...
+	-[Thu Feb 27 18:08:57 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:08:59 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:09:00 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:09:12 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:09:19 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:09:33 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:09:59 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:09:59 2020]Starting new game session...
+	-[Thu Feb 27 18:10:55 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 18:10:58 2020] giuseppe has joined the game!
+	-[Thu Feb 27 18:11:58 2020] GAME OVER: Winner is giuseppe with 0 items delivered.
+[Thu Feb 27 18:11:58 2020]Starting new game session...
+	-[Thu Feb 27 18:12:58 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:12:58 2020]Starting new game session...
+	-[Thu Feb 27 18:13:58 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:13:58 2020]Starting new game session...
+	-[Thu Feb 27 18:14:00 2020] giuseppe has left the game.
+	-[Thu Feb 27 18:14:58 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 18:14:58 2020]Starting new game session...
+	-[Thu Feb 27 18:26:03 2020] New connection from 10.0.2.2

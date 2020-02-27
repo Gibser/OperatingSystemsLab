@@ -99,6 +99,7 @@ void selectionSort(struct player *arr[], int n);
 int partiziona(struct player* a[], int low, int high);
 void dropInPosition(struct player *info, int add_x,int add_y);
 void printScoreboard();
+void buildLoggedUsersString(char *loggedUsersString);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -192,7 +193,7 @@ void *mapGenerator(void* args){
 // Game Function
 void game(int clientsd,char *username){
     //printf("Username client %s\n",username);
-    char info[250]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto.\n";
+    char info[350]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto.\n";
     char command;
     struct player infoplayer;
     int isLogged=1;
@@ -252,6 +253,7 @@ void game(int clientsd,char *username){
           sendMessage(clientsd,scoreboardString);
         }
         if(read(clientsd,&command,1) <= 0){
+          printf("\n\nClient disconnesso...\n\n");
           if(infoplayer.hasItem)
             dropItem(&infoplayer);
           else
@@ -652,6 +654,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
   //int clientsd=map[info_player->x][info_player->y].playerSD;
   int n;
   char obj;
+  char loggedUsers[300];
   //char log[100];
   if(msg == 't' || msg == 'T'){
     sprintf(info, "Tempo rimanente: %d secondi\n", gameTime);
@@ -719,6 +722,10 @@ void checkCommand(char msg, struct player *info_player,char *info){
       sendMessage(info_player->clientsd,info);
       close(info_player->clientsd);
       info_player->clientsd=-1;
+  }
+  else if(msg=='u'||msg=='U'){
+    buildLoggedUsersString(loggedUsers);
+    strcpy(info, loggedUsers);
   }
   else
     checkMovement(msg, info_player,info);
@@ -1108,4 +1115,33 @@ void dropInPosition(struct player *info, int add_x,int add_y){
   map[info->x+add_x][info->y+add_y].object=info->pack->object;
   map[info->x+add_x][info->y+add_y].pointer=(void*)info->pack;
   pthread_mutex_unlock(&editMatrix);
+}
+
+void buildLoggedUsersString(char *loggedUsersString){
+  int fd;
+  int i = 0;
+  memset(loggedUsersString, '\0', sizeof(loggedUsersString));
+  if((fd = open("logged_users", O_RDONLY)) < 0){
+    perror("Errore apertura file logged_users.");
+    exit(1);
+  }
+
+  char buff;
+  while(read(fd, &buff, 1) == 1){
+    if(buff != ' ')
+      loggedUsersString[i++] = buff;
+    else{
+
+      loggedUsersString[i++] = ' ';
+      loggedUsersString[i++] = '-';
+      loggedUsersString[i++] = ' ';
+
+      while(read(fd, &buff, 1) == 1){
+        if(buff == '\n')
+          break;
+      }
+    }
+  }
+
+  close(fd);
 }

@@ -84,7 +84,16 @@ void receiveMessage(int server_sd){
         buffer[n_bytes] = '\0';
         //write(STDOUT_FILENO, buffer, n_bytes);
         printf(GREEN"%s"RST,buffer);
+        if(strstr(buffer, "uscito") != NULL)
+            printf("Premi un tasto per chiudere il gioco: ");
+        else
+            printf("Comando: ");
+        
     }
+    else
+        printf("Comando: ");
+    
+    
 
 }
 
@@ -152,14 +161,15 @@ void game(int server_sd){
         //receiveMessage(server_sd);//Scoreboard
         printMap(server_sd);
         receiveMessage(server_sd);//Info
-        printf("Comando: ");
+        //printf("Comando: ");
         clearBuffer();
         scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
         if(gameFinished){
-            if(read(server_sd, &playerLetter, 1)<0)
+            if(read(server_sd, &playerLetter, 1)<=0){
                 break;
+            }
             gameFinished = 0;
         }
             
