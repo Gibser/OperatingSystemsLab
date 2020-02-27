@@ -49,9 +49,10 @@ void logout(int clientsd){
 }
 
 
-int tmpCommand(char* cmd){
+int tmpCommand(char* cmd, char* fileName){
 	int fd;
-	if((fd = open("./tmp", O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
+	strcat("./", fileName);
+	if((fd = open(fileName, O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
 		perror("Errore creazione file tmp");
 		exit(1);
 	}
@@ -92,11 +93,17 @@ void extractPassword(char *buffer, char *password){
 }
 
 int usernameCheck(char* username){	
+	pthread_t currentTid = pthread_self();
+	char stringTid[20];
+	char removeString[50];
 	//conto il numero di utenti con il nome inserito
 	char cmd[100] = "echo $(cat users | grep -c \"";
 	strcat(cmd, username);
-	strcat(cmd, " \") > tmp");
-	int fd = tmpCommand(cmd);
+
+	sprintf(stringTid, "tmp%ld", currentTid);
+	strcat(cmd, " \") > ");
+	strcat(cmd, stringTid);
+	int fd = tmpCommand(cmd, stringTid);
 
 	//controllo il numero restituito da grep
 	int n_users;
@@ -105,7 +112,8 @@ int usernameCheck(char* username){
 	
 	n_users = atoi(&buff);
 	close(fd);
-	system("rm tmp");
+	sprintf(removeString, "rm %s", stringTid);
+	system(removeString);
 
 	if(n_users == 1)
 		return 0;

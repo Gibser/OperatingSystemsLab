@@ -10,7 +10,7 @@
 #define MAX_USERS 8
 
 
-int tmpCommand(char* cmd);
+int tmpCommand(char* cmd, char* fileName);
 void extractUsername(char *buffer,char* username);
 void extractPassword(char *buffer, char* password);
 int usernameCheck(char* username);

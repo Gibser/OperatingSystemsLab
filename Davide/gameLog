@@ -1665,3 +1665,59 @@
 	-[Thu Feb 27 12:25:46 2020] pietro has joined the game!
 	-[Thu Feb 27 12:25:49 2020] pietro has left the game.
 [Thu Feb 27 12:25:52 2020]Server closed.
+[Thu Feb 27 12:29:25 2020]Turning on the server...
+	-Mutex initialized
+	-Socket successfully created
+	-Socket successfully binded
+	-Server Listening...
+[Thu Feb 27 12:29:25 2020]Starting new game session...
+	-[Thu Feb 27 12:29:27 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 12:29:37 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 12:29:47 2020] peppe has joined the game!
+	-[Thu Feb 27 12:29:48 2020] peppe has left the game.
+	-[Thu Feb 27 12:29:57 2020] pinco2 has joined the game!
+	-[Thu Feb 27 12:30:06 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 12:30:16 2020] pinco2 has left the game.
+	-[Thu Feb 27 12:30:20 2020] dio has joined the game!
+	-[Thu Feb 27 12:30:21 2020] dio has left the game.
+	-[Thu Feb 27 12:30:25 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:30:25 2020]Starting new game session...
+	-[Thu Feb 27 12:30:31 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 12:30:52 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 12:30:58 2020] dioo has joined the game!
+	-[Thu Feb 27 12:30:59 2020] dioo has left the game.
+	-[Thu Feb 27 12:31:08 2020] New connection from 10.0.2.2
+	-[Thu Feb 27 12:31:25 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:31:25 2020]Starting new game session...
+	-[Thu Feb 27 12:31:48 2020] New connection from 127.0.0.1
+	-[Thu Feb 27 12:32:11 2020] giuseppe has joined the game!
+	-[Thu Feb 27 12:32:11 2020] dio has joined the game!
+	-[Thu Feb 27 12:32:13 2020] dio has left the game.
+	-[Thu Feb 27 12:32:26 2020] GAME OVER: Winner is giuseppe with 0 items delivered.
+[Thu Feb 27 12:32:26 2020]Starting new game session...
+	-[Thu Feb 27 12:32:51 2020] giuseppe has left the game.
+	-[Thu Feb 27 12:33:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:33:26 2020]Starting new game session...
+	-[Thu Feb 27 12:34:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:34:26 2020]Starting new game session...
+	-[Thu Feb 27 12:35:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:35:26 2020]Starting new game session...
+	-[Thu Feb 27 12:36:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:36:26 2020]Starting new game session...
+	-[Thu Feb 27 12:37:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:37:26 2020]Starting new game session...
+	-[Thu Feb 27 12:38:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:38:26 2020]Starting new game session...
+	-[Thu Feb 27 12:39:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:39:26 2020]Starting new game session...
+	-[Thu Feb 27 12:40:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:40:26 2020]Starting new game session...
+	-[Thu Feb 27 12:41:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:41:26 2020]Starting new game session...
+	-[Thu Feb 27 12:42:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:42:26 2020]Starting new game session...
+	-[Thu Feb 27 12:43:26 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:43:26 2020]Starting new game session...
+	-[Thu Feb 27 12:44:27 2020] GAME OVER: Winner is  with 0 items delivered.
+[Thu Feb 27 12:44:27 2020]Starting new game session...
+[Thu Feb 27 12:45:11 2020]Server closed.
