@@ -139,7 +139,7 @@ void *mapGenerator(void* args){
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
-      while(!loggedUsersCount);
+      //while(!loggedUsersCount);
       pthread_mutex_lock(&editMatrix);
       
       rows = randNumb();
@@ -152,7 +152,7 @@ void *mapGenerator(void* args){
           printf("Giocatore: %d\n", scoreboard[i]->clientsd);
       }
       createMap(&info_map, rows, cols, map);
-      
+      while(!loggedUsersCount);
       //condizione di vittoria
       if(loggedUsersCount != 0)
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/loggedUsersCount);
