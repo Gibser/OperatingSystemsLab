@@ -134,10 +134,12 @@ void *mapGenerator(void* args){
     while(1){
       maxItemsReached = 0;
       memset(msg,'\0',sizeof(msg));
+      
       timeString=getUTCString();
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
+      while(!loggedUsersCount);
       pthread_mutex_lock(&editMatrix);
       
       rows = randNumb();
@@ -149,8 +151,6 @@ void *mapGenerator(void* args){
         if(scoreboard[i]->clientsd >= 0)
           printf("Giocatore: %d\n", scoreboard[i]->clientsd);
       }
-      printf("Valore clientsd nullStruct: %d\n", nullStruct->clientsd);
-      printf("\n\n");
       createMap(&info_map, rows, cols, map);
       
       //condizione di vittoria
@@ -160,7 +160,7 @@ void *mapGenerator(void* args){
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-
+      
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
@@ -197,7 +197,9 @@ void game(int clientsd,char *username){
     struct player infoplayer;
     int isLogged=1;
     char playerLetter;
-
+    pthread_mutex_lock(&loggedUsersCountMutex);
+    loggedUsersCount++;
+    pthread_mutex_unlock(&loggedUsersCountMutex);
     while(isLogged){
       if(!gameStarted){
         pthread_mutex_lock(&editMatrix);
@@ -272,9 +274,6 @@ void *clientThread(void *sockfd)
         writeLog_JoinGame(username);
         /*sprintf(message,"\t-%s has joined the game!\n",username);
         writeLog(message,1);*/
-        pthread_mutex_lock(&loggedUsersCountMutex);
-        loggedUsersCount++;
-        pthread_mutex_unlock(&loggedUsersCountMutex);
         game(clientsd,username);
     }
 	close(clientsd);
