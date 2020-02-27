@@ -134,14 +134,12 @@ void *mapGenerator(void* args){
     while(1){
       maxItemsReached = 0;
       memset(msg,'\0',sizeof(msg));
-      
       timeString=getUTCString();
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
-      //while(!loggedUsersCount);
       pthread_mutex_lock(&editMatrix);
-      
+      while(!loggedUsersCount);
       rows = randNumb();
       cols = randNumb();
       printf("%d %d\n", rows, cols);
@@ -163,7 +161,7 @@ void *mapGenerator(void* args){
       printMatrix(rows,cols,map);
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
-      while(!loggedUsersCount);
+      
       gameStarted = 1;
       while(gameTime-- > 0){ //era gameTime++ < 60
         if(maxItemsReached==1)
