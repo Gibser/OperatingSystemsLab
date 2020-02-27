@@ -220,6 +220,7 @@ void game(int clientsd,char *username){
       while(1){
         //printf("\n\nValore nullStruct sd: %d\n\n", nullStruct->clientsd);
           matrixToString(info, clientsd,infoplayer.obstacles);
+          printf("\nBoh\n");
           memset(info,'\0',sizeof(info));
           //printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
