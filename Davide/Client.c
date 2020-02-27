@@ -190,6 +190,7 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
+            system("clear");
             homeClient(sockfd);
         }
 } 
@@ -275,6 +276,7 @@ char loginCred(int server_sd){
     char msg[20];
     int n;
     userStatus=1;
+    system("clear");
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -319,7 +321,8 @@ void regCred(int server_sd){
     char creds[200];
     char msg[20];
     int n;
-    userStatus=2;                
+    userStatus=2;       
+    system("clear");         
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));

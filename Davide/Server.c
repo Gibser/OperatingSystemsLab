@@ -93,10 +93,11 @@ void writeLog_GameOver(struct player *winner);
 void writeLog_JoinGame(char *user);
 void writeLog_QuitGame(char *user);
 void writeLog_serverAbort();
-
+void dropItem(struct player *info);
 void initCell(int i, int j);
 void selectionSort(struct player *arr[], int n);
 int partiziona(struct player* a[], int low, int high);
+void dropInPosition(struct player *info, int add_x,int add_y);
 void printScoreboard();
 
 pthread_mutex_t signup_mutex;
@@ -229,7 +230,10 @@ void game(int clientsd,char *username){
               checkCommand(command, &infoplayer,info);
           }
           else{
-              initCell(infoplayer.x, infoplayer.y);
+              if(infoplayer.hasItem)
+                dropItem(&infoplayer);
+              else
+                initCell(infoplayer.x, infoplayer.y);
               gameLogout(clientsd);
               isLogged=0;
               writeLog_QuitGame(username);
@@ -246,7 +250,10 @@ void game(int clientsd,char *username){
         sendMessage(clientsd,scoreboardString);
 
         if(read(clientsd,&command,1) <= 0){
-          initCell(infoplayer.x, infoplayer.y);
+          if(infoplayer.hasItem)
+            dropItem(&infoplayer);
+          else
+            initCell(infoplayer.x, infoplayer.y);
           gameLogout(clientsd);
           isLogged=0;
           writeLog_QuitGame(username);
@@ -684,6 +691,13 @@ void checkCommand(char msg, struct player *info_player,char *info){
       }
       //writeLog(log,1);
     }
+    else if(msg=='q'||msg=='Q'){
+      strcpy(info,"Sei uscito dal gioco.\n");
+      write(info_player->clientsd, &(int){0}, sizeof(int));
+      write(info_player->clientsd, &(int){0}, sizeof(int));
+      sendMessage(info_player->clientsd,info);
+      close(info_player->clientsd);
+    }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.\n");
     else if(info_player->hasItem && !isWarehouseHere(info_player))
@@ -1052,6 +1066,19 @@ char * getUTCString(){
   return str;
 
 }
+void dropItem(struct player *info){
+  if(map[info->x][info->y].object!=' ')
+    dropInPosition(info,0,0);
+  else if(isLeftFree(info->x,info->y))
+    dropInPosition(info,0,-1);
+  else if(isRightFree(info->x,info->y))
+    dropInPosition(info,0,1);
+  else if(isUpFree(info->x,info->y))
+    dropInPosition(info,-1,0);
+  else if(isDownFree(info->x,info->y))
+    dropInPosition(info,1,0);
+  map[info->x][info->y].playerSD=-1;
+}
 
 struct player* getWinnerStruct(){
   /*int i=MAX_USERS-1;
@@ -1071,4 +1098,11 @@ void initCell(int i, int j){
   map[i][j].playerSD=-1; 
   map[i][j].object=' ';
   map[i][j].pointer=NULL;
+}
+
+void dropInPosition(struct player *info, int add_x,int add_y){
+  pthread_mutex_lock(&editMatrix);
+  map[info->x+add_x][info->y+add_y].object=info->pack->object;
+  map[info->x+add_x][info->y+add_y].pointer=(void*)info->pack;
+  pthread_mutex_unlock(&editMatrix);
 }

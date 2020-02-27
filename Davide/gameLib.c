@@ -100,6 +100,7 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       map[r][c].object=items[index];
       i++;
       oggetto->warehouse=idWarehouse;
+      oggetto->object=items[index];
       map[r][c].pointer=(void *)oggetto;
     }
 
