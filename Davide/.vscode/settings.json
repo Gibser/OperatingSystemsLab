@@ -3,5 +3,6 @@
         "signal.h": "c",
         "login.h": "c",
         "gamelib.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
