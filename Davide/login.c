@@ -10,6 +10,16 @@
 #include <arpa/inet.h>
 #include "login.h"
 
+
+void sendMessage(int clientsd, char *msg){
+  int n;
+  n = strlen(msg);
+  write(clientsd, &n, sizeof(int));
+  if(n>0)
+    write(clientsd, msg, n);
+}
+
+
 int maxUsers(){
 	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > tmp";
 	int fd = tmpCommand(cmd);
@@ -170,19 +180,22 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		extractUsername(buffer,username);
 		extractPassword(buffer,password);
 		if(usernameCheck(username)){
-			write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
+			//write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
+			sendMessage(clientsd, "~USRNOTEXISTS");
 			return 0;
 		}
 
 		if(loggedUser(username)){
 			printf("Utente già loggato\n");
-			write(clientsd, "~USRLOGGED", 10); //Utente già loggato
+			//write(clientsd, "~USRLOGGED", 10); //Utente già loggato
+			sendMessage(clientsd, "~USRLOGGED");
 			return 0;
 		}
 
 		if(maxUsers()){
 			printf("Il server è pieno\n");
-			write(clientsd, "~SERVERISFULL", 13); //Server pieno
+			//write(clientsd, "~SERVERISFULL", 13); //Server pieno
+			sendMessage(clientsd, "~SERVERISFULL");
 			return 0;
 		}
 
@@ -203,13 +216,15 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 
 		//printf("\n%s %s\n", password, passwd);
 		if(strcmp(password, passwd) == 0){
-			write(clientsd, "~OKLOGIN", 8); //Login effettuato!
+			//write(clientsd, "~OKLOGIN", 8); //Login effettuato!
+			sendMessage(clientsd, "~OKLOGIN");
 			printf("Login effettuato con successo.\n");
 			logUser(username, clientsd, login);
 			return 1;
 		}
 		else{
-			write(clientsd, "~NOVALIDPW", 10); //Password non validaù
+			//write(clientsd, "~NOVALIDPW", 10); //Password non valida
+			sendMessage(clientsd, "~NOVALIDPW");
 			printf("Password non valida\n");
 			return 0;
 		}

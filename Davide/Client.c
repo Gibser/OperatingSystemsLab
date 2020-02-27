@@ -46,6 +46,7 @@ int combineStr(char *creds,char *username, char *password);
 void printRow(char *buff);
 void printMap(int server_sd);
 void receiveMessage(int server_sd);
+void receiveSignal(int server_sd, char *buffer);
 
 void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
@@ -83,6 +84,16 @@ void receiveMessage(int server_sd){
         buffer[n_bytes] = '\0';
         //write(STDOUT_FILENO, buffer, n_bytes);
         printf(GREEN"%s"RST,buffer);
+    }
+
+}
+
+void receiveSignal(int server_sd, char *buffer){
+    int n_bytes;
+    read(server_sd, &n_bytes, sizeof(int));
+    if(n_bytes > 0){
+        read(server_sd, buffer, n_bytes);
+        buffer[n_bytes] = '\0';
     }
 
 }
@@ -226,6 +237,7 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 int checkLoginStatus(char *msg){
+    printf("Segnale: %s\n", msg);
     if(strcmp(msg,"~OKLOGIN")==0){
         printf("Login effettuato!\n");
         return 1;
@@ -277,7 +289,8 @@ char loginCred(int server_sd){
             n=combineStr(creds,username,password);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
-            read(server_sd,msg,sizeof(msg));//Receive msg about login status
+            //read(server_sd,msg,sizeof(msg));//Receive msg about login status
+            receiveSignal(server_sd, msg);
             if(checkLoginStatus(msg))
                 return '1';
             else
@@ -321,7 +334,8 @@ void regCred(int server_sd){
             n=combineStr(creds,username,password);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
-            read(server_sd,msg,sizeof(msg));
+            //read(server_sd,msg,sizeof(msg));
+            receiveSignal(server_sd, msg);
             if(strcmp(msg,"~SIGNUPOK")==0){
                 printf("Registrazione effettuata con successo!\n");
             }

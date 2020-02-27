@@ -154,7 +154,11 @@ void *mapGenerator(void* args){
       createMap(&info_map, rows, cols, map);
       
       //condizione di vittoria
-      MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+MAX_USERS;
+      if(loggedUsersCount != 0)
+        MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/loggedUsersCount);
+      else
+        MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
+      
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
 
       pthread_cond_broadcast(&mapGen_cond_var);
