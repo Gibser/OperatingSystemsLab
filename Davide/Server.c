@@ -152,7 +152,7 @@ void *mapGenerator(void* args){
           printf("Giocatore: %d\n", scoreboard[i]->clientsd);
       }
       createMap(&info_map, rows, cols, map);
-      while(!loggedUsersCount);
+
       //condizione di vittoria
       if(loggedUsersCount != 0)
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/loggedUsersCount);
@@ -163,6 +163,7 @@ void *mapGenerator(void* args){
       printMatrix(rows,cols,map);
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
+      while(!loggedUsersCount);
       gameStarted = 1;
       while(gameTime-- > 0){ //era gameTime++ < 60
         if(maxItemsReached==1)
