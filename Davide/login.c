@@ -11,7 +11,7 @@
 #include "login.h"
 
 
-void sendMessage(int clientsd, char *msg){
+void sendSignal(int clientsd, char *msg){
   int n;
   n = strlen(msg);
   write(clientsd, &n, sizeof(int));
@@ -181,21 +181,21 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		extractPassword(buffer,password);
 		if(usernameCheck(username)){
 			//write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
-			sendMessage(clientsd, "~USRNOTEXISTS");
+			sendSignal(clientsd, "~USRNOTEXISTS");
 			return 0;
 		}
 
 		if(loggedUser(username)){
 			printf("Utente già loggato\n");
 			//write(clientsd, "~USRLOGGED", 10); //Utente già loggato
-			sendMessage(clientsd, "~USRLOGGED");
+			sendSignal(clientsd, "~USRLOGGED");
 			return 0;
 		}
 
 		if(maxUsers()){
 			printf("Il server è pieno\n");
 			//write(clientsd, "~SERVERISFULL", 13); //Server pieno
-			sendMessage(clientsd, "~SERVERISFULL");
+			sendSignal(clientsd, "~SERVERISFULL");
 			return 0;
 		}
 
@@ -217,14 +217,14 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		//printf("\n%s %s\n", password, passwd);
 		if(strcmp(password, passwd) == 0){
 			//write(clientsd, "~OKLOGIN", 8); //Login effettuato!
-			sendMessage(clientsd, "~OKLOGIN");
+			sendSignal(clientsd, "~OKLOGIN");
 			printf("Login effettuato con successo.\n");
 			logUser(username, clientsd, login);
 			return 1;
 		}
 		else{
 			//write(clientsd, "~NOVALIDPW", 10); //Password non valida
-			sendMessage(clientsd, "~NOVALIDPW");
+			sendSignal(clientsd, "~NOVALIDPW");
 			printf("Password non valida\n");
 			return 0;
 		}

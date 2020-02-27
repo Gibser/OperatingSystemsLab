@@ -21,4 +21,4 @@ int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login, char *u
 void logUser(char* username, int clientsd, pthread_mutex_t login);
 int loggedUser(char* username);
 void logout(int clientsd);
-void sendMessage(int clientsd, char *msg);
+void sendSignal(int clientsd, char *msg);
