@@ -138,7 +138,7 @@ void *mapGenerator(void* args){
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
-      while(!loggedUsersCount) sleep(1);
+      while(!loggedUsersCount);
       pthread_mutex_lock(&editMatrix);
       rows = randNumb();
       cols = randNumb();
