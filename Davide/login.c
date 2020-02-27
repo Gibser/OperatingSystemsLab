@@ -19,21 +19,29 @@ void sendSignal(int clientsd, char *msg){
     write(clientsd, msg, n);
 }
 
-
-int maxUsers(){
-	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > tmp";
-	int fd = tmpCommand(cmd);
+int maxUsers(){ 
+	pthread_t currentTid = pthread_self();
+	char stringTid[20];
+	char removeString[50];
+	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > ";
+	sprintf(stringTid, "tmp%ld", currentTid);
+	strcat(cmd,stringTid);
+	sprintf(removeString,"rm %s",stringTid);
+	int fd = tmpCommand(cmd,stringTid);
 	char buff[4];
 
 	read(fd, buff, 4);
 	close(fd);
-	system("rm tmp");
+	system(removeString);
 	printf("Utenti connessi: %d\n", atoi(buff));
 	if(atoi(buff) >= MAX_USERS)
 		return 1;
 	else
 		return 0;
 }
+
+
+
 
 void logout(int clientsd){
 	char sd[10];
@@ -133,17 +141,23 @@ void copyStringFromFile(char* string, int fd){
 }
 
 int loggedUser(char* username){
+	pthread_t currentTid = pthread_self();
 	char cmd[100] = "echo $(cat logged_users | grep -c \"";
+	char stringTid[20];
+	char removeString[50];
 	strcat(cmd, username);
-	strcat(cmd, " \") > tmp");
-	int fd = tmpCommand(cmd);
+	strcat(cmd, " \") > ");
+	sprintf(stringTid,"tmp%ld",currentTid);
+	strcat(cmd, stringTid);
+	sprintf(removeString,"rm %s",stringTid);
+	int fd = tmpCommand(cmd,stringTid);
 
 	int n_users;
 	char buff;
 	read(fd, &buff, 1);
 	n_users = atoi(&buff);
 	close(fd);
-	system("rm tmp");
+	system(removeString);
 
 	if(n_users == 1)
 		return 1;
@@ -207,19 +221,23 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 			return 0;
 		}
 
-
+		pthread_t currentTid = pthread_self();
 		char cmd[100] = "echo $(cat users | sed -n 's/";
+		char stringTid[20];
+		char removeString[50];
 		strcat(cmd, username);
-		strcat(cmd, " \\(.*\\)/\\1/p') > tmp");
-		
+		sprintf(stringTid,"tmp%ld",currentTid);
+		strcat(cmd, " \\(.*\\)/\\1/p') > ");
+		strcat(cmd, stringTid);
 		//pthread_mutex_lock(&login);
-		int fd = tmpCommand(cmd);
+		int fd = tmpCommand(cmd,stringTid);
 		char passwd[100];
 
 		copyStringFromFile(passwd, fd);
 
 		close(fd);
-		system("rm tmp");
+		sprintf(removeString,"rm %s",stringTid);
+		system(removeString);
 		//pthread_mutex_unlock(&login);
 
 		//printf("\n%s %s\n", password, passwd);
