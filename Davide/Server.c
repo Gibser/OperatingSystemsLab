@@ -160,7 +160,7 @@ void *mapGenerator(void* args){
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-      
+      printMatrix(rows,cols,map);
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
