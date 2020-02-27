@@ -138,8 +138,8 @@ void *mapGenerator(void* args){
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
+      while(!loggedUsersCount) sleep(1);
       pthread_mutex_lock(&editMatrix);
-      while(!loggedUsersCount);
       rows = randNumb();
       cols = randNumb();
       printf("%d %d\n", rows, cols);
