@@ -158,7 +158,8 @@ void game(int server_sd){
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
         if(gameFinished){
-            read(server_sd, &playerLetter, 1);
+            if(read(server_sd, &playerLetter, 1)<0)
+                break;
             gameFinished = 0;
         }
             
