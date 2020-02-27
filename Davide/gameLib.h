@@ -14,7 +14,7 @@ struct cell{
 };
 struct items{
   int warehouse;
-  char object
+  char object;
 };
 
 struct warehouse{
