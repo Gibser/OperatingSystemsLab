@@ -13,15 +13,23 @@
 #include <signal.h>
 #define MAX 1000 
 
-#define RED     "\x1b[31m"
-#define GREEN   "\x1b[32m"
-#define YELLOW  "\x1b[33m"
-#define BLUE    "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN    "\x1b[36m"
-#define WHITE   "\x1b[37m"
-#define RST   "\x1b[0m"
-#define BRIGHT_CYAN "\x1b[96m"
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_WHITE   "\x1b[37m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define BLK "\e[0;30m"
+#define RED "\e[0;31m"
+#define GRN "\e[0;32m"
+#define YEL "\e[0;33m"
+#define BLU "\e[0;34m"
+#define MAG "\e[0;35m"
+#define CYN "\e[0;36m"
+#define WHT "\e[0;37m"
+#define RST "\e[0m"
 
 extern int errno;
 int userStatus=0; //0 Menu 1 login 2 sign up
@@ -30,10 +38,6 @@ struct config{
     char ip[28];
     char hostname[100];
 };
-
-char playerLetter;
-int gameFinished = 0;
-
 void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
 void homeClient(int server_sd);//aveva server_sd
@@ -46,7 +50,6 @@ int combineStr(char *creds,char *username, char *password);
 void printRow(char *buff);
 void printMap(int server_sd);
 void receiveMessage(int server_sd);
-void receiveSignal(int server_sd, char *buffer);
 
 void clientAbort(int signalvalue){
     printf("\nRitorna presto!\n");
@@ -58,14 +61,8 @@ void printRow(char *buff){
     //printf("| ");
     printf(RED"|"RST" ");
     for(int i = 0; i < strlen(buff); i++){
-        if(buff[i] == playerLetter)
-            printf(YELLOW"%c"RST" ", buff[i]);
-        else if(buff[i] == 'x')
-            printf(GREEN"%c"RST" ", buff[i]);
-        else if(buff[i]>='1'&&buff[i]<='9')
-            printf(BRIGHT_CYAN"%c"RST" ", buff[i]);
-        else if(buff[i]>='A'&&buff[i]<='H')
-            printf(BLUE"%c"RST" ",buff[i]);
+        if(buff[i]>='A'&&buff[i]<='H')
+            printf(BLU"%c"RST" ",buff[i]);
         else
             printf("%c ", buff[i]);
     }
@@ -83,26 +80,7 @@ void receiveMessage(int server_sd){
         read(server_sd, buffer, n_bytes);
         buffer[n_bytes] = '\0';
         //write(STDOUT_FILENO, buffer, n_bytes);
-        printf(GREEN"%s"RST,buffer);
-        if(strstr(buffer, "uscito") != NULL)
-            printf("Premi un tasto per chiudere il gioco: ");
-        else
-            printf("Comando: ");
-        
-    }
-    else
-        printf("Comando: ");
-    
-    
-
-}
-
-void receiveSignal(int server_sd, char *buffer){
-    int n_bytes;
-    read(server_sd, &n_bytes, sizeof(int));
-    if(n_bytes > 0){
-        read(server_sd, buffer, n_bytes);
-        buffer[n_bytes] = '\0';
+        printf(GRN"%s"RST,buffer);
     }
 
 }
@@ -115,10 +93,9 @@ void printMap(int server_sd){
     read(server_sd, &cols, sizeof(int));
     if(rows>0&&cols>0){
         //printf("Righe: %d Colonne: %d\n",rows,cols);
-        printf("Lettera giocatore: %c\n\n", playerLetter);
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf(RED"_"RST" ");
+            printf(ANSI_COLOR_RED"_"ANSI_COLOR_RESET" ");
             //printf("_ ");
         printf("\n");
         for(int i = 0; i < rows; i++){
@@ -129,13 +106,10 @@ void printMap(int server_sd){
 
         printf("  ");
         for(int i = 0; i < cols; i++)
-            printf(RED"─"RST" ");
+            printf(ANSI_COLOR_RED"─"ANSI_COLOR_RESET" ");
             //printf("─ ");
 
         printf("\n\n");
-    }
-    else{
-        gameFinished = 1;
     }
     
 }
@@ -144,37 +118,22 @@ char firstChar(char *buffer){
     return buffer[0];
 }
 
-void clearBuffer(){
-    char c;
-    while ((c = getchar()) != '\n' && c != EOF) { };
-}
-
 void game(int server_sd){
     char msg;
     char buffer[200];
     char row[16];
     int rows;
     int cols;
-    read(server_sd, &playerLetter, 1);
     while(1){
         system("clear");
         //receiveMessage(server_sd);//Scoreboard
         printMap(server_sd);
         receiveMessage(server_sd);//Info
-        //printf("Comando: ");
-        clearBuffer();
-        scanf("%s",buffer);//con questo sembra andare
+        printf("Comando: ");
+        //scanf(" %c",&msg);
+        fgets(buffer, sizeof(buffer), stdin);
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
-        if(gameFinished){
-            if(read(server_sd, &playerLetter, 1)<=0){
-                break;
-            }
-            gameFinished = 0;
-        }
-            
-        
-       
     }
 }
 
@@ -201,7 +160,6 @@ int main()
         } 
         else
             printf("Connesso al server!\n");
-            system("clear");
             homeClient(sockfd);
         }
 } 
@@ -249,7 +207,6 @@ void chooseServer(struct sockaddr_in *serverConfig){
 }
 
 int checkLoginStatus(char *msg){
-    printf("Segnale: %s\n", msg);
     if(strcmp(msg,"~OKLOGIN")==0){
         printf("Login effettuato!\n");
         return 1;
@@ -287,7 +244,6 @@ char loginCred(int server_sd){
     char msg[20];
     int n;
     userStatus=1;
-    system("clear");
     write(server_sd,"~USRLOGIN",9); //Notifying server about new login
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -302,8 +258,7 @@ char loginCred(int server_sd){
             n=combineStr(creds,username,password);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
-            //read(server_sd,msg,sizeof(msg));//Receive msg about login status
-            receiveSignal(server_sd, msg);
+            read(server_sd,msg,sizeof(msg));//Receive msg about login status
             if(checkLoginStatus(msg))
                 return '1';
             else
@@ -332,8 +287,7 @@ void regCred(int server_sd){
     char creds[200];
     char msg[20];
     int n;
-    userStatus=2;       
-    system("clear");         
+    userStatus=2;                
     write(server_sd,"~USRSIGNUP",10); //Notifying server about new registration
     memset(creds,'\0',sizeof(creds));
     memset(msg,'\0',sizeof(msg));
@@ -348,8 +302,7 @@ void regCred(int server_sd){
             n=combineStr(creds,username,password);
             write(server_sd,&n,sizeof(int));//Tell to server how many bytes I'm going to send him
             write(server_sd,creds,strlen(creds));//Then I send data
-            //read(server_sd,msg,sizeof(msg));
-            receiveSignal(server_sd, msg);
+            read(server_sd,msg,sizeof(msg));
             if(strcmp(msg,"~SIGNUPOK")==0){
                 printf("Registrazione effettuata con successo!\n");
             }

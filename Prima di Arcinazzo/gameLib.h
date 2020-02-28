@@ -14,7 +14,6 @@ struct cell{
 };
 struct items{
   int warehouse;
-  char object;
 };
 
 struct warehouse{
@@ -32,7 +31,6 @@ struct mapObjects{
 };
 
 struct player{
-  char username[50];
   int x;
   int y;
   int hasItem;

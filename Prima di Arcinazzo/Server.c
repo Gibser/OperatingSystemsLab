@@ -12,18 +12,17 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <signal.h>
 #include "login.h"
 #include "gameLib.h"
 #define MAX 1000
 #define PORT 5000
 #define SA struct sockaddr 
 #define MAX_THREADS 8
-#define TIMER 30
+
 /**spawnPlayer gets a clientSD and a pointer to a struct player type as parameters.
  * It spawns a player in a cell (using some criteria) and initializes its associated struct.
  */
-void spawnPlayer(int clientsd,struct player *info_player,char *username);
+void spawnPlayer(int clientsd,struct player *info_player);
 /*isCellGood function determines if a cell object is good for a player's spawn*/
 int isCellGood(struct cell a,int index1,int index2);
 /*isCellFree function tells if a cell is free (no warehouses/players/objects/obstacles)*/
@@ -86,22 +85,6 @@ void quicksort(struct player* a[MAX_USERS], int first, int last);
 void writeLog(char *msg,int flag);
 int mutexInitialization();
 char * getUTCString();
-struct player *getWinnerStruct();
-void writeLog_ItemDelivered(struct player *info);
-void writeLog_NewConnection(char *ip);
-void writeLog_GameOver(struct player *winner);
-void writeLog_JoinGame(char *user);
-void writeLog_QuitGame(char *user);
-void writeLog_serverAbort();
-void dropItem(struct player *info);
-void initCell(int i, int j);
-void selectionSort(int n);
-int partiziona(struct player* a[], int low, int high);
-void dropInPosition(struct player *info, int add_x,int add_y);
-void printScoreboard();
-void buildLoggedUsersString(char *loggedUsersString);
-int findMax(int i);
-int setScoreboardArr();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -111,7 +94,7 @@ pthread_mutex_t mapGen;
 pthread_mutex_t notifyMaxItems;
 pthread_cond_t mapGen_cond_var;
 pthread_mutex_t gameLog;
-pthread_mutex_t loggedUsersCountMutex;
+
 
 
 //int threadStatus[MAX_THREADS]={0};
@@ -123,64 +106,51 @@ int rows, cols;
 int mapPlayers[MAX_USERS];
 struct player* scoreboard[MAX_USERS];
 int gameStarted = 0;
-int gameTime = TIMER; //era zero
+int gameTime = 60; //era zero
 int MAX_ITEMS;
-int maxItemsReached=0;
+int maxItemReached=0;
 char scoreboardString[500]="";
 struct player *nullStruct;
-int loggedUsersCount = 0;
-struct player **arr;
+
 
 void *mapGenerator(void* args){
     int i=0,j=0;
     char *timeString;
-    struct player *winner;
     char msg[100];
     while(1){
-      maxItemsReached = 0;
       memset(msg,'\0',sizeof(msg));
-      timeString=getUTCString();
+      *timeString=getUTCString();
       sprintf(msg,"[%s]Starting new game session...\n",timeString);
       writeLog(msg,1);
       gameStarted = 0;
-      while(!loggedUsersCount);
       pthread_mutex_lock(&editMatrix);
+      
       rows = randNumb();
       cols = randNumb();
       printf("%d %d\n", rows, cols);
       initGame();
       printf("\n\nClassifica live\n");
+      for(i= 0; i < MAX_USERS; i++){
+        if(scoreboard[i]->clientsd >= 0)
+          printf("Giocatore: %d\n", scoreboard[i]->clientsd);
+      }
+      printf("Valore clientsd nullStruct: %d\n", nullStruct->clientsd);
+      printf("\n\n");
+      //printMatrix(rows, cols, map);
       createMap(&info_map, rows, cols, map);
-
-      //condizione di vittoria
-      if(loggedUsersCount != 0)
-        MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/loggedUsersCount);
-      else
-        MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
-      
-      printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-      printMatrix(rows,cols,map);
+      MAX_ITEMS=info_map.n_items/2;
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
-      
       gameStarted = 1;
       while(gameTime-- > 0){ //era gameTime++ < 60
-        if(maxItemsReached==1)
+        if(maxItemReached==1)
           break;
         sleep(1);
       }
-      printf("\nCreo scoreboard...\n");
       createScoreboard();
-      printf("\n\n--------------------------\n\n");
-      printf("\n\nScoreboard creata\n\n");
       //memset(msg,'\0',sizeof(msg));
-      free(arr);
-      printf("\n\nLog aggiornato\n\n");
-      printf("\n\n---------------------------\n\n");
-      /*memset(msg,'\0',sizeof(msg));
-      sprintf(msg,"\t-GAME OVER: Winner is %s with %d items delivered.\n",winner->username,winner->itemsDelivered);
-      writeLog(msg,1);*/
-      gameTime = TIMER; //Era 0
+      //SCRIVERE NEL LOG CHI HA VINTO DOVREMMO ESTRARRE USERNAME
+      gameTime = 60; //Era 0
       printf("Fine sleep, genero mappa...\n");
       //pthread_exit(NULL);
       
@@ -188,16 +158,11 @@ void *mapGenerator(void* args){
 }
 
 // Game Function
-void game(int clientsd,char *username){
-    //printf("Username client %s\n",username);
-    char info[350]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto, [Q] per uscire.\n";
+void game(int clientsd){
+    char info[250]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto.\n";
     char command;
     struct player infoplayer;
     int isLogged=1;
-    char playerLetter;
-    pthread_mutex_lock(&loggedUsersCountMutex);
-    loggedUsersCount++;
-    pthread_mutex_unlock(&loggedUsersCountMutex);
     while(isLogged){
       if(!gameStarted){
         pthread_mutex_lock(&editMatrix);
@@ -207,63 +172,34 @@ void game(int clientsd,char *username){
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
 
       pthread_mutex_lock(&editMatrix);
-      spawnPlayer(clientsd,&infoplayer,username);
+      spawnPlayer(clientsd, &infoplayer);
       pthread_mutex_unlock(&editMatrix);
-
-      playerLetter = getLetter(clientsd);
-      write(clientsd, &playerLetter, 1);
 
       printf("Giocatore %c\n", getLetter(clientsd));
       printf("Fine Spawn\n");
       printf("Coordinate\nx: %d\ny: %d\n", infoplayer.x, infoplayer.y);
       while(1){
-          if(infoplayer.clientsd==-1)
-            break;
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
-          //printf("Valore gameStarted: %d\n", gameStarted);
+          printf("Valore gameStarted: %d\n", gameStarted);
           //if(!gameStarted) break;
           if(getLetter(clientsd) == '0') break;
           if(read(clientsd, &command, sizeof(command))>0){
             if(getLetter(clientsd) == '0') break;
-            checkCommand(command, &infoplayer,info);
+              checkCommand(command, &infoplayer,info);
           }
           else{
-              printf("Sono nell'else malefico\n");
-              if(infoplayer.hasItem)
-                dropItem(&infoplayer);
-              else
-                initCell(infoplayer.x, infoplayer.y);
               gameLogout(clientsd);
               isLogged=0;
-              writeLog_QuitGame(username);
-              pthread_mutex_lock(&loggedUsersCountMutex);
-              loggedUsersCount--;
-              pthread_mutex_unlock(&loggedUsersCountMutex);
               break;
           }
       }
       if(isLogged){
-        if(infoplayer.clientsd>=0){
-          printf("classifica \n%s\n",scoreboardString);
-          write(clientsd,&(int){0},sizeof(int));
-          write(clientsd,&(int){0},sizeof(int));
-          sendMessage(clientsd,scoreboardString);
-        }
-        if(read(clientsd,&command,1) <= 0){
-          printf("\n\nClient disconnesso...\n\n");
-          if(infoplayer.hasItem)
-            dropItem(&infoplayer);
-          else
-            initCell(infoplayer.x, infoplayer.y);
-          gameLogout(clientsd);
-          isLogged=0;
-          writeLog_QuitGame(username);
-          pthread_mutex_lock(&loggedUsersCountMutex);
-          loggedUsersCount--;
-          pthread_mutex_unlock(&loggedUsersCountMutex);
-        }
-
+        printf("classifica \n%s\n",scoreboardString);
+        write(clientsd,&(int){0},sizeof(int));
+        write(clientsd,&(int){0},sizeof(int));
+        sendMessage(clientsd,scoreboardString);
+        read(clientsd,&command,1);
       }
       
     }
@@ -274,15 +210,10 @@ void *clientThread(void *sockfd)
 { 
     int clientsd=*(int*)sockfd;
     int log = 0;
-    char username[100];
-    char message[50];
-    log = loginMain(clientsd, signup_mutex, login, username);
+    log = loginMain(clientsd, signup_mutex, login);
     if(log == 1){
         printf("Gestisco il client...\n");
-        writeLog_JoinGame(username);
-        /*sprintf(message,"\t-%s has joined the game!\n",username);
-        writeLog(message,1);*/
-        game(clientsd,username);
+        game(clientsd);
     }
 	close(clientsd);
 	pthread_exit(NULL);
@@ -290,19 +221,10 @@ void *clientThread(void *sockfd)
 }
 
 
-void serverAbort(){
-  printf("\nChiusura server...\n");
-  system("rm logged_users");
-  //system("touch logged_users");
-  writeLog_serverAbort();
-  exit(0);
-}
-
 // Driver function 
 int main() 
-{   
-    system("touch logged_users");
-    signal(SIGINT, serverAbort);
+{ 
+   
     int sockfd, connfd, len,i=0; 
     struct sockaddr_in servaddr, cli; 
     void *result;
@@ -382,7 +304,7 @@ int main()
     printf("Socket successfully binded..\n"); 
   
     // Now server is ready to listen and verification 
-    if ((listen(sockfd,128)) != 0) { 
+    if ((listen(sockfd, 10)) != 0) { 
         printf("Listen failed...\n"); 
         strcpy(msg,"\t-Socket listen FAILED\n");
         writeLog(msg,0); 
@@ -402,13 +324,13 @@ int main()
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
             memset(msg,'\0',sizeof(msg));
+            memset(timeString,'\0',sizeof(timeString));
             i++;
             int *thread_sd = (int*) malloc(sizeof(int));
             *thread_sd =  connfd;
             /////////
-            //sprintf(msg,"\t-New connection from %s\n",inet_ntoa(cli.sin_addr));
-            //writeLog(msg,1);
-            writeLog_NewConnection(inet_ntoa(cli.sin_addr));
+            sprintf(msg,"\t[%s] New connection from %s\n",timeString,inet_ntoa(cli.sin_addr));
+            writeLog(msg,1);
             ////////
             printf("server: new connection from %d %s\n",connfd,inet_ntoa(cli.sin_addr));
             pthread_create(&tid, NULL, clientThread, (void *) thread_sd);
@@ -452,12 +374,13 @@ void logoutStructs(int clientsd){
   int i;
   for(i=0;i<MAX_USERS;i++){
     if(mapPlayers[i]==clientsd){
+      //pthread_mutex_lock(&editMapPlayers); //cappadavide 
       mapPlayers[i]=-1;
+      //pthread_mutex_unlock(&editMapPlayers);//cappadavide
     }
-    if(scoreboard[i] != NULL)
-      if(scoreboard[i]->clientsd == clientsd){
-        scoreboard[i]=NULL; //nullStruct;
-      }
+    if(scoreboard[i]->clientsd == clientsd){
+      scoreboard[i]=nullStruct;
+    }
   }
 }
 
@@ -511,7 +434,7 @@ int isCellGood(struct cell a,int index1,int index2){
 
 
 
-void spawnPlayer(int clientsd,struct player *info_player,char *username){
+void spawnPlayer(int clientsd,struct player *info_player){
   char c;
   int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
   setLetter(clientsd);
@@ -523,14 +446,14 @@ void spawnPlayer(int clientsd,struct player *info_player,char *username){
       break;
     }
   }
-  strcpy(info_player->username,username);
-  printf("Spawn %s\n",info_player->username);
   info_player->x=index1;
   info_player->y=index2;
   info_player->hasItem=0;
   info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
   info_player->pack=NULL;
+  printf("clientsd nullStruct prima di dio: %d\n", nullStruct->clientsd);
   info_player->clientsd = clientsd;
+  printf("clientsd nullStruct dopo dio: %d\n", nullStruct->clientsd);
 
   map[index1][index2].playerSD=clientsd;
 
@@ -538,10 +461,11 @@ void spawnPlayer(int clientsd,struct player *info_player,char *username){
 
 void setScorePlayer(struct player *info_player){
   int i=0;
-  while(scoreboard[i] != NULL){
+  while(scoreboard[i]!=nullStruct){
     i++;
   }
   scoreboard[i]=info_player;
+  printf("Nuovo valore giocatore: %p\n", scoreboard[i]);
 
 }
 
@@ -565,7 +489,7 @@ void matrixToString(char *info, int clientsd,int *obstacles){
     memset(msg,'\0',16);
     while(j < cols){
       if(map[i][j].playerSD >=0){
-        //printf("parsing %c\n", getLetter(map[i][j].playerSD));
+        printf("parsing %c\n", getLetter(map[i][j].playerSD));
         msg[j] = getLetter(map[i][j].playerSD);
       }
       else if(map[i][j].isObstacle){
@@ -590,15 +514,16 @@ void matrixToString(char *info, int clientsd,int *obstacles){
   }
   sendMessage(clientsd,info);
 
+
 }
 
 void initGame(){
   int i=0,j=0;
-  //initNullStruct();
+  initNullStruct();
   for(i=0;i<MAX_USERS;i++){ 
         mapPlayers[i]=-1;
-        scoreboard[i]=NULL;  //= nullStruct;
-        //printf("Init: %d\n", scoreboard[i]->clientsd);
+        scoreboard[i]=nullStruct;
+        printf("Init: %d\n", scoreboard[i]->clientsd);
   }
   map=(struct cell**)malloc(rows * sizeof(struct cell *));
   for(i=0;i<rows;i++){
@@ -618,10 +543,10 @@ void initGame(){
 void movement(struct player *info_player, int add_x, int add_y){
       int id;
       struct obstacles *a;
-      //printf("x: %d y: %d\n", info_player->x, info_player->y);
+      printf("x: %d y: %d\n", info_player->x, info_player->y);
       if(isCellNotSolid(map[(info_player->x)+add_x][info_player->y+add_y])){
         changeCoordinates(info_player, add_x, add_y);
-        //printf("x: %d y: %d\n", info_player->x, info_player->y);
+        printf("x: %d y: %d\n", info_player->x, info_player->y);
       }
       else if(map[(info_player->x)+add_x][info_player->y+add_y].isObstacle){
         a=(struct obstacles*)map[(info_player->x)+add_x][info_player->y+add_y].pointer;
@@ -650,8 +575,6 @@ void checkCommand(char msg, struct player *info_player,char *info){
   //int clientsd=map[info_player->x][info_player->y].playerSD;
   int n;
   char obj;
-  char loggedUsers[300];
-  //char log[100];
   if(msg == 't' || msg == 'T'){
     sprintf(info, "Tempo rimanente: %d secondi\n", gameTime);
   }
@@ -673,7 +596,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
     }
     else
     {
-      strcpy(info,"Inventario pieno.\n");
+      strcpy(info,"Inventario pieno.");
     }
   }
   else if(msg=='e'||msg=='E'){
@@ -681,16 +604,8 @@ void checkCommand(char msg, struct player *info_player,char *info){
       //printf("Il giocatore possiede un pacco con id %d\n",info_player->pack->warehouse);
       info_player->hasItem=0;
       info_player->itemsDelivered++;
-      writeLog_ItemDelivered(info_player);
-      //sprintf(log,"\t-%s delivered an item to warehouse n.%d\n",info_player->username,info_player->pack->warehouse);
       info_player->pack=NULL;
       strcpy(info,"Oggetto consegnato.\n");
-      if(info_player->itemsDelivered >= MAX_ITEMS){
-        pthread_mutex_lock(&notifyMaxItems);
-        maxItemsReached = 1;
-        pthread_mutex_unlock(&notifyMaxItems);
-      }
-      //writeLog(log,1);
     }
     else if(info_player->hasItem==0 && isWarehouseHere(info_player))
         strcpy(info,"Non hai oggetti nell'inventario.\n");
@@ -709,20 +624,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
     
   }
   else if(msg=='h'||msg=='H'){
-    snprintf(info,256,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n[U]Utenti connessi\n[Q]Esci\n");
-  }
-  else if(msg=='q'||msg=='Q'){
-      strcpy(info,"Sei uscito dal gioco.\n");
-      write(info_player->clientsd, &(int){0}, sizeof(int));
-      write(info_player->clientsd, &(int){0}, sizeof(int));
-      sendMessage(info_player->clientsd,info);
-      close(info_player->clientsd);
-      info_player->clientsd=-1;
-  }
-  else if(msg=='u'||msg=='U'){
-    buildLoggedUsersString(loggedUsers);
-    printf("\nComando u\nloggedUsers: %s\n", loggedUsers);
-    sprintf(info, "---UTENTI CONNESSI---\n%s", loggedUsers);
+    snprintf(info,238,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n");
   }
   else
     checkMovement(msg, info_player,info);
@@ -795,7 +697,7 @@ int noBoundaryCheck(struct player *a,int add_x,int add_y){
 }
 
 int mutexInitialization(){
-    if (pthread_mutex_init(&signup_mutex, NULL) != 0)
+  if (pthread_mutex_init(&signup_mutex, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
@@ -830,65 +732,54 @@ int mutexInitialization(){
         printf("\n mutex init failed\n");
         return 1;
     }
-
-    if (pthread_mutex_init(&loggedUsersCountMutex, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
     return 0;
 }
 
 void gameLogout(int clientsd){
-  //initNullStruct();
   logout(clientsd);
   logoutStructs(clientsd);
 }
 
-int setScoreboardArr(){
-  int j = 0;
-  for(int i = 0; i < MAX_USERS; i++){
-    if(scoreboard[i] != NULL)
-      arr[j++] = scoreboard[i];
-  }
-  return j;
-}
-
 void createScoreboard(){
-  int i; //= 0;
+  int i = 0;
+  char buff[50];
+  char cmd[200] = ""; 
+  char num[10];
+  int fd;
   int n;
-  char buffer[100];
-  arr = (struct player **)malloc(loggedUsersCount*sizeof(struct player *));
-  n = setScoreboardArr();
   memset(scoreboardString,'\0',sizeof(scoreboardString)); //cappadavide
-  strcpy(scoreboardString,"    ---PARTITA FINITA---\n   Classifica avventurieri:\nGIOCATORI\t\t\tOGGETTI\n");
-  selectionSort(n);
-  printf("Classifica:\n");
-  for(int i = n-1; i >= 0; i--){
-      printf("%s %d: %d\n", arr[i]->username, arr[i]->clientsd, arr[i]->itemsDelivered);
-  }
-  //selectionSort(scoreboard, MAX_USERS);
-  printf("Sorting done\n");
-  i = n - 1;
-  while(i >= 0){
-    memset(buffer,'\0',sizeof(buffer));
-    if(arr[i]->clientsd >= 0){
-      sprintf(buffer,"%s\t\t\t\t%d\n", arr[i]->username, arr[i]->itemsDelivered);
-      strcat(scoreboardString, buffer);
+  strcpy(scoreboardString,"---PARTITA FINITA---\nClassifica avventurieri:\n");
+  quicksort(scoreboard, 0, MAX_USERS-1);
+  while(i < MAX_USERS){
+    if(scoreboard[i]->clientsd >= 0){
+      sprintf(num, "%d", scoreboard[i]->clientsd);
+      strcpy(cmd, "echo $(cat logged_users | sed -n 's/\\(.*\\) ");
+      strcat(cmd, num);
+      strcat(cmd, "$/\\1/p') > tmp2");
+      printf("Comando: %s\n", cmd);
+
+      if((fd = open("./tmp2", O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
+        perror("Errore creazione file tmp2");
+        exit(1);
+      }
+
+      system(cmd);
+      n = read(fd, buff, 50);
+      system("rm tmp2");
+      buff[n-1] = '\0';
+      strcat(scoreboardString, buff);
+      strcat(scoreboardString, " ");
+      sprintf(num, "%d", scoreboard[i]->itemsDelivered);
+      strcat(scoreboardString, num);
+      strcat(scoreboardString, "\n");
+      printf("Operazione su %d %s\n",scoreboard[i]->clientsd,scoreboardString);
     }
-    i--;
+
+    i++;
   }
-  struct player *winner;
-  if(n == 0)
-    winner = NULL;
-  else
-    winner = arr[n-1];
-  printf("\n\nVincitore ottenuto\n\n");
-  writeLog_GameOver(winner);
 }
 
 void copyStruct(struct player *a, struct player *temp){
-  memset(temp->username,'\0',sizeof(temp->username));
   temp->x = a->x;
   temp->y = a->y;
   temp->hasItem = a->hasItem;
@@ -896,15 +787,8 @@ void copyStruct(struct player *a, struct player *temp){
   temp->pack = a->pack;
   temp->obstacles = a->obstacles;
   temp->clientsd = a->clientsd;
-  strcpy(temp->username,a->username);
 }
 
-void swapStructAddr(struct player *a, struct player *b){
-  struct player *temp;
-  temp = a;
-  a = b;
-  b = temp;
-}
 
 void swapStruct(struct player *a, struct player *b){
   struct player *temp = (struct player *)malloc(sizeof(struct player));
@@ -914,75 +798,31 @@ void swapStruct(struct player *a, struct player *b){
   free(temp);
 }
 
-/*
-void selectionSort(struct player *arr[], int n)  
-{  
-    int i, j, min_idx;  
-  
-    // One by one move boundary of unsorted subarray  
-    for (i = 0; i < n-1; i++)  
-    {  
-        // Find the minimum element in unsorted array  
-        min_idx = i;  
-        for (j = i+1; j < n; j++)  
-        if (arr[j]->itemsDelivered < arr[min_idx]->itemsDelivered)  
-            min_idx = j;  
-  
-        // Swap the found minimum element with the first element  
-        swapStructAddr(arr[min_idx], arr[i]);  
-    }  
-}  
+void quicksort(struct player* a[MAX_USERS], int first, int last){
+   int i, j, pivot, temp;
+/*pivot -- inizialmente il pivot è il first elemento
+first e last sono le due variabili che servono per scorrere l'array
 */
-/*
-int partiziona(struct player* a[], int low, int high){
-  int pivot = a[high]->itemsDelivered;
-  int i = (low - 1);
-  for(int j = low; j <= high- 1; j++){
-    if (a[j]->itemsDelivered < pivot)
-        {
-            i++;    // increment index of smaller element
-            swapStructAddr(a[i], a[j]);
-        }
-    }
-    swapStructAddr(a[i + 1], a[high]);
-    return (i + 1);
-  }
-*/
-
-void selectionSort(int n){
-  int max;
-  for(int i=n-1;i>0;i--){
-    max=findMax(i);
-    swapStruct(arr[max], arr[i]);
-  }
-}
-
-int findMax(int i){
-  int max = 0;
-  for(int j=1; j<=i; j++){
-    if(arr[max]->itemsDelivered < arr[j]->itemsDelivered)
-      max=j;
-  }
-  return max;
-}
-
-void printScoreboard(){
-  
-}
-
-/*
-void quicksort(struct player* a[MAX_USERS], int low, int high){
-    int pi;
-    if (low < high)
-    {
+   if(first<last){
+      pivot=first;
+      i=first;
+      j=last;     
       
-        pi = partiziona(a, low, high);
+      while(i<j){
+         while(a[i]->itemsDelivered <= a[pivot]->itemsDelivered && i < last)
+            i++;
+         while(a[j]->itemsDelivered > a[pivot]->itemsDelivered)
+            j--;
+         if(i<j){   
+            swapStruct(a[i], a[j]);
+         }
+      }
 
-        quicksort(a, low, pi - 1);  // Before pi
-        quicksort(a, pi + 1, high); // After pi
-    }
+      swapStruct(a[pivot], a[j]);
+      quicksort(a, first, j-1);
+      quicksort(a, j+1, last);
+   }
 }
-*/
 
 void initNullStruct(){
   nullStruct = (struct player *)malloc(sizeof(struct player));
@@ -1013,90 +853,6 @@ void writeLog(char *msg,int flag){
     close(fd);
   }
 }
-void writeLog_GameOver(struct player *winner){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  if(winner!=NULL){
-    sprintf(msg,"\t-[%s] GAME OVER: Winner is %s with %d items delivered.\n",str,winner->username,winner->itemsDelivered);
-  }
-  else
-    sprintf(msg,"\t-[%s] GAME OVER: No winner.\n",str);
-  writeLog(msg,1);
-}
-
-void writeLog_serverAbort(){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  
-  sprintf(msg,"[%s]Server closed.\n",str);
-  writeLog(msg,1);
-}
-
-
-void writeLog_ItemDelivered(struct player *info){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  sprintf(msg,"\t-[%s] %s delivered an item to warehouse n.%d\n",str,info->username,info->pack->warehouse);
-  writeLog(msg,1);
-}
-
-
-void writeLog_NewConnection(char *ip){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  sprintf(msg,"\t-[%s] New connection from %s\n",str,ip);
-  writeLog(msg,1);
-}
-
-void writeLog_JoinGame(char *user){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  sprintf(msg,"\t-[%s] %s has joined the game!\n",str,user);
-  writeLog(msg,1);
-}
-
-void writeLog_QuitGame(char *user){
-  char str[30];
-  char msg[200];
-  time_t connTime;
-  struct tm *infoTime;
-  memset(str,'\0',sizeof(str));
-  time(&connTime);
-  infoTime=gmtime(&connTime);
-  strftime(str,sizeof(str),"%c",infoTime);
-  sprintf(msg,"\t-[%s] %s has left the game.\n",str,user);
-  writeLog(msg,1);
-}
 
 char * getUTCString(){
   static char str[30];
@@ -1108,63 +864,4 @@ char * getUTCString(){
   strftime(str,sizeof(str),"%c",infoTime);
   return str;
 
-}
-void dropItem(struct player *info){
-  if(map[info->x][info->y].object==' ')
-    dropInPosition(info,0,0);
-  else if(isLeftFree(info->x,info->y))
-    dropInPosition(info,0,-1);
-  else if(isRightFree(info->x,info->y))
-    dropInPosition(info,0,1);
-  else if(isUpFree(info->x,info->y))
-    dropInPosition(info,-1,0);
-  else if(isDownFree(info->x,info->y))
-    dropInPosition(info,1,0);
-  map[info->x][info->y].playerSD=-1;
-}
-
-
-void initCell(int i, int j){
-  map[i][j].isObstacle=0;
-  map[i][j].isWareHouse=0;
-  map[i][j].playerSD=-1; 
-  map[i][j].object=' ';
-  map[i][j].pointer=NULL;
-}
-
-void dropInPosition(struct player *info, int add_x,int add_y){
-  pthread_mutex_lock(&editMatrix);
-  map[info->x+add_x][info->y+add_y].object=info->pack->object;
-  map[info->x+add_x][info->y+add_y].pointer=(void*)info->pack;
-  pthread_mutex_unlock(&editMatrix);
-}
-
-void buildLoggedUsersString(char *loggedUsersString){
-  int fd;
-  int i = 0;
-  if((fd = open("logged_users", O_RDONLY)) < 0){
-    perror("Errore apertura file logged_users.");
-    exit(1);
-  }
-
-  char buff;
-  while(read(fd, &buff, 1) == 1){
-    if(buff != ' ')
-      loggedUsersString[i++] = buff;
-    else{
-
-      loggedUsersString[i++] = ' ';
-      loggedUsersString[i++] = '-';
-      loggedUsersString[i++] = ' ';
-
-      while(read(fd, &buff, 1) == 1){
-        if(buff == '\n')
-          break;
-      }
-    }
-  }
-  i = i-3;
-  loggedUsersString[i++] = '\n';
-  loggedUsersString[i] = '\0';
-  close(fd);
 }

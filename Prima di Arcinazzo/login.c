@@ -8,41 +8,22 @@
 #include <string.h>
 #include <pthread.h>
 #include <arpa/inet.h>
-#include <sys/types.h>
 #include "login.h"
 
-
-void sendSignal(int clientsd, char *msg){
-  int n;
-  n = strlen(msg);
-  write(clientsd, &n, sizeof(int));
-  if(n>0)
-    write(clientsd, msg, n);
-}
-
-int maxUsers(){ 
-	pthread_t currentTid = pthread_self();
-	char stringTid[20];
-	char removeString[50];
-	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > ";
-	sprintf(stringTid, "tmp%ld", currentTid);
-	strcat(cmd,stringTid);
-	sprintf(removeString,"rm %s",stringTid);
-	int fd = tmpCommand(cmd,stringTid);
+int maxUsers(){
+	char cmd[100] = "echo $(cat logged_users | grep -c \".*\") > tmp";
+	int fd = tmpCommand(cmd);
 	char buff[4];
 
 	read(fd, buff, 4);
 	close(fd);
-	system(removeString);
+	system("rm tmp");
 	printf("Utenti connessi: %d\n", atoi(buff));
 	if(atoi(buff) >= MAX_USERS)
 		return 1;
 	else
 		return 0;
 }
-
-
-
 
 void logout(int clientsd){
 	char sd[10];
@@ -58,9 +39,9 @@ void logout(int clientsd){
 }
 
 
-int tmpCommand(char* cmd, char* fileName){
+int tmpCommand(char* cmd){
 	int fd;
-	if((fd = open(fileName, O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
+	if((fd = open("./tmp", O_RDWR | O_CREAT | O_TRUNC, 0777)) < 0){
 		perror("Errore creazione file tmp");
 		exit(1);
 	}
@@ -101,17 +82,11 @@ void extractPassword(char *buffer, char *password){
 }
 
 int usernameCheck(char* username){	
-	pthread_t currentTid = pthread_self();
-	char stringTid[100];
-	char removeString[150];
 	//conto il numero di utenti con il nome inserito
 	char cmd[100] = "echo $(cat users | grep -c \"";
 	strcat(cmd, username);
-
-	sprintf(stringTid, "tmp%ld", currentTid);
-	strcat(cmd, " \") > ");
-	strcat(cmd, stringTid);
-	int fd = tmpCommand(cmd, stringTid);
+	strcat(cmd, " \") > tmp");
+	int fd = tmpCommand(cmd);
 
 	//controllo il numero restituito da grep
 	int n_users;
@@ -120,8 +95,7 @@ int usernameCheck(char* username){
 	
 	n_users = atoi(&buff);
 	close(fd);
-	sprintf(removeString, "rm %s", stringTid);
-	system(removeString);
+	system("rm tmp");
 
 	if(n_users == 1)
 		return 0;
@@ -141,23 +115,17 @@ void copyStringFromFile(char* string, int fd){
 }
 
 int loggedUser(char* username){
-	pthread_t currentTid = pthread_self();
 	char cmd[100] = "echo $(cat logged_users | grep -c \"";
-	char stringTid[20];
-	char removeString[50];
 	strcat(cmd, username);
-	strcat(cmd, " \") > ");
-	sprintf(stringTid,"tmp%ld",currentTid);
-	strcat(cmd, stringTid);
-	sprintf(removeString,"rm %s",stringTid);
-	int fd = tmpCommand(cmd,stringTid);
+	strcat(cmd, " \") > tmp");
+	int fd = tmpCommand(cmd);
 
 	int n_users;
 	char buff;
 	read(fd, &buff, 1);
 	n_users = atoi(&buff);
 	close(fd);
-	system(removeString);
+	system("rm tmp");
 
 	if(n_users == 1)
 		return 1;
@@ -171,7 +139,7 @@ void logUser(char* username, int clientsd, pthread_mutex_t login){
 	//converto clientsd in stringa
 	snprintf(sd, 10, "%d", clientsd);
 
-	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0666);
+	int fd = open("logged_users", O_APPEND | O_RDWR | O_CREAT, 0777);
 	if(fd < 0){
 		perror("Errore apertura file utenti loggati.");
 		exit(1);
@@ -202,55 +170,46 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		extractUsername(buffer,username);
 		extractPassword(buffer,password);
 		if(usernameCheck(username)){
-			//write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
-			sendSignal(clientsd, "~USRNOTEXISTS");
+			write(clientsd, "~USRNOTEXISTS", 13); //Username non esistente!
 			return 0;
 		}
 
 		if(loggedUser(username)){
 			printf("Utente già loggato\n");
-			//write(clientsd, "~USRLOGGED", 10); //Utente già loggato
-			sendSignal(clientsd, "~USRLOGGED");
+			write(clientsd, "~USRLOGGED", 10); //Utente già loggato
 			return 0;
 		}
 
 		if(maxUsers()){
 			printf("Il server è pieno\n");
-			//write(clientsd, "~SERVERISFULL", 13); //Server pieno
-			sendSignal(clientsd, "~SERVERISFULL");
+			write(clientsd, "~SERVERISFULL", 13); //Server pieno
 			return 0;
 		}
 
-		pthread_t currentTid = pthread_self();
+
 		char cmd[100] = "echo $(cat users | sed -n 's/";
-		char stringTid[20];
-		char removeString[50];
 		strcat(cmd, username);
-		sprintf(stringTid,"tmp%ld",currentTid);
-		strcat(cmd, " \\(.*\\)/\\1/p') > ");
-		strcat(cmd, stringTid);
+		strcat(cmd, " \\(.*\\)/\\1/p') > tmp");
+		
 		//pthread_mutex_lock(&login);
-		int fd = tmpCommand(cmd,stringTid);
+		int fd = tmpCommand(cmd);
 		char passwd[100];
 
 		copyStringFromFile(passwd, fd);
 
 		close(fd);
-		sprintf(removeString,"rm %s",stringTid);
-		system(removeString);
+		system("rm tmp");
 		//pthread_mutex_unlock(&login);
 
 		//printf("\n%s %s\n", password, passwd);
 		if(strcmp(password, passwd) == 0){
-			//write(clientsd, "~OKLOGIN", 8); //Login effettuato!
-			sendSignal(clientsd, "~OKLOGIN");
+			write(clientsd, "~OKLOGIN", 8); //Login effettuato!
 			printf("Login effettuato con successo.\n");
 			logUser(username, clientsd, login);
 			return 1;
 		}
 		else{
-			//write(clientsd, "~NOVALIDPW", 10); //Password non valida
-			sendSignal(clientsd, "~NOVALIDPW");
+			write(clientsd, "~NOVALIDPW", 10); //Password non validaù
 			printf("Password non valida\n");
 			return 0;
 		}
@@ -273,8 +232,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 		extractUsername(buffer,username);
 		extractPassword(buffer,password);
 		if(!usernameCheck(username)){
-			//write(clientsd, "~USREXISTS", 10); //Username già esistente
-			sendSignal(clientsd, "~USREXISTS");
+			write(clientsd, "~USREXISTS", 10); //Username già esistente
 			return 0;
 		}
 		int fd;
@@ -292,8 +250,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 			exit(1);
 		}
 		pthread_mutex_unlock(&lock);
-		//write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
-		sendSignal(clientsd, "~SIGNUPOK");
+		write(clientsd, "~SIGNUPOK", 9);  //Registrazione effettuata
 		return 1;
 	}
 	else{
@@ -302,9 +259,9 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 }
 
 
-int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login, char *username){
+int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login){
 	char msg[30];
-	char passwd[100];
+	char nome[100], passwd[100];
 	int log=0;
 	int reg;
 	while(1){
@@ -312,7 +269,7 @@ int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login, char *u
 		memset(msg,'\0',sizeof(msg));
 		if(read(clientsd,msg,sizeof(msg))>0){
 			if(strcmp(msg,"~USRLOGIN")==0){
-				if((log = loginF(username, passwd, clientsd, login)) == 0)
+				if((log = loginF(nome, passwd, clientsd, login)) == 0)
 					printf("Errore login\n");
 				else if(log==-1){
 					printf("Utente disconnesso durante login\n"); //Qui si dovrà gestire la disconnessione improvvisa dell'utente durante il login
@@ -320,7 +277,7 @@ int loginMain(int clientsd, pthread_mutex_t lock, pthread_mutex_t login, char *u
 				}
 			}
 			else if(strcmp(msg,"~USRSIGNUP")==0){
-				if((reg=regF(username, passwd, clientsd, lock))==0)
+				if((reg=regF(nome, passwd, clientsd, lock))==0)
 					printf("Errore registrazione\n");
 				else if(reg==-1){
 					printf("Utente disconnesso durante registrazione\n"); //Gestione disconnessione

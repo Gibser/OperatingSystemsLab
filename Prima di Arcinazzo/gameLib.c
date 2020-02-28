@@ -30,14 +30,8 @@ printf("Funzione terminata\n");
 }*/
 
 int randNumb(){
-  return (rand()%9+16);
+  return (rand()%9+8); 
 }
-
-int calculateMaxNumber(int rows, int cols, int element){
-  int minNum = min(rows, cols);
-  return ((element*minNum)/16);
-}
-
 
 void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   //int wareHouses, obstacles=-1, n_items;
@@ -49,13 +43,13 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   struct obstacles *ostacolo;
   char items[3]={'$','@','s'};
   printf("Choosing number of warehouses...\n");
-  info->n_warehouses=rand()%(calculateMaxNumber(rows, cols, 4))+1; 
+  info->n_warehouses=rand()%4+1; 
   printf("Number of Warehouses: %d\n",info->n_warehouses);
   printf("Choosing number of obstacles...\n");
-  info->n_obstacles= (rand()%(calculateMaxNumber(rows, cols, min(rows,cols))))+8;
+  info->n_obstacles= (rand()%min(rows,cols))+5;
   printf("Number of Obstacles: %d\n", info->n_obstacles);
   printf("Choosing number of items...\n");
-  info->n_items=rand()%(calculateMaxNumber(rows, cols, 5))+12; 
+  info->n_items=rand()%5+8; //Da 8 a 12 items sparsi nella mappa
   printf("Number of items: %d\n",info->n_items);
   printf("Generating map...\n");
   i=0;
@@ -100,7 +94,6 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       map[r][c].object=items[index];
       i++;
       oggetto->warehouse=idWarehouse;
-      oggetto->object=items[index];
       map[r][c].pointer=(void *)oggetto;
     }
 
