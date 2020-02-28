@@ -16,7 +16,6 @@
 #include "login.h"
 #include "gameLib.h"
 #define MAX 1000
-#define PORT 5000
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 #define TIMER 30
@@ -101,6 +100,7 @@ void printScoreboard();
 void buildLoggedUsersString(char *loggedUsersString);
 int findMax(int i);
 int setScoreboardArr();
+void checkPort(int argc,char **args);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -112,7 +112,7 @@ pthread_cond_t mapGen_cond_var;
 pthread_mutex_t gameLog;
 pthread_mutex_t loggedUsersCountMutex;
 
-
+int PORT=49153;
 struct mapObjects info_map;    //info numero oggetti sulla mappa
 struct cell **map;
 int rows, cols;
@@ -274,8 +274,10 @@ void serverAbort(){
 }
 
 // Driver function 
-int main() 
+int main(int argc, char **args) 
 {   
+
+    checkPort(argc,args);
     system("touch logged_users");
     signal(SIGINT, serverAbort);
     int sockfd, connfd, len,i=0; 
@@ -285,7 +287,8 @@ int main()
     char msg[200];
     char *timeString;
     timeString=getUTCString(timeString);
-    sprintf(msg,"[%s]Turning on the server...\n",timeString);
+    printf("Turning on the server..\nListening on port %d..\n",PORT);
+    sprintf(msg,"[%s]Turning on the server...  Listening on port %d...\n",timeString,PORT);
     writeLog(msg,0);
     memset(msg,'\0',sizeof(msg));
     srand(time(NULL));
@@ -1067,4 +1070,17 @@ void buildLoggedUsersString(char *loggedUsersString){
   loggedUsersString[i++] = '\n';
   loggedUsersString[i] = '\0';
   close(fd);
+}
+
+void checkPort(int argc,char **args){
+  if(argc>2){
+      printf("Numero di argomenti non valido. Utilizzo: %s <PORTA> (facoltativo)\n",args[0]);
+      exit(1);
+    }
+    else if(argc==2){
+      if(!(PORT=atoi(args[1]))){
+        printf("Numero di porta non valido.\n");
+        exit(1);
+      }
+  }
 }
