@@ -60,10 +60,8 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   printf("Generating map...\n");
   i=0;
   while(i<info->n_warehouses){
-    printf("rows: %d cols: %d\n", rows, cols);
     r=rand()%rows;
     c=rand()%cols;
-    printf("%d %d\n", r, c);
     if(map[r][c].isWareHouse==0){
       magazzino=(struct warehouse *)malloc(sizeof(struct warehouse));
       map[r][c].isWareHouse=1;
