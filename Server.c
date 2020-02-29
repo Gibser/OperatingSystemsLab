@@ -18,7 +18,7 @@
 #define MAX 1000
 #define SA struct sockaddr 
 #define MAX_THREADS 8
-#define TIMER 30
+#define TIMER 10
 /**spawnPlayer gets a clientSD and a pointer to a struct player type as parameters.
  * It spawns a player in a cell (using some criteria) and initializes its associated struct.
  */
@@ -102,6 +102,7 @@ int findMax(int i);
 int setScoreboardArr();
 void checkPort(int argc,char **args);
 void waitSeconds(int seconds);
+void clientAbort();
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -109,7 +110,7 @@ pthread_mutex_t editMatrix;
 pthread_mutex_t editMapPlayers;
 pthread_mutex_t mapGen;
 pthread_mutex_t notifyMaxItems;
-pthread_cond_t mapGen_cond_var;
+pthread_cond_t mapGen_cond_var = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t gameLog;
 pthread_mutex_t loggedUsersCountMutex;
 
@@ -156,7 +157,7 @@ void *mapGenerator(void* args){
       writeLog(msg,1);
       gameStarted = 0;
       while(!loggedUsersCount);
-      pthread_mutex_lock(&editMatrix);
+      //pthread_mutex_lock(&editMatrix);
       rows = randNumb();
       cols = randNumb();
       initGame();
@@ -169,10 +170,10 @@ void *mapGenerator(void* args){
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-      waitSeconds(10);
+      waitSeconds(5);
       printf("Sblocco i threads...\n");
+      //pthread_mutex_unlock(&editMatrix);
       pthread_cond_broadcast(&mapGen_cond_var);
-      pthread_mutex_unlock(&editMatrix);
       gameStarted = 1;
       while(gameTime-- > 0){
         if(maxItemsReached==1)
@@ -190,6 +191,7 @@ void *mapGenerator(void* args){
       printf("Fine sleep, genero mappa...\n");
     }
 }
+
 
 // Game Function
 void game(int clientsd,char *username){
@@ -210,17 +212,18 @@ void game(int clientsd,char *username){
         printf("Attesa terminata\n");
       }
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
-
+      printf("Spawn player...\n");
       pthread_mutex_lock(&editMatrix);
       spawnPlayer(clientsd,&infoplayer,username);
       pthread_mutex_unlock(&editMatrix);
-
+      printf("Player spawnato\n");
       playerLetter = getLetter(clientsd);
       write(clientsd, &playerLetter, 1);
       while(1){
           if(infoplayer.clientsd==-1)
             break;
           matrixToString(info, clientsd,infoplayer.obstacles);
+          printf("OK\n");
           memset(info,'\0',sizeof(info));
           if(getLetter(clientsd) == '0') break;
           if(read(clientsd, &command, sizeof(command))>0){
@@ -260,15 +263,22 @@ void game(int clientsd,char *username){
           loggedUsersCount--;
           pthread_mutex_unlock(&loggedUsersCountMutex);
         }
+        else
+          printf("Comando: %c\n", command);
+        
 
       }
       
     }
 }
 
+void clientAbort(){
+  
+}
 
 void *clientThread(void *sockfd) 
 { 
+    signal(SIGPIPE, clientAbort);
     int clientsd=*(int*)sockfd;
     int log = 0;
     char username[100];
@@ -531,6 +541,7 @@ void matrixToString(char *info, int clientsd,int *obstacles){
   struct obstacles *a;
   write(clientsd, &rows, sizeof(int));
   write(clientsd, &cols, sizeof(int));
+  printf("Inviato...\n");
   while(i < rows){
     memset(msg,'\0',16);
     while(j < cols){
@@ -779,12 +790,12 @@ int mutexInitialization(){
         printf("\n mutex init failed\n");
         return 1;
     }
-    if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
+    /*if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
     }
-
+    */
     if (pthread_mutex_init(&loggedUsersCountMutex, NULL) != 0)
     {
         printf("\n mutex init failed\n");
