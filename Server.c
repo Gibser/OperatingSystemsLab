@@ -212,18 +212,15 @@ void game(int clientsd,char *username){
         printf("Attesa terminata\n");
       }
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
-      printf("Spawn player...\n");
       pthread_mutex_lock(&editMatrix);
       spawnPlayer(clientsd,&infoplayer,username);
       pthread_mutex_unlock(&editMatrix);
-      printf("Player spawnato\n");
       playerLetter = getLetter(clientsd);
       write(clientsd, &playerLetter, 1);
       while(1){
           if(infoplayer.clientsd==-1)
             break;
           matrixToString(info, clientsd,infoplayer.obstacles);
-          printf("OK\n");
           memset(info,'\0',sizeof(info));
           if(getLetter(clientsd) == '0') break;
           if(read(clientsd, &command, sizeof(command))>0){
@@ -541,7 +538,6 @@ void matrixToString(char *info, int clientsd,int *obstacles){
   struct obstacles *a;
   write(clientsd, &rows, sizeof(int));
   write(clientsd, &cols, sizeof(int));
-  printf("Inviato...\n");
   while(i < rows){
     memset(msg,'\0',16);
     while(j < cols){

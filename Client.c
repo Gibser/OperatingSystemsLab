@@ -49,6 +49,8 @@ void receiveMessage(int server_sd);
 void receiveSignal(int server_sd, char *buffer);
 
 void clientAbort(int signalvalue){
+    if(signalvalue == SIGPIPE)
+        printf("Disconnesso dal server.");
     printf("\nRitorna presto!\n");
     exit(0);
 }
@@ -146,23 +148,52 @@ char firstChar(char *buffer){
 
 void clearBuffer(){
     char c;
-    while ((c = getchar()) != '\n' && c != EOF) { };
+    while ((c = getchar()) != '\n') {
+         //printf("Carattere: %c\n", c);
+    }
+}
+
+void clearBufferSTDIN(){
+    char c;
+    while ((getchar()) != '')
+        printf("%c", c);
+}
+
+void removeNewLine(char *buffer){
+    int i = 0;
+    int j = 0;
+    while(buffer[i] != '\0'){
+        j = i+1;
+        if(buffer[i] == '\n'){
+            while(buffer[j] != '\0'){
+                buffer[j-1] = buffer[j];
+                j++;
+            }
+        }
+        else
+            i++;
+        
+    }
 }
 
 void game(int server_sd){
     char msg;
     char buffer[200];
+    char buf[500];
     char row[16];
     int rows;
     int cols;
+    int stdin_copy;
     read(server_sd, &playerLetter, 1);
+    clearBufferSTDIN();
+    printf("Fatto\n");
+    
     while(1){
-        system("clear");
-        //receiveMessage(server_sd);//Scoreboard
+        //system("clear");
         printMap(server_sd);
         receiveMessage(server_sd);//Info
-        //printf("Comando: ");
         clearBuffer();
+        //getchar();
         scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
@@ -173,10 +204,7 @@ void game(int server_sd){
             }
             printf("Lettera ricevuta\n");
             gameFinished = 0;
-        }
-            
-        
-       
+        }       
     }
 }
 
@@ -184,6 +212,7 @@ void game(int server_sd){
 int main() 
 { 
     signal(SIGINT,clientAbort);
+    signal(SIGPIPE, clientAbort);
     int sockfd, connfd; 
     pthread_t tid;
     struct sockaddr_in serverConfig;
