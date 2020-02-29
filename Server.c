@@ -101,6 +101,7 @@ void buildLoggedUsersString(char *loggedUsersString);
 int findMax(int i);
 int setScoreboardArr();
 void checkPort(int argc,char **args);
+void waitSeconds(int seconds);
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -126,11 +127,27 @@ char scoreboardString[500]="";
 int loggedUsersCount = 0;
 struct player **arr;
 
+
+void waitSeconds(int seconds){
+  struct timeval now;
+  struct timeval current;
+  gettimeofday(&now,NULL);
+  current = now;
+  while(current.tv_sec < now.tv_sec + seconds)
+    gettimeofday(&current,NULL);
+
+  return;
+}
+
+
 void *mapGenerator(void* args){
     int i=0,j=0;
     char *timeString;
     struct player *winner;
     char msg[100];
+
+   
+
     while(1){
       maxItemsReached = 0;
       memset(msg,'\0',sizeof(msg));
@@ -152,9 +169,10 @@ void *mapGenerator(void* args){
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
+      waitSeconds(10);
+      printf("Sblocco i threads...\n");
       pthread_cond_broadcast(&mapGen_cond_var);
       pthread_mutex_unlock(&editMatrix);
-      
       gameStarted = 1;
       while(gameTime-- > 0){
         if(maxItemsReached==1)
@@ -170,7 +188,6 @@ void *mapGenerator(void* args){
       printf("\n\n---------------------------\n\n");
       gameTime = TIMER;
       printf("Fine sleep, genero mappa...\n");
-      
     }
 }
 
@@ -186,9 +203,11 @@ void game(int clientsd,char *username){
     pthread_mutex_unlock(&loggedUsersCountMutex);
     while(isLogged){
       if(!gameStarted){
+        //read(clientsd, &command, 1);
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
         pthread_mutex_unlock(&editMatrix);
+        printf("Attesa terminata\n");
       }
       infoplayer.obstacles=(int *)calloc(info_map.n_obstacles,sizeof(int));
 
@@ -1078,7 +1097,8 @@ void checkPort(int argc,char **args){
       exit(1);
     }
     else if(argc==2){
-      if(!(PORT=atoi(args[1]))){
+      PORT=atoi(args[1]);
+      if(PORT <= 0){
         printf("Numero di porta non valido.\n");
         exit(1);
       }

@@ -167,9 +167,11 @@ void game(int server_sd){
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
         if(gameFinished){
+            printf("Ricevo la lettera...\n");
             if(read(server_sd, &playerLetter, 1)<=0){
                 break;
             }
+            printf("Lettera ricevuta\n");
             gameFinished = 0;
         }
             
