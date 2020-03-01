@@ -33,6 +33,8 @@ struct config{
 
 char playerLetter;
 int gameFinished = 0;
+pthread_t cleaner;
+int stopClean=0;
 
 void clientAbort(int signalvalue);
 void chooseServer(struct sockaddr_in *serverConfig);
@@ -47,6 +49,13 @@ void printRow(char *buff);
 void printMap(int server_sd);
 void receiveMessage(int server_sd);
 void receiveSignal(int server_sd, char *buffer);
+
+void *cleanerThread(void *args){
+    while(!stopClean){
+        getchar();
+    }
+    pthread_exit(0);
+} 
 
 void clientAbort(int signalvalue){
     if(signalvalue == SIGPIPE)
@@ -153,11 +162,11 @@ void clearBuffer(){
     }
 }
 
-void clearBufferSTDIN(){
+/*void clearBufferSTDIN(){
     char c;
     while ((getchar()) != '')
         printf("%c", c);
-}
+}*/
 
 void removeNewLine(char *buffer){
     int i = 0;
@@ -184,28 +193,34 @@ void game(int server_sd){
     int rows;
     int cols;
     int stdin_copy;
+    pthread_create(&cleaner, NULL, cleanerThread, NULL);
     read(server_sd, &playerLetter, 1);
-    clearBufferSTDIN();
-    printf("Fatto\n");
-    
+    //ungetc('m',stdin);
+    stopClean=1;
+    write(STDIN_FILENO,"m",1);
+
     while(1){
-        //system("clear");
+        system("clear");
         printMap(server_sd);
         receiveMessage(server_sd);//Info
         clearBuffer();
-        //getchar();
         scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
         if(gameFinished){
             printf("Ricevo la lettera...\n");
+            stopClean=0;
+            pthread_create(&cleaner, NULL, cleanerThread, NULL);
             if(read(server_sd, &playerLetter, 1)<=0){
                 break;
             }
+            stopClean=1;
+            //printf("Premi un tasto per continuare\n");
             printf("Lettera ricevuta\n");
             gameFinished = 0;
         }       
     }
+    stopClean=1;
 }
 
 

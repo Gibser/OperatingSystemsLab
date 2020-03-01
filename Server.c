@@ -195,7 +195,7 @@ void *mapGenerator(void* args){
 
 // Game Function
 void game(int clientsd,char *username){
-    char info[350]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto, [Q] per uscire.\n";
+    char info[350]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto, [Q] per uscire.\nPremi un tasto qualsiasi per iniziare la partita.\n";
     char command;
     struct player infoplayer;
     int isLogged=1;
@@ -246,6 +246,7 @@ void game(int clientsd,char *username){
           write(clientsd,&(int){0},sizeof(int));
           write(clientsd,&(int){0},sizeof(int));
           sendMessage(clientsd,scoreboardString);
+          strcpy(info,"Premi un tasto qualsiasi per continuare\n");
         }
         if(read(clientsd,&command,1) <= 0){
           printf("\n\nClient disconnesso...\n\n");
