@@ -204,7 +204,7 @@ void game(int server_sd){
         printMap(server_sd);
         receiveMessage(server_sd);//Info
         //clearBuffer();
-        scanf("%s",buffer);//con questo sembra andare
+        fgets(buffer, sizeof(buffer), stdin);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);
         if(gameFinished){
