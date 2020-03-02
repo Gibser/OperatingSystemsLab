@@ -157,7 +157,7 @@ char firstChar(char *buffer){
 
 void clearBuffer(){
     char c;
-    while ((c = getchar()) != '\n') {
+    while ((c = getchar()) != '\n' && c != EOF) {
          //printf("Carattere: %c\n", c);
     }
 }
@@ -197,13 +197,13 @@ void game(int server_sd){
     read(server_sd, &playerLetter, 1);
     //ungetc('m',stdin);
     stopClean=1;
-    write(STDIN_FILENO,"m",1);
+    //write(STDIN_FILENO,"m",1);
 
     while(1){
         system("clear");
         printMap(server_sd);
         receiveMessage(server_sd);//Info
-        clearBuffer();
+        //clearBuffer();
         scanf("%s",buffer);//con questo sembra andare
         msg = firstChar(buffer);
         write(server_sd, &msg, 1);

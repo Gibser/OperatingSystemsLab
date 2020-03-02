@@ -84,7 +84,7 @@ void quicksort(struct player* a[MAX_USERS], int first, int last);
 void writeLog(char *msg,int flag);
 int mutexInitialization();
 char * getUTCString();
-struct player *getWinnerStruct();
+struct player *getWinner(int dim);
 void writeLog_ItemDelivered(struct player *info);
 void writeLog_NewConnection(char *ip);
 void writeLog_GameOver(struct player *winner);
@@ -170,7 +170,8 @@ void *mapGenerator(void* args){
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-      waitSeconds(5);
+      //waitSeconds(5);
+      sleep(5);
       printf("Sblocco i threads...\n");
       //pthread_mutex_unlock(&editMatrix);
       pthread_cond_broadcast(&mapGen_cond_var);
@@ -837,8 +838,19 @@ void createScoreboard(){
   if(n == 0)
     winner = NULL;
   else
-    winner = arr[n-1];
+    winner = getWinner(n);
   writeLog_GameOver(winner);
+}
+
+struct player *getWinner(int dim){
+  int max = arr[dim-1]->itemsDelivered;
+  int i = 0;
+  while(i < dim-1){
+    if(arr[i]->itemsDelivered == max)
+      return NULL;
+    i++;
+  }
+  return arr[dim-1];
 }
 
 void copyStruct(struct player *a, struct player *temp){
