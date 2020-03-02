@@ -119,7 +119,7 @@ void receiveSignal(int server_sd, char *buffer){
 }
 
 void printMap(int server_sd){
-    char row[16];
+    char row[30];
     int rows;
     int cols;
     read(server_sd, &rows, sizeof(int));

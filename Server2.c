@@ -160,6 +160,7 @@ void *mapGenerator(void* args){
       //pthread_mutex_lock(&editMatrix);
       rows = randNumb();
       cols = randNumb();
+      printf("Rows: %d\nCols: %d\n", rows, cols);
       initGame();
       createMap(&info_map, rows, cols, map);
 
@@ -219,7 +220,7 @@ void game(int clientsd,char *username){
       playerLetter = getLetter(clientsd);
       write(clientsd, &playerLetter, 1);
       while(1){
-          if(infoplayer.clientsd==-1)
+          if(infoplayer.itemsDelivered==-1)
             break;
           matrixToString(info, clientsd,infoplayer.obstacles);
           memset(info,'\0',sizeof(info));
@@ -229,6 +230,7 @@ void game(int clientsd,char *username){
             checkCommand(command, &infoplayer,info);
           }
           else{
+              printf("\n\nClient disconnesso...\n\n");
               if(infoplayer.hasItem)
                 dropItem(&infoplayer);
               else
@@ -243,7 +245,7 @@ void game(int clientsd,char *username){
           }
       }
       if(isLogged){
-        if(infoplayer.clientsd>=0){
+        if(infoplayer.itemsDelivered>=0){
           write(clientsd,&(int){0},sizeof(int));
           write(clientsd,&(int){0},sizeof(int));
           sendMessage(clientsd,scoreboardString);
@@ -536,12 +538,12 @@ char getLetter(int playerSD){
 void matrixToString(char *info, int clientsd,int *obstacles){
   int i = 0;
   int j = 0;
-  char msg[16];
+  char msg[30];
   struct obstacles *a;
   write(clientsd, &rows, sizeof(int));
   write(clientsd, &cols, sizeof(int));
   while(i < rows){
-    memset(msg,'\0',16);
+    memset(msg,'\0',sizeof(msg));
     while(j < cols){
       if(map[i][j].playerSD >=0){
         msg[j] = getLetter(map[i][j].playerSD);
@@ -682,7 +684,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
       write(info_player->clientsd, &(int){0}, sizeof(int));
       sendMessage(info_player->clientsd,info);
       close(info_player->clientsd);
-      info_player->clientsd=-1;
+      info_player->itemsDelivered=-1;
   }
   else if(msg=='u'||msg=='U'){
     buildLoggedUsersString(loggedUsers);
