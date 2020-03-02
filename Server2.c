@@ -676,7 +676,7 @@ void checkCommand(char msg, struct player *info_player,char *info){
     
   }
   else if(msg=='h'||msg=='H'){
-    snprintf(info,256,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n[U]Utenti connessi\n[Q]Esci\n");
+    snprintf(info,260,"---LISTA COMANDI---\n[W]Muoversi sopra\n[A]Muoversi a sinistra\n[S]Muoversi giù\n[D]Muoversi a destra\n[I]Informazioni giocatore\n[P]Prendere oggetti\n[E]Consegnare oggetti\n[T]Tempo rimanente\n(Sono ammesse anche le lettere minuscole)\n[U]Utenti connessi\n[Q]Esci\n");
   }
   else if(msg=='q'||msg=='Q'){
       strcpy(info,"Sei uscito dal gioco.\n");
