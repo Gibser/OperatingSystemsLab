@@ -274,7 +274,7 @@ void game(int clientsd,char *username){
 }
 
 void clientAbort(){
-  
+  printf("Catturato!\n");
 }
 
 void *clientThread(void *sockfd) 
