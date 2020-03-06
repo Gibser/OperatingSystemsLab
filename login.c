@@ -229,7 +229,6 @@ int loginF(char* username, char* password, int clientsd, pthread_mutex_t login){
 		sprintf(stringTid,"tmp%ld",currentTid);
 		strcat(cmd, " \\(.*\\)/\\1/p') > ");
 		strcat(cmd, stringTid);
-		//pthread_mutex_lock(&login);
 		int fd = tmpCommand(cmd,stringTid);
 		char passwd[100];
 

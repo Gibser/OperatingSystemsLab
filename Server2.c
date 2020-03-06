@@ -298,7 +298,6 @@ void game(int clientsd,char *username){
 }
 
 void clientAbort(){
-  
 }
 /*Thread che gestisce il client*/
 void *clientThread(void *sockfd) 
