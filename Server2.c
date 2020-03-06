@@ -1,4 +1,3 @@
-/*Prova Server*/
 #include <time.h>
 #include <stdio.h> 
 #include <netdb.h> 
@@ -19,90 +18,131 @@
 #define SA struct sockaddr 
 #define MAX_THREADS 8
 #define TIMER 20
-/**spawnPlayer gets a clientSD and a pointer to a struct player type as parameters.
- * It spawns a player in a cell (using some criteria) and initializes its associated struct.
+/**spawnPlayer prende in ingresso un clientSD e un puntatore a struct player come parametri.
+ * Si occupa di spawnare il giocatore (utilizzando alcuni criteri) e inizializza le strutture a esso associate.
  */
 void spawnPlayer(int clientsd,struct player *info_player,char *username);
-/*isCellGood function determines if a cell object is good for a player's spawn*/
+/*La funzione isCellGood stabilisce se un punto della mappa è adeguato per lo spawn di un giocatore*/
 int isCellGood(struct cell a,int index1,int index2);
-/*isCellFree function tells if a cell is free (no warehouses/players/objects/obstacles)*/
+/*La funzione isCellFree stabilisce se un punto della mappa è libero (privo di oggetti,magazzini,ostacoli,giocatori) o meno*/
 int isCellFree(struct cell a);
-/*isCellNotSolid function tells if a cell is "not Solid", that is, a cell on which a player can move*/
+/*La funzione isCellSolid stabilisce se una cella è appunto, "non solida" , ossia una cella su cui poter effettuare uno spostamento*/
 int isCellNotSolid(struct cell a);
-/**isLeftFree function checks whether the left cell (in relation of current position) is free or not.
- * It requires a struct cell matrix and current position
+/**La funzione isLeftFree stabilisce se la cella sinistra (rispetto alla posizione corrente) è libera o meno.
+ * Richiede una matrice di struct cell e la posizione corrente.
  */
 int isLeftFree(int index1,int index2);
-/**isRightFree function checks whether the right cell (in relation of current position) is free or not.
- * It requires a struct cell matrix and current position
+/**La funzione isRightFree stabilisce se la cella destra (rispetto alla posizione corrente) è libera o meno.
+ * Richiede una matrice di struct cell e la posizione corrente.
  */
 int isRightFree(int index1,int index2);
-/**isUpFree function checks whether the top cell (in relation of current position) is free or not.
- * It requires a struct cell matrix and current position
+/**La funzione isUpFree stabilisce se la cella superiore (rispetto alla posizione corrente) è libera o meno.
+ * Richiede una matrice di struct cell e la posizione corrente.
  */
 int isUpFree(int index1,int index2);
-/**isDownFree function checks whether the bottom cell (in relation of current position) is free or not.
- * It requires a struct cell matrix and current position
+/**La funzione isDownFree stabilisce se la cella inferiore (rispetto alla posizione corrente) è libera o meno.
+ * Richiede una matrice di struct cell e la posizione corrente.
  */
 int isDownFree(int index1,int index2);
-/*setLetter function assigns a letter to a new Player*/
+/*setLetter() assegna la prima lettera disponibile al giocatore*/
 void setLetter(int clientsd);
-/*getLetter function returns the letter used by a specified player*/
+/**getLetter() ritorna la lettera assegnata a un giocatore specifico. 
+ * Ritorna '0' se il giocatore specificato non è presente.
+ */
 char getLetter(int clientsd);
-/**matrixToString sends game map to a specific player in order to display it on its Game's Client.
- * It can append an informative message.
+/**matrixToString() invia la mappa di gioco a uno specifico giocatore in maniera tale da visualizzarla sul suo client.
+ * Può anche inviare un messaggio informativo.
 */
 void matrixToString(char *msg, int clientsd,int *obstacles);
-//char parsePlayer(int playerSD);
-/**initGame initializes everything that's necessary to run the game correctly 
- * (mapPlayers,map,scoreboard).
+/**initGame() inizializza tutte le strutture necessarie per il corretto funzionamento del gioco (mapPlayers,map,scoreboard).
  */
 void initGame();
-
+/**La funzione checkMovement() viene invocata qualora l'input inviato da un giocatore è un input di movimento.
+ * In base al comando ricevuto, checkMovement() effettua il movimento desiderato dal giocatore nella mappa.
+ */
 void checkMovement(char msg,struct player *info_player,char *info);
+/**La funzione checkCommand() verifica l'input inviato dal giocatore e se in grado di soddisfare la richiesta,
+ * costruisce un messaggio informativo ad hoc sull'array di caratteri info.
+ * Altrimenti affida il lavoro a checkMovement().
+ */
 void checkCommand(char msg, struct player *info_player,char *info);
-/*changeCoordinates modifies game map to update a player's position*/
+/*changeCoordinates modifica la mappa di gioco per aggiornare la posizione del giocatore.*/
 void changeCoordinates(struct player *info_player, int add_x, int add_y);
+/**La funzione movement() si assicura che la cella su cui il giocatore desidera spostarsi consenta il movimento
+ * altrimenti, aggiorna l'array del giocatore che tiene traccia degli ostacoli visibili o non per rendere
+ * visibile l'ostacolo appena incontrato.
+ */
 void movement(struct player *info_player, int add_x, int add_y);
-/*isWarehouseHere tells if there's at least a warehouse around the player*/
+/*isWarehouseHere() ritorna 1 se è presente attorno al giocatore almeno un magazzino,0 altrimenti.*/
 int isWarehouseHere(struct player *a);
-/*checkWarehouse tells whether a warehouse is on a specified cell*/
+/*checkWarehouse() restituisce 1 se la cella specificata è occupata da un magazzino, 0 altrimenti.*/
 int checkWarehouse(struct player *info_player, int add_x, int add_y);
+/**noBoundaryCheck() restituisce 1 se la cella selezionata, 
+ * rispetto alla posizione corrente, rimane nei limiti della mappa, 0 altrimenti.
+ */
 int noBoundaryCheck(struct player *a,int add_x,int add_y);
-/*sendMessage sends a message to a specified socket. It sends the length of the message it's going to send before sending it*/
+/*sendMessage() invia un messaggio a un socket specifico. Prima di mandare il messaggio, invia l'informazione sulla lunghezza di esso*/
 void sendMessage(int clientsd, char *msg);
-/*gameLogout does everything it's necessary when a player leaves game*/
+/*gameLogou() effettua tutto ciò che è necessario quando un giocatore lascia una partita.*/
 void gameLogout(int clientsd);
-/*logoutStructs removes every information about a player that left a game session*/
+/*logoutStructs() rimuove tutte le informazioni di un utente che ha lasciato la partita dalle strutture del gioco.*/
 void logoutStructs(int clientsd);
-/*setScorePlayer inserts a new player into scoreboard*/
+/*setScorePlayer() inserisce un nuovo giocatore nell'array scoreBoard*/
 void setScorePlayer(struct player *info_player);
-/*createScoreboard creates a message containing scoreboard when a game session is over*/
+/*createScoreboard() scrive un messaggio su scoreboardString contenente la classifica*/
 void createScoreboard();
-/*quicksort algorithm to sort a game session's scoreboard*/
-void quicksort(struct player* a[MAX_USERS], int first, int last);
+/**writeLog() consente la scrittura di un messaggio di log all'interno del file gameLog.
+ *Se il flag è 1, la scrittura sul log viene effettuata adoperando mutex.
+ */
 void writeLog(char *msg,int flag);
+/*Effettua l'inizializzazione dei mutex. Ritorna 1 se qualcosa è andato storto, 0 altrimenti*/
 int mutexInitialization();
+/**getUTCString restituisce un puntatore all'array statico str.
+ * Scrive su quest'ultimo un messaggio che riporta l'informazione sulla data odierna e l'orario in UTC.
+ */
 char * getUTCString();
+/*getWinner() restituisce un puntatore a struct player che punta alla struct del giocatore che ha vinto*/
 struct player *getWinner(int dim);
+/*Scrive un log riguardo la consegna di un oggetto da parte di uno specifico giocatore*/
 void writeLog_ItemDelivered(struct player *info);
+/*Scrive un log riguardo la connessione da parte di un nuovo socket*/
 void writeLog_NewConnection(char *ip);
+/*Scrive un log riguardo la fine della partita e indica (se presente) lo username del vincitore.*/
 void writeLog_GameOver(struct player *winner);
+/*Scrive un log riguardo la partecipazione di un giocatore alla sessione di gioco*/
 void writeLog_JoinGame(char *user);
+/*Scrive un log riguardo l'uscita di un giocatore dalla sessione di gioco*/
 void writeLog_QuitGame(char *user);
+/*Scrive un log riguardo l'imminente chiusura del server*/
 void writeLog_serverAbort();
+/**Funzione invocata nel caso in cui un giocatore che sta 
+ * lasciando la sessione di gioco, possiede un oggetto non consegnato.
+ * L'oggetto viene droppato nella posizione del giocatore se la cella non ha oggetti,
+ * altrimenti si cerca una posizione libera intorno.
+ */
 void dropItem(struct player *info);
+/**Funzione invocata nel caso in cui un giocatore 
+ * ha lasciato la sessione di gioco e non possiede oggetti da consegnare.
+ * La cella su cui risiedeva il giocatore, viene liberata.
+ */
 void initCell(int i, int j);
+/*Algoritmo di ordinamento per ordinare la classifica al termine della partita*/
 void selectionSort(int n);
-int partiziona(struct player* a[], int low, int high);
-void dropInPosition(struct player *info, int add_x,int add_y);
-void printScoreboard();
-void buildLoggedUsersString(char *loggedUsersString);
 int findMax(int i);
+void quicksort(struct player* a[MAX_USERS], int first, int last);
+int partiziona(struct player* a[], int low, int high);
+/*dropInPosition() droppa l'item posseduto dall'utente nella posizione indicata rispetto a quella corrente*/
+void dropInPosition(struct player *info, int add_x,int add_y);
+/*Costruisce un messaggio che riporta gli utenti attualmente connessi*/
+void buildLoggedUsersString(char *loggedUsersString);
+/*Funzione adibita al popolamento dell'array arr. Ritorna la grandezza dell'array.*/
 int setScoreboardArr();
+/*Verifica che la porta inserita a riga di comando sia valida.*/
 void checkPort(int argc,char **args);
-void waitSeconds(int seconds);
+/*Signal handler che cattura il segnale SIGPIPE*/
 void clientAbort();
+
+pthread_cond_t mapGen_cond_var = PTHREAD_COND_INITIALIZER;
 
 pthread_mutex_t signup_mutex;
 pthread_mutex_t login;
@@ -110,37 +150,26 @@ pthread_mutex_t editMatrix;
 pthread_mutex_t editMapPlayers;
 pthread_mutex_t mapGen;
 pthread_mutex_t notifyMaxItems;
-pthread_cond_t mapGen_cond_var = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t gameLog;
 pthread_mutex_t loggedUsersCountMutex;
 
 int PORT=49153;
-struct mapObjects info_map;    //info numero oggetti sulla mappa
-struct cell **map;
+struct mapObjects info_map;    //Informazioni numero oggetti presenti sulla mappa
+struct cell **map; 
 int rows, cols;
-int mapPlayers[MAX_USERS];
+int mapPlayers[MAX_USERS]; 
 struct player* scoreboard[MAX_USERS];
 int gameStarted = 0;
 int gameTime = TIMER;
 int MAX_ITEMS;
 int maxItemsReached=0;
 char scoreboardString[500]="";
-int loggedUsersCount = 0;
+int loggedUsersCount = 0; 
 struct player **arr;
 
 
-void waitSeconds(int seconds){
-  struct timeval now;
-  struct timeval current;
-  gettimeofday(&now,NULL);
-  current = now;
-  while(current.tv_sec < now.tv_sec + seconds)
-    gettimeofday(&current,NULL);
 
-  return;
-}
-
-
+/*Thread che genera una nuova partita*/
 void *mapGenerator(void* args){
     int i=0,j=0;
     char *timeString;
@@ -157,24 +186,20 @@ void *mapGenerator(void* args){
       writeLog(msg,1);
       gameStarted = 0;
       while(!loggedUsersCount);
-      //pthread_mutex_lock(&editMatrix);
       rows = randNumb();
       cols = randNumb();
       printf("Rows: %d\nCols: %d\n", rows, cols);
       initGame();
       createMap(&info_map, rows, cols, map);
 
-      //condizione di vittoria
       if(loggedUsersCount != 0)
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/loggedUsersCount);
       else
         MAX_ITEMS = rand()%(info_map.n_items-MAX_USERS)+(MAX_USERS/2);
       
       printf("Numero massimo di pacchi: %d\n", MAX_ITEMS);
-      //waitSeconds(5);
       sleep(5);
       printf("Sblocco i threads...\n");
-      //pthread_mutex_unlock(&editMatrix);
       pthread_cond_broadcast(&mapGen_cond_var);
       gameStarted = 1;
       while(gameTime-- > 0){
@@ -195,7 +220,7 @@ void *mapGenerator(void* args){
 }
 
 
-// Game Function
+/*Funzione invocata dal thread client-handler quando il client entra in partita*/
 void game(int clientsd,char *username){
     char info[350]="Benvenuto in partita, giovane avventuriero! Premi [H] per aiuto, [Q] per uscire.\nPremi un tasto qualsiasi per iniziare la partita.\n";
     char command;
@@ -207,7 +232,6 @@ void game(int clientsd,char *username){
     pthread_mutex_unlock(&loggedUsersCountMutex);
     while(isLogged){
       if(!gameStarted){
-        //read(clientsd, &command, 1);
         pthread_mutex_lock(&editMatrix);
         pthread_cond_wait(&mapGen_cond_var, &editMatrix);
         pthread_mutex_unlock(&editMatrix);
@@ -276,7 +300,7 @@ void game(int clientsd,char *username){
 void clientAbort(){
   
 }
-
+/*Thread che gestisce il client*/
 void *clientThread(void *sockfd) 
 { 
     signal(SIGPIPE, clientAbort);
@@ -295,7 +319,7 @@ void *clientThread(void *sockfd)
 
 }
 
-
+/*Signal handler per la chiusura del server*/
 void serverAbort(){
   printf("\nChiusura server...\n");
   system("rm logged_users");
@@ -303,7 +327,6 @@ void serverAbort(){
   exit(0);
 }
 
-// Driver function 
 int main(int argc, char **args) 
 {   
 
@@ -329,7 +352,6 @@ int main(int argc, char **args)
     }
     strcpy(msg,"\t-Mutex initialized\n");
     writeLog(msg,0);
-    // socket create and verification 
     memset(msg,'\0',sizeof(msg));
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
@@ -349,7 +371,6 @@ int main(int argc, char **args)
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0) 
         perror("setsockopt(SO_REUSEPORT) failed");
 
-    //set timeout for socket input/output
     struct timeval timeout;      
     timeout.tv_sec = 180;
     timeout.tv_usec = 0;
@@ -365,13 +386,12 @@ int main(int argc, char **args)
     //------------------------------------------------------------------------------------------------------------------
     memset(&servaddr, '\0', sizeof(servaddr));
     
-    // assign IP, PORT 
+    // Assegnazione IP, Porta
     servaddr.sin_family = AF_INET; 
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     servaddr.sin_port = htons(PORT); 
 
-
-    // Binding newly created socket to given IP and verification 
+    //Bind del socket
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
         printf("socket bind failed...\n"); 
         strcpy(msg,"\t-Socket bind FAILED\n");
@@ -383,7 +403,7 @@ int main(int argc, char **args)
     memset(msg,'\0',sizeof(msg));
     printf("Socket successfully binded..\n"); 
   
-    // Now server is ready to listen and verification 
+    // Il server ora è pronto ad ascoltare
     if ((listen(sockfd,128)) != 0) { 
         printf("Listen failed...\n"); 
         strcpy(msg,"\t-Socket listen FAILED\n");
@@ -399,7 +419,6 @@ int main(int argc, char **args)
 
     pthread_create(&gameThread, NULL, mapGenerator, NULL);
     while(1){
-        // Accept the data packet from client and verification 
         connfd = accept(sockfd, (SA*)&cli, &len); 
         if(connfd>0){
             memset(msg,'\0',sizeof(msg));
@@ -486,20 +505,21 @@ int isCellGood(struct cell a,int index1,int index2){
     exp=isLeftFree(index1,index2)+isRightFree(index1,index2)+isUpFree(index1,index2)+isDownFree(index1,index2);
     if(exp>0)//Se almeno una cella è libera attorno al giocatore okay
       return 1;
-    return 0;
+
   }
+  return 0;
 }
 
 
 
 void spawnPlayer(int clientsd,struct player *info_player,char *username){
   char c;
-  int index1,index2; //Potrebbero trovarsi all'esterno, quindi magari devono essere puntatori a quegli indici
+  int index1,index2; 
   setLetter(clientsd);
   setScorePlayer(info_player);
   while(1){
     index1=rand()%rows;
-    index2=rand()%cols; //Cerca indici buoni finché non otteniamo una cella libera e non scomoda
+    index2=rand()%cols; 
     if(isCellGood(map[index1][index2],index1,index2)){
       break;
     }
@@ -509,7 +529,7 @@ void spawnPlayer(int clientsd,struct player *info_player,char *username){
   info_player->x=index1;
   info_player->y=index2;
   info_player->hasItem=0;
-  info_player->itemsDelivered=0; //AGGIUNTO LOCK QUANDO SI FA LO SPAWN (cappadavide)
+  info_player->itemsDelivered=0; 
   info_player->pack=NULL;
   info_player->clientsd = clientsd;
 
@@ -586,7 +606,7 @@ void initGame(){
       map[i][j].isObstacle=0;
       map[i][j].isWareHouse=0;
       map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
-      map[i][j].object=' '; //prima era 0
+      map[i][j].object=' '; 
       map[i][j].pointer=NULL;
     }
   }
@@ -790,12 +810,7 @@ int mutexInitialization(){
         printf("\n mutex init failed\n");
         return 1;
     }
-    /*if (pthread_cond_init(&mapGen_cond_var, NULL) != 0)
-    {
-        printf("\n mutex init failed\n");
-        return 1;
-    }
-    */
+
     if (pthread_mutex_init(&loggedUsersCountMutex, NULL) != 0)
     {
         printf("\n mutex init failed\n");
@@ -819,7 +834,7 @@ int setScoreboardArr(){
 }
 
 void createScoreboard(){
-  int i; //= 0;
+  int i; 
   int n;
   char buffer[100];
   arr = (struct player **)malloc(loggedUsersCount*sizeof(struct player *));
@@ -916,9 +931,7 @@ int findMax(int i){
   return max;
 }
 
-void printScoreboard(){
-  
-}
+
 
 /*
 void quicksort(struct player* a[MAX_USERS], int low, int high){
@@ -1073,8 +1086,6 @@ void initCell(int i, int j){
   map[i][j].isObstacle=0;
   map[i][j].isWareHouse=0;
   map[i][j].playerSD=-1; 
-  map[i][j].object=' ';
-  map[i][j].pointer=NULL;
 }
 
 void dropInPosition(struct player *info, int add_x,int add_y){

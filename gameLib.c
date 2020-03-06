@@ -1,5 +1,3 @@
-/*Matrix punz by cappadavide punz*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,23 +9,6 @@
 
 
 
-/*void initializeMatrix(struct cell **map,int rows,int cols){
-  int i=0,j=0;
-  map=(struct cell**)malloc(rows * sizeof(struct cell *));
-  printf("Allocato\n");
-  for(i=0;i<rows;i++){
-    map[i]=(struct cell*)malloc(cols*sizeof(struct cell));
-  }
-  for(i=0;i<rows;i++){
-    for(j=0;j<cols;j++){
-      map[i][j].isObstacle=0;
-      map[i][j].isWareHouse=0;
-      map[i][j].playerSD=-1; //Un socket descriptor ha valori tra 0 e 1024
-      map[i][j].object='0';
-    }
-  } 
-printf("Funzione terminata\n");
-}*/
 
 int randNumb(){
   return (rand()%9+16);
@@ -40,7 +21,6 @@ int calculateMaxNumber(int rows, int cols, int element){
 
 
 void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
-  //int wareHouses, obstacles=-1, n_items;
   int i;
   int r,c,index;
   int idWarehouse=1,idObstacle=0;
@@ -66,7 +46,6 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
       magazzino=(struct warehouse *)malloc(sizeof(struct warehouse));
       map[r][c].isWareHouse=1;
       i++;
-      //map[r][c].object = 'w';
       map[r][c].object=idWarehouse+'0';//cappadavide
       magazzino->id=idWarehouse++;
       map[r][c].pointer=(void *)magazzino;
@@ -105,57 +84,8 @@ void createMap(struct mapObjects* info,int rows,int cols,struct cell **map){
   }
   printf("items done\n");
 
-  /*int j;   BLOCCO NON NECESSARIO
-  for(i = 0; i < rows; i++){
-    for(j = 0; j < cols; j++){
-      if(map[i][j].isWareHouse == 0 && map[i][j].isObstacle == 0 && map[i][j].object == '0')
-        map[i][j].object = ' ';
-    }
-  }*/
 }
 
-
-/*void printMatrix(int rows, int cols, struct cell **map){
-  int i,j;
-  printf("  ");
-  for(i=0;i<cols;i++){
-    printf("_ ");
-  }
-  printf(" \n");
-  for(i=0;i<rows;i++){
-    printf("| ");
-    for(j=0;j<cols;j++){
-      if(map[i][j].isWareHouse==1){
-        printf("ħ ");
-      }
-      else if(map[i][j].isObstacle==1){//Dovrà essere nascosto in un primo momento al client
-        printf("x ");
-      }
-      else if(strlen(map[i][j].object)>0){
-        if(strcmp(map[i][j].object,"gold")==0){
-          printf("$ ");
-        }
-        else if(strcmp(map[i][j].object,"sword")==0){
-          printf("ł ");
-        }
-        else if(strcmp(map[i][j].object,"food")==0){
-          printf("@ ");
-        }
-      }
-      else{
-        printf("  ");
-      }
-    }
-    printf("|");
-    printf("\n");
-  }
-  printf("  ");
-  for(i=0;i<cols;i++){
-    printf("─ ");
-  }
-  printf("\n");
-}
-*/
 
 void printMatrix(int rows, int cols, struct cell **map){
   int i, j;
