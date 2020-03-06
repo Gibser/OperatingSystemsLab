@@ -35,21 +35,36 @@ char playerLetter;
 int gameFinished = 0;
 pthread_t cleaner;
 int stopClean=0;
-
+/*Signal handler per SIGINT e SIGPIPE. Se il segnale è SIGPIPE allora viene stampato "Disconnesso dal server". Viene stampato poi un messaggio di uscita (Anche se il segnale è SIGINT) e poi chiuso il programma.*/
 void clientAbort(int signalvalue);
+/*Imposta serverConfig con l'ip del server o l'hostname in base alla scelta dell'utente.*/
 void chooseServer(struct sockaddr_in *serverConfig);
-void homeClient(int server_sd);//aveva server_sd
-char loginCred(int server_sd);//aveva server_sd
-void regCred(int server_sd);//aveva server_sd
+/*Menù principale. Aspetta un input, la scelta. Se è valida si prosegue con la funzionalità corrispondente.*/
+void homeClient(int server_sd);
+/*Comunica al server che sta per eseguire il login. Aspetta in input le credenziali che scrive su un'unica stringa, inviata poi al server. Restituisce '1' se il login avviene con successo, '0' altrimenti.*/
+char loginCred(int server_sd);
+/*Comunica al server che sta per eseguire la registrazione. Aspetta in input le credenziali che scrive su un'unica stringa, inviata poi al server.*/
+void regCred(int server_sd);
+/*Stampa in output la guida di gioco scritta su GameGuide.txt.*/
 void printGuide();
+/*Stampa in output le informazioni scritte su GameInfo.txt*/
 void printInfo();
+/*Aspetta un segnale dal server dopo un tentativo di login. Restituisce 1 se il login avviene con successo, 0 altrimenti. Stampa in output l'esito.*/
 int checkLoginStatus(char *msg);
+/*Scrive prima username, poi '\n' e poi password su creds. Ritorna la lunghezza di creds.*/
 int combineStr(char *creds,char *username, char *password);
+/*Stampa in output una riga della mappa di gioco inviata dal server.*/
 void printRow(char *buff);
+/*Stampa la mappa di gioco inviata dal server, una riga per volta, chiamando printRow. Se riceve 0 come numero di righe e di colonne, imposta gameFinished = 1.*/
 void printMap(int server_sd);
+/*Riceve la lunghezza del messaggio e il messaggio stesso dal server, chiamando read sul socket. Stampa poi in output la stringa.*/
 void receiveMessage(int server_sd);
+/*Riceve la lunghezza del messaggio e il messaggio stesso dal server, scrivendolo su buffer.*/
 void receiveSignal(int server_sd, char *buffer);
 
+
+
+/*Thread utilizzato per svuotare il buffer di stdin.*/
 void *cleanerThread(void *args){
     while(!stopClean){
         getchar();
