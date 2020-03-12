@@ -4,6 +4,7 @@
         "socket.h": "c",
         "time.h": "c",
         "inet.h": "c",
-        "login3.h": "c"
+        "login3.h": "c",
+        "stdlib.h": "c"
     }
 }
