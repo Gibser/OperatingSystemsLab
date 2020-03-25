@@ -18,11 +18,14 @@ Puoi portare massimo due oggetti alla volta.
 
 ---TASTI---
 In Partita:
-P - Posizione Utenti/Oggetti/Magazzini/Ostacoli Incontrati
-R - Raccogliere oggetto (Sulla posizione dell'oggetto)
-D - Depositare oggetto  (Sulla posizione del magazzino)
-L - Lista degli utenti
+(Sono ammesse anche le lettere minuscole)
+P - Raccogliere oggetto (Sulla posizione dell'oggetto)
+E - Depositare oggetto (Nelle vicinanze del magazzino)
+U - Lista degli utenti connessi
 W - Movimento Su
 A - Movimento Sinistra
 S - Movimento Giù
 D - Movimento Destra
+I - Informazioni giocatore
+T - Tempo rimanente
+Q - Esci
