@@ -17,7 +17,7 @@
 #define MAX 1000
 #define SA struct sockaddr 
 #define MAX_THREADS 8
-#define TIMER 20
+#define TIMER 60
 /**spawnPlayer prende in ingresso un clientSD e un puntatore a struct player come parametri.
  * Si occupa di spawnare il giocatore (utilizzando alcuni criteri) e inizializza le strutture a esso associate.
  */

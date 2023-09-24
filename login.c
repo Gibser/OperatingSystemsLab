@@ -264,7 +264,7 @@ int regF(char* username, char* password, int clientsd, pthread_mutex_t lock){
 			return 0;
 		}
 		int fd;
-		if((fd = open("/users", O_RDWR | O_APPEND | O_CREAT, 0777)) < 0){
+		if((fd = open("users", O_RDWR | O_APPEND | O_CREAT, 0777)) < 0){
 			perror("Errore apertura users");
 			exit(1);
 		}
